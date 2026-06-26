@@ -1,0 +1,28 @@
+/**
+ * MediRoad 브랜드 색 토큰 오버라이드
+ * --------------------------------------------------------------------------
+ * Seed 기본 brand 계열은 당근 carrot(주황) 팔레트를 가리킨다.
+ * → MediRoad 메디컬 블루(#1E5BD6)로 brand 계열 semantic 토큰만 교체한다.
+ *   (neutral/critical/positive 등 나머지 톤은 Seed 기본 유지)
+ *
+ * 이 파일은 의도적으로 @layer 밖(unlayered)에 둔다.
+ * CSS 캐스케이드에서 unlayered 선언은 @layer(seed-base) 안의 선언을 항상 이기므로,
+ * 명시도와 무관하게 오버라이드가 보장된다.
+ *
+ * 라이트 고정(light-only)이라 브랜드 블루는 모드와 무관하게 동일 → [data-seed]에 일괄 적용.
+ */
+[data-seed] {
+  /* 배경 */
+  --seed-color-bg-brand-solid: #1e5bd6;
+  --seed-color-bg-brand-solid-pressed: #1a4fbd;
+  --seed-color-bg-brand-weak: #eaf0fc;
+  --seed-color-bg-brand-weak-pressed: #d8e3f8;
+
+  /* 전경(텍스트·아이콘) */
+  --seed-color-fg-brand: #1e5bd6;
+  --seed-color-fg-brand-contrast: #1a4fbd;
+
+  /* 테두리 */
+  --seed-color-stroke-brand-solid: #1a4fbd;
+  --seed-color-stroke-brand-weak: #b9cdf2;
+}

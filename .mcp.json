@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "seed-design": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@seed-design/mcp"
+      ],
+      "env": {}
+    }
+  }
+}

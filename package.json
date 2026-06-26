@@ -1,0 +1,42 @@
+{
+  "name": "mediroad",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "seed:columns": "node --env-file=.env.local --import tsx scripts/seed-columns.mts",
+    "ingest": "node --env-file=.env.local --import tsx scripts/ingest-columns.mts",
+    "sync:hospitals": "node --env-file=.env.local --import tsx scripts/sync-hospitals.mts",
+    "enrich:departments": "node --env-file=.env.local --import tsx scripts/enrich-departments.mts"
+  },
+  "dependencies": {
+    "@seed-design/css": "^1.2.16",
+    "@seed-design/react": "^1.2.14",
+    "@seed-design/react-drawer": "^1.0.10",
+    "@supabase/supabase-js": "^2.108.2",
+    "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-query-devtools": "^5.101.0",
+    "gray-matter": "^4.0.3",
+    "next": "16.2.9",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5",
+    "xlsx": "^0.18.5"
+  }
+}

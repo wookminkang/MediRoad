@@ -1,0 +1,193 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css");
+@import "tailwindcss";
+
+:root {
+  color-scheme: light; /* light-only 고정 */
+  --background: #ffffff;
+  --foreground: #0f172a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Seed 토큰 → Tailwind 색 유틸 (text-neutral / text-muted / text-subtle / text-brand 등) */
+  --color-neutral: var(--seed-color-fg-neutral);
+  --color-muted: var(--seed-color-fg-neutral-muted);
+  --color-subtle: var(--seed-color-fg-neutral-subtle);
+  --color-brand: var(--seed-color-fg-brand);
+  --color-warning: var(--seed-color-fg-warning);
+  --color-positive: var(--seed-color-fg-positive);
+  /* 배경/테두리 (bg-*, border-*) */
+  --color-neutral-weak: var(--seed-color-bg-neutral-weak);
+  --color-neutral-solid: var(--seed-color-bg-neutral-solid);
+  --color-brand-solid: var(--seed-color-bg-brand-solid);
+  --color-brand-weak: var(--seed-color-bg-brand-weak);
+  --color-line: var(--seed-color-stroke-neutral-weak);
+  /* 기본 폰트 = Pretendard */
+  --font-sans:
+    Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+}
+
+/* 라이트 고정(light-only) — OS 다크모드 미디어쿼리 제거 (DESIGN_SYSTEM 다크모드 정책) */
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* 인터랙티브 요소 커서 — Tailwind v4는 button 기본 커서가 default라 포인터로 복원 */
+button:not(:disabled),
+select:not(:disabled),
+[role="button"] {
+  cursor: pointer;
+}
+
+/* 지도 hover 마커 핑(퍼졌다 사라지는) 애니메이션 */
+@keyframes mediroad-ping {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* AI 증상 도우미 — 브랜드 글로우 호흡 + 등장 애니메이션 */
+@keyframes mediroad-aiglow {
+  0%,
+  100% {
+    box-shadow: 0 0 28px rgba(30, 91, 214, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 56px rgba(30, 91, 214, 0.95);
+  }
+}
+@keyframes mediroad-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* 앰비언트 라이트 — 빛 덩어리 드리프트 */
+@keyframes mediroad-drift1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(6%, -4%) scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes mediroad-drift2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.08);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-7%, 5%) scale(0.92);
+    opacity: 1;
+  }
+}
+
+/* 칼럼 본문 마크다운 — Seed 토큰 기반 타이포 (react-markdown 출력 스코프) */
+.markdown {
+  color: var(--seed-color-fg-neutral);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+.markdown > * + * {
+  margin-top: 1rem;
+}
+.markdown h2 {
+  margin-top: 2.5rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.4;
+  scroll-margin-top: 6rem; /* 앵커 점프 시 sticky 헤더 가림 방지 */
+}
+/* 섹션 제목 위 포인트 아이콘 */
+.markdown h2::before {
+  content: "✳";
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--seed-color-fg-brand);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+/* 중요 문장 하이라이트 (연한 파란 배경) */
+.markdown mark {
+  background: var(--seed-color-bg-brand-weak);
+  color: inherit;
+  padding: 0.12em 0.18em;
+  border-radius: 0.2em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.markdown h3 {
+  margin-top: 1.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  scroll-margin-top: 6rem;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 1.25rem;
+}
+.markdown ul {
+  list-style: disc;
+}
+.markdown ol {
+  list-style: decimal;
+}
+.markdown li + li {
+  margin-top: 0.375rem;
+}
+.markdown a {
+  color: var(--seed-color-fg-brand);
+  text-decoration: underline;
+}
+.markdown strong {
+  font-weight: 700;
+}
+.markdown img {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-radius: var(--seed-radius-r4);
+}
+.markdown .md-figure {
+  display: block;
+  margin: 2rem 0;
+  text-align: center;
+}
+.markdown .md-figure img {
+  margin: 0 auto;
+}
+.markdown .md-figcaption {
+  display: block;
+  margin-top: 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--seed-color-fg-neutral-subtle);
+}
+.markdown blockquote {
+  padding-left: 1rem;
+  border-left: 3px solid var(--seed-color-stroke-neutral-weak);
+  color: var(--seed-color-fg-neutral-muted);
+}
+.markdown code {
+  padding: 0.1em 0.35em;
+  border-radius: var(--seed-radius-r1);
+  background: var(--seed-color-bg-neutral-weak);
+  font-size: 0.9em;
+}

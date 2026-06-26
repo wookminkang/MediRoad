@@ -1,0 +1,63 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { Text } from "@seed-design/react";
+
+import type { OpeningHours } from "@/types/hospital";
+
+/** "HH:MM" → 분 */
+const toMin = (s: string) => {
+  const [h, m] = s.split(":").map(Number);
+  return h * 60 + m;
+};
+
+/**
+ * 오늘 기준 실시간 영업상태. SSG 페이지 정합성을 위해 현재 시각은 클라이언트에서 계산.
+ * (네이버 플레이스 "영업중 · 18:00 종료" UX)
+ */
+export function TodayStatus({ hours }: { hours: OpeningHours[] }) {
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => setNow(new Date()), []);
+  if (!now) return null; // 하이드레이션 불일치 방지
+
+  const today = hours.find((h) => h.day === now.getDay());
+  const cur = now.getHours() * 60 + now.getMinutes();
+
+  let open = false;
+  let label: string;
+
+  if (!today || today.closed || !today.open || !today.close) {
+    label = "오늘 휴진";
+  } else {
+    const o = toMin(today.open);
+    const c = toMin(today.close);
+    const lunch = today.lunch?.split("-");
+    if (cur < o) {
+      label = `영업 전 · ${today.open} 진료 시작`;
+    } else if (cur >= c) {
+      label = `영업 종료 · 오늘 ${today.close}까지`;
+    } else if (lunch && cur >= toMin(lunch[0]) && cur < toMin(lunch[1])) {
+      label = `점심시간 · ${lunch[1]} 진료 재개`;
+    } else {
+      open = true;
+      label = `영업중 · ${today.close} 진료 마감`;
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`inline-block h-2 w-2 rounded-full ${open ? "bg-positive" : "bg-subtle"}`}
+        aria-hidden
+      />
+      <Text
+        as="span"
+        textStyle="t5Bold"
+        className={open ? "text-positive" : "text-muted"}
+      >
+        {label}
+      </Text>
+    </div>
+  );
+}
