@@ -56,6 +56,8 @@ export function MapExplorer({
     lng: number;
     zoom?: number;
   } | null>(null);
+  // 모바일 바텀시트 활성 스냅 포인트(0.5=절반, 1=전체)
+  const [snap, setSnap] = useState<number | string | null>(0.5);
   const [openOnly, setOpenOnly] = useState(false); // 영업중만 보기
   const [nightOnly, setNightOnly] = useState(false); // 야간진료만 보기
   // fetchForView(useCallback []) 에서 최신 토글값 읽기용 ref
@@ -315,6 +317,11 @@ export function MapExplorer({
     if (regionMode) loadRegionPage(regionMode, regionPage + 1);
   }, [regionMode, regionPage, loadRegionPage]);
 
+  // 바텀시트는 열릴 때마다 절반(0.5) 스냅에서 시작
+  useEffect(() => {
+    if (hasPanel) setSnap(0.5);
+  }, [hasPanel]);
+
   // 지도 페이지 동안 페이지 스크롤 잠금 (모바일 주소창/오버스크롤로 영역 들썩임 방지)
   useEffect(() => {
     const html = document.documentElement;
@@ -348,15 +355,31 @@ export function MapExplorer({
     // lat·lng → 해당 좌표로 지도 이동 (zoom 옵션, 기본 14: 구 단위 분포 보기)
     const lat = Number(sp.get("lat"));
     const lng = Number(sp.get("lng"));
-    if (Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0) {
+    const hasLatLng =
+      Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0;
+    if (hasLatLng) {
       const z = Number(sp.get("zoom"));
       setFocus({ lat, lng, zoom: Number.isFinite(z) && z > 0 ? z : 14 });
     }
-    // near=1 → 내 위치로 이동 (진료과 필터는 위에서 적용됨)
-    if (sp.get("near") === "1" && navigator.geolocation) {
+
+    const near = sp.get("near") === "1";
+    if (near && navigator.geolocation) {
+      // near=1 → 내 위치로 이동 (진료과 필터는 위에서 적용됨)
       navigator.geolocation.getCurrentPosition(
         (pos) => setFocus({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => alert("위치 권한을 허용하면 내 주변 병원을 보여드려요."),
+      );
+    } else if (!near && !hasLatLng && !q && navigator.geolocation) {
+      // 지도 진입 시 위치 권한 요청 → 허용하면 내 위치로 이동(거부 시 기본 위치 유지)
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          setFocus({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            zoom: 15,
+          }),
+        () => {},
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -421,6 +444,8 @@ export function MapExplorer({
             if (!open) clearSearch();
           }}
           snapPoints={[0.5, 1]}
+          activeSnapPoint={snap}
+          setActiveSnapPoint={setSnap}
           modal={false}
           dismissible
           handleOnly
@@ -429,9 +454,12 @@ export function MapExplorer({
             className="seed-bottom-sheet__positioner pointer-events-none"
             style={{ "--sheet-z-index": 20 } as React.CSSProperties}
           >
-            <DrawerContent className="seed-bottom-sheet__content pointer-events-auto h-[90dvh] w-full">
+            <DrawerContent className="seed-bottom-sheet__content pointer-events-auto h-[90dvh] w-full touch-none">
               <DrawerTitle className="sr-only">병원 목록</DrawerTitle>
-              <DrawerHandle className="mx-auto mb-1 mt-2.5 h-1.5 w-10 shrink-0 cursor-grab rounded-full bg-[#C7CDD6]" />
+              {/* 핸들 — 넓은 터치 영역으로 지도와 겹쳐 드래그되는 문제 방지 */}
+              <DrawerHandle className="flex w-full shrink-0 cursor-grab touch-none items-center justify-center py-3">
+                <span className="h-1.5 w-10 rounded-full bg-[#C7CDD6]" />
+              </DrawerHandle>
               <MapHospitalList
                 idPrefix="m"
                 items={listItems}
@@ -566,6 +594,7 @@ export function MapExplorer({
           onSelect={(hs) => setSelectedGroup(hs)}
           onSelectRegion={onSelectRegion}
           onSelectGrid={onSelectGrid}
+          onMapDrag={() => setSnap(0.5)}
           panelOpen={hasPanel}
         />
 

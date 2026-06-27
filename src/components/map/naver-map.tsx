@@ -93,6 +93,7 @@ export function NaverMap({
   onSelect,
   onSelectRegion,
   onSelectGrid,
+  onMapDrag,
   panelOpen = false,
 }: {
   mode: "marker" | "cluster" | "grid";
@@ -106,6 +107,8 @@ export function NaverMap({
   onSelect?: (hs: Hospital[]) => void;
   onSelectRegion?: (c: ClusterPoint) => void;
   onSelectGrid?: (c: ClusterPoint) => void;
+  /** 사용자가 지도를 드래그(팬)하기 시작할 때 — 모바일 바텀시트 내리기용 */
+  onMapDrag?: () => void;
   /** 모바일 바텀시트가 열려있는지 — 줌/위치 버튼을 시트 위로 올림 */
   panelOpen?: boolean;
 }) {
@@ -134,6 +137,8 @@ export function NaverMap({
   onSelectRegionRef.current = onSelectRegion;
   const onSelectGridRef = useRef(onSelectGrid);
   onSelectGridRef.current = onSelectGrid;
+  const onMapDragRef = useRef(onMapDrag);
+  onMapDragRef.current = onMapDrag;
 
   // 지도 초기화 (1회)
   useEffect(() => {
@@ -183,6 +188,10 @@ export function NaverMap({
           );
         };
         naver.maps.Event.addListener(map, "idle", emit);
+        // 사용자가 지도를 끌기 시작하면 알림(바텀시트 내리기)
+        naver.maps.Event.addListener(map, "dragstart", () =>
+          onMapDragRef.current?.(),
+        );
         emit();
       })
       .catch(() => {});
