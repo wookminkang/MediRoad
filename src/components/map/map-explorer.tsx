@@ -482,8 +482,8 @@ export function MapExplorer({
         </DrawerRoot>
       </div>
 
-      {/* 지도 + 상단 필터바 */}
-      <div className="relative flex-1">
+      {/* 지도 + 상단 필터바 — isolate로 naver 로고/저작권 z-index를 이 컨텍스트에 가둠 */}
+      <div className="relative isolate flex-1">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-center gap-2 px-3 py-3">
           <form
             onSubmit={(e) => {
