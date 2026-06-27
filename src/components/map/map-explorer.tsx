@@ -242,6 +242,7 @@ export function MapExplorer({
 
   // 지역 클러스터 클릭 → 그 지역 병원 전체 로드
   const onSelectRegion = (c: ClusterPoint) => {
+    setSnap(0.5); // 지역 선택 → 바텀시트 절반으로 올림
     const isSido = c.region === c.sido;
     const rm = {
       label: `${c.region} ${c.cnt.toLocaleString()}곳`,
@@ -285,6 +286,7 @@ export function MapExplorer({
 
   // 그리드 버블 클릭 → 그 셀(step 격자)의 병원 목록 로드
   const onSelectGrid = async (c: ClusterPoint) => {
+    setSnap(0.5); // 그리드 셀 선택 → 바텀시트 절반으로 올림
     const zoom = viewRef.current?.zoom ?? 15;
     const step = gridStep(zoom);
     const minLat = Math.floor(c.lat / step) * step;
@@ -404,6 +406,7 @@ export function MapExplorer({
       syncUrl(q, filters.type, filters.department);
       setSearchResults(items);
       setSelectedGroup(null);
+      setSnap(0.5); // 검색 결과 → 바텀시트 절반으로 올림
       const first = items.find((h) => h.location?.lat && h.location?.lng);
       if (first) setFocus({ lat: first.location.lat, lng: first.location.lng });
     } finally {
@@ -591,7 +594,10 @@ export function MapExplorer({
           selectedIds={selectedIds}
           focus={focus}
           onViewChanged={onViewChanged}
-          onSelect={(hs) => setSelectedGroup(hs)}
+          onSelect={(hs) => {
+            setSelectedGroup(hs);
+            setSnap(0.5); // 마커 탭 → 바텀시트 절반으로 올림
+          }}
           onSelectRegion={onSelectRegion}
           onSelectGrid={onSelectGrid}
           onMapDrag={() => setSnap(0.12)}
