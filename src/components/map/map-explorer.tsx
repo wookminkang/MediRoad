@@ -443,7 +443,7 @@ export function MapExplorer({
           onOpenChange={(open) => {
             if (!open) clearSearch();
           }}
-          snapPoints={[0.5, 1]}
+          snapPoints={[0.12, 0.5, 1]}
           activeSnapPoint={snap}
           setActiveSnapPoint={setSnap}
           modal={false}
@@ -594,7 +594,7 @@ export function MapExplorer({
           onSelect={(hs) => setSelectedGroup(hs)}
           onSelectRegion={onSelectRegion}
           onSelectGrid={onSelectGrid}
-          onMapDrag={() => setSnap(0.5)}
+          onMapDrag={() => setSnap(0.12)}
           panelOpen={hasPanel}
         />
 

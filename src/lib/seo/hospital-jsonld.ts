@@ -1,3 +1,4 @@
+import { getNeighborDistricts } from "@/constants/region-neighbors";
 import { SITE_URL } from "@/constants/site";
 import type { Hospital } from "@/types/hospital";
 
@@ -48,6 +49,17 @@ export function buildMedicalClinicLd(h: Hospital) {
     },
     hasMap: naverMapUrl(h),
     medicalSpecialty: h.departments,
+    // 진료 지역(자치구 + 인접 자치구) — 근처 지역 검색·생성형 인용 대응
+    areaServed: [h.region.sigungu, ...getNeighborDistricts(h.region.sigungu)].map(
+      (name) => ({ "@type": "AdministrativeArea", name }),
+    ),
+    ...(h.nearestStation && {
+      publicTransport: `${h.nearestStation.name}${
+        h.nearestStation.distanceM
+          ? ` 도보 ${Math.max(1, Math.round(h.nearestStation.distanceM / 67))}분`
+          : ""
+      }`,
+    }),
     ...(h.hours?.some((d) => !d.closed) && {
       openingHoursSpecification: h.hours
         .filter((d) => !d.closed && d.open && d.close)

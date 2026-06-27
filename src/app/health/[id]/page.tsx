@@ -38,7 +38,15 @@ export async function generateMetadata({
   return {
     title,
     description,
-    keywords: c.seo?.keywords ?? [categoryLabel(c.category), ...(c.tags ?? [])],
+    keywords: c.seo?.keywords ?? [
+      categoryLabel(c.category),
+      "건강정보",
+      "건강 칼럼",
+      ...(c.tags ?? []),
+    ],
+    authors: [{ name: c.author }, { name: c.reviewedBy.name }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
     alternates: { canonical: url },
     robots: { index: !c.seo?.noindex, follow: true },
     openGraph: {
@@ -52,6 +60,10 @@ export async function generateMetadata({
       modifiedTime: c.updatedAt,
       authors: [c.reviewedBy.name],
       ...(c.thumbnail && { images: [{ url: c.thumbnail }] }),
+    },
+    other: {
+      copyright: SITE_NAME,
+      "article:section": categoryLabel(c.category),
     },
   };
 }

@@ -40,16 +40,32 @@ export async function generateMetadata({
   }
 
   const url = `${SITE_URL}/hospitals/${h.slug}`;
-  const title = h.seo?.title ?? `${h.name} · ${h.region.sigungu} ${h.departments[0] ?? ""}`.trim();
+  const sido = h.region.sido;
+  const sigungu = h.region.sigungu;
+  const addr = h.roadAddress ?? h.address;
+  const deptStr = h.departments.join(", ");
+  const station = h.nearestStation ? ` ${h.nearestStation.name} 인근.` : "";
+
+  // 제목: "{병원명} 위치·진료시간·진료과목 안내 - {구} {유형}"
+  const title =
+    h.seo?.title ??
+    `${h.name} 위치·진료시간·진료과목 안내 - ${sigungu} ${h.type}`;
+
+  // 설명: 사이트·주소·병원명·진료과목 + 지하철 (지역 검색 노출 강화)
   const description =
     h.seo?.description ??
-    `${h.region.sigungu} ${h.type} ${h.name} — ${h.departments.join(", ")} 진료. 위치·진료시간·연락처·길찾기 안내.`;
+    `메디로드에서 ${sido} ${sigungu} ${addr} ${h.name}의 ${deptStr} 진료 정보를 확인하세요.${station} 위치·진료시간·연락처·길찾기 안내.`;
+
+  const keywords = h.seo?.keywords ?? hospitalKeywords(h);
   const image = h.seo?.ogImage ?? h.photos?.find((p) => p.isPrimary)?.url ?? h.photos?.[0]?.url;
 
   return {
     title,
     description,
-    keywords: h.seo?.keywords ?? hospitalKeywords(h),
+    keywords,
+    authors: [{ name: SITE_NAME, url: SITE_URL }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
     alternates: { canonical: url },
     robots: { index: !h.seo?.noindex, follow: true },
     openGraph: {
@@ -59,13 +75,18 @@ export async function generateMetadata({
       description,
       siteName: SITE_NAME,
       locale: "ko_KR",
-      ...(image && { images: [{ url: image, alt: `${h.name} 사진` }] }),
+      ...(image && {
+        images: [{ url: image, alt: `${h.name} ${h.type} 사진` }],
+      }),
     },
     other: {
       "geo.region": "KR",
-      "geo.placename": h.region.sigungu,
+      "geo.placename": `${sido} ${sigungu}`,
       "geo.position": `${h.location.lat};${h.location.lng}`,
       ICBM: `${h.location.lat}, ${h.location.lng}`,
+      coverage: `${sido} ${sigungu}`,
+      copyright: SITE_NAME,
+      "article:section": "병원 상세",
     },
   };
 }

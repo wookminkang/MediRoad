@@ -54,11 +54,10 @@ export function HospitalDetail({
         </Text>
       </nav>
 
-      {/* 상단 사진 갤러리 (가로 스트립 — 없으면 플레이스홀더) */}
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const photo = photos[i];
-          return photo?.url ? (
+      {/* 상단 사진 갤러리 — 사진이 있을 때만 노출 (없으면 미노출) */}
+      {photos.length > 0 && (
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {photos.map((photo, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={i}
@@ -66,15 +65,9 @@ export function HospitalDetail({
               alt={photo.alt ?? `${h.name} 사진 ${i + 1}`}
               className="aspect-[4/3] w-full rounded-xl object-cover"
             />
-          ) : (
-            <ImagePlaceholder
-              key={i}
-              rounded="rounded-xl"
-              className="aspect-[4/3] w-full"
-            />
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* 타이틀 블록 */}
       <header className="mt-6">
@@ -89,15 +82,8 @@ export function HospitalDetail({
           )}
         </div>
 
-        {/* 평점·후기(공간) · 종별·지역 */}
+        {/* 종별·지역 (평점·후기는 준비 중 — 잠시 숨김) */}
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-          <span className="flex items-center gap-1 font-bold text-neutral">
-            <StarIcon />
-            {h.rating ?? "—"}
-          </span>
-          <span className="text-subtle">·</span>
-          <span>후기 {h.reviewCount ?? 0}</span>
-          <span className="text-subtle">·</span>
           <span>{h.type}</span>
           <span className="text-subtle">·</span>
           <span>{h.region.sigungu}</span>
@@ -181,8 +167,8 @@ export function HospitalDetail({
             </Section>
           )}
 
-          {/* 후기 (공간만 — 준비 중) */}
-          <ReviewSection />
+          {/* 후기 (준비 중 — 잠시 숨김) */}
+          {/* <ReviewSection /> */}
         </div>
 
         {/* 정보 사이드바 (우) */}

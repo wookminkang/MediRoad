@@ -43,6 +43,9 @@ export async function generateMetadata({
     title,
     description,
     keywords,
+    authors: [{ name: h.name }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
     alternates: { canonical: url },
     robots: { index: !post.seo?.noindex, follow: true },
     openGraph: {
@@ -52,7 +55,18 @@ export async function generateMetadata({
       description,
       siteName: SITE_NAME,
       locale: "ko_KR",
+      ...(post.publishedAt && { publishedTime: post.publishedAt }),
+      ...(post.updatedAt && { modifiedTime: post.updatedAt }),
+      authors: [h.name],
       ...(image && { images: [{ url: image, alt: post.title }] }),
+    },
+    other: {
+      "geo.region": "KR",
+      "geo.placename": `${h.region.sido} ${h.region.sigungu}`,
+      "geo.position": `${h.location.lat};${h.location.lng}`,
+      ICBM: `${h.location.lat}, ${h.location.lng}`,
+      copyright: SITE_NAME,
+      "article:section": "병원 건강정보",
     },
   };
 }
