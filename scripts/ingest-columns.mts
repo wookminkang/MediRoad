@@ -111,7 +111,7 @@ async function addWatermark(imageBuf: Buffer): Promise<Buffer> {
   const m = await base.metadata();
   const W = m.width ?? 1024;
   const H = m.height ?? 1024;
-  const logo = await whiteLogo(Math.round(W * 0.18));
+  const logo = await whiteLogo(Math.round(W * 0.12));
   const padIn = Math.round(W * 0.018);
   const boxW = logo.w + padIn * 2;
   const boxH = logo.h + padIn * 2;
@@ -131,47 +131,61 @@ async function addWatermark(imageBuf: Buffer): Promise<Buffer> {
     .toBuffer();
 }
 
-/** 썸네일 틀(강남언니 스타일): 이미지 + 하단 스크림 + 타이틀(흰) + 메디로드 로고(흰, 중앙 하단) */
+/**
+ * 썸네일 — 강남언니풍: 사진 + 부드러운 스크림 + 가운데 흰 굵은 타이틀(그림자) + 로고(가운데 하단).
+ * 오버레이는 일관되게 두고, "다양함"은 AI 이미지의 구도에서 만든다.
+ */
 async function composeThumbnail(imageBuf: Buffer, title: string): Promise<Buffer> {
   const S = THUMB_SIZE;
   const base = await sharp(imageBuf).resize(S, S, { fit: "cover" }).toBuffer();
 
+  // 부드러운 스크림 — 상·하단만 살짝 어둡게(어떤 사진에서도 글씨 가독)
   const scrim = Buffer.from(
     `<svg width="${S}" height="${S}"><defs>` +
       `<linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +
-      `<stop offset="42%" stop-color="#000" stop-opacity="0"/>` +
-      `<stop offset="100%" stop-color="#000" stop-opacity="0.62"/>` +
+      `<stop offset="0%" stop-color="#000" stop-opacity="0.16"/>` +
+      `<stop offset="42%" stop-color="#000" stop-opacity="0.04"/>` +
+      `<stop offset="74%" stop-color="#000" stop-opacity="0.30"/>` +
+      `<stop offset="100%" stop-color="#000" stop-opacity="0.58"/>` +
       `</linearGradient></defs>` +
       `<rect width="${S}" height="${S}" fill="url(#g)"/></svg>`,
   );
 
   const len = title.replace(/\s/g, "").length;
   const dpi = len <= 14 ? 560 : len <= 22 ? 460 : 380;
-  const titleImg = await sharp({
-    text: {
-      text: `<span foreground="#ffffff" weight="bold">${escapeXml(title)}</span>`,
-      font: "Apple SD Gothic Neo",
-      width: Math.round(S * 0.84),
-      align: "center",
-      rgba: true,
-      dpi,
-    },
-  })
-    .png()
-    .toBuffer();
+  const renderText = (color: string) =>
+    sharp({
+      text: {
+        text: `<span foreground="${color}" weight="bold">${escapeXml(title)}</span>`,
+        font: "Apple SD Gothic Neo",
+        width: Math.round(S * 0.84),
+        align: "center",
+        rgba: true,
+        dpi,
+      },
+    })
+      .png()
+      .toBuffer();
+
+  const titleImg = await renderText("#ffffff");
+  // 가독성용 소프트 섀도(검정 텍스트를 흐려 뒤에 깔기)
+  const shadowImg = await sharp(await renderText("#000000")).blur(7).toBuffer();
   const tm = await sharp(titleImg).metadata();
+  const tw = tm.width ?? 0;
+  const th = tm.height ?? 0;
 
-  const logo = await whiteLogo(Math.round(S * 0.3));
-
+  const logo = await whiteLogo(Math.round(S * 0.2));
   const bottomPad = Math.round(S * 0.07);
   const logoTop = S - logo.h - bottomPad;
-  const gap = Math.round(S * 0.04);
-  const titleTop = Math.max(24, logoTop - (tm.height ?? 0) - gap);
+  const gap = Math.round(S * 0.045);
+  const titleTop = Math.max(24, logoTop - th - gap);
+  const titleLeft = Math.round((S - tw) / 2);
 
   return sharp(base)
     .composite([
       { input: scrim, top: 0, left: 0 },
-      { input: titleImg, top: titleTop, left: Math.round((S - (tm.width ?? 0)) / 2) },
+      { input: shadowImg, top: titleTop + 3, left: titleLeft },
+      { input: titleImg, top: titleTop, left: titleLeft },
       { input: logo.buf, top: logoTop, left: Math.round((S - logo.w) / 2) },
     ])
     .webp({ quality: WEBP_QUALITY })

@@ -259,25 +259,54 @@ export default async function Home() {
                 <li key={p.id}>
                   <Link
                     href={`/hospitals/${p.hospitalSlug}/posts/${p.id}`}
-                    className="flex h-full flex-col gap-3"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-lg"
                   >
-                    {p.thumbnail ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.thumbnail}
-                        alt={p.title}
-                        className="aspect-[4/3] w-full rounded-2xl object-cover"
-                      />
-                    ) : (
-                      <ImagePlaceholder className="aspect-[4/3] w-full" />
-                    )}
-                    <span className="text-sm font-bold text-brand">
-                      {p.hospitalName}
-                    </span>
-                    <span className="line-clamp-2 text-lg font-bold text-neutral">
-                      {p.title}
-                    </span>
-                    <span className="line-clamp-2 text-sm text-muted">{p.excerpt}</span>
+                    {/* 브랜드 틴트 헤더 (썸네일 대체 — 아이콘 + 병원명) */}
+                    <div className="relative flex items-center gap-2.5 overflow-hidden bg-brand-weak px-5 py-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1E5BD6] text-white">
+                        <PostMarkIcon />
+                      </span>
+                      <span className="truncate text-sm font-bold text-brand">
+                        {p.hospitalName}
+                      </span>
+                      {/* 데코 따옴표 */}
+                      <svg
+                        className="pointer-events-none absolute -right-1 -top-2 text-brand/10"
+                        width="76"
+                        height="76"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-hidden
+                      >
+                        <path d="M7 7h4v4c0 3-2 5-5 5v-2c1.7 0 3-1.3 3-3H7V7zm8 0h4v4c0 3-2 5-5 5v-2c1.7 0 3-1.3 3-3h-2V7z" />
+                      </svg>
+                    </div>
+                    {/* 본문 */}
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="line-clamp-2 text-lg font-bold text-neutral">
+                        {p.title}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 flex-1 text-sm text-muted">
+                        {p.excerpt}
+                      </p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-brand">
+                        자세히 보기
+                        <svg
+                          className="transition-transform group-hover:translate-x-0.5"
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <path d="m9 18 6-6-6-6" />
+                        </svg>
+                      </span>
+                    </div>
                   </Link>
                 </li>
               ))}
@@ -364,6 +393,15 @@ function SectionHeading({
 }
 
 /* ── 아이콘 ── */
+function PostMarkIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" />
+      <path d="M8 12h2l1.5 3 2-6L15 12h1" />
+    </svg>
+  );
+}
 function PinIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
