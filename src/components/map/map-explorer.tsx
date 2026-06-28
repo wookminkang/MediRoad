@@ -61,6 +61,8 @@ export function MapExplorer({
   const [snap, setSnap] = useState<number | string | null>(0.5);
   // 모바일 검색 전용 화면 표시 여부
   const [searchPageOpen, setSearchPageOpen] = useState(false);
+  // 사용자 현재 위치 (검색 자동완성 거리 계산용)
+  const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
   // 마지막 선택 시각 — 선택 직후 탭의 미세드래그(dragstart)로 시트가 내려가는 race 방지
   const lastSelectRef = useRef(0);
   /** 마커/지역/검색 선택 시 시트를 절반으로 올리고, 직후 드래그-내림을 잠시 억제 */
@@ -248,6 +250,22 @@ export function MapExplorer({
     if (viewRef.current) fetchForView(viewRef.current.b, viewRef.current.zoom, filters);
   };
 
+  // 자동완성에서 병원 선택 → 그 병원만 지도/리스트에 바로 표시
+  const pickHospital = (h: Hospital) => {
+    searchActiveRef.current = true;
+    appliedQRef.current = h.name;
+    setQInput(h.name);
+    setRegionMode(null);
+    setSelectedGroup(null);
+    setSearchResults([h]);
+    syncUrl(h.name, filters.type, filters.department);
+    if (h.location?.lat && h.location?.lng) {
+      setFocus({ lat: h.location.lat, lng: h.location.lng, zoom: 16 });
+    }
+    raiseSheet();
+    setSearchPageOpen(false);
+  };
+
   // 지역 병원 페이지 로드 (무한스크롤)
   const REGION_PAGE_SIZE = 24;
   const loadRegionPage = useCallback(
@@ -398,18 +416,29 @@ export function MapExplorer({
     if (near && navigator.geolocation) {
       // near=1 → 내 위치로 이동 (진료과 필터는 위에서 적용됨)
       navigator.geolocation.getCurrentPosition(
-        (pos) => setFocus({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLoc(loc);
+          setFocus(loc);
+        },
         () => alert("위치 권한을 허용하면 내 주변 병원을 보여드려요."),
       );
     } else if (!near && !hasLatLng && !q && navigator.geolocation) {
       // 지도 진입 시 위치 권한 요청 → 허용하면 내 위치로 이동(거부 시 기본 위치 유지)
       navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLoc(loc);
+          setFocus({ ...loc, zoom: 15 });
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
+      );
+    } else if (navigator.geolocation) {
+      // 좌표/검색 진입이어도 거리 계산용으로 위치는 조용히 확보(이동은 안 함)
+      navigator.geolocation.getCurrentPosition(
         (pos) =>
-          setFocus({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            zoom: 15,
-          }),
+          setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
         () => {},
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
       );
@@ -508,6 +537,8 @@ export function MapExplorer({
                 onClose={clearSearch}
                 onFocus={focusHospital}
                 onHover={setHoveredId}
+                // 시트가 완전히 펼쳐졌을 때만 리스트 스크롤 허용 (그 전엔 위 스와이프=시트 확장)
+                scrollable={Number(snap) >= 0.99}
               />
             </DrawerContent>
           </DrawerPositioner>
@@ -576,7 +607,7 @@ export function MapExplorer({
                 value={qInput}
                 onChange={(e) => setQInput(e.target.value)}
                 placeholder="병원 이름 검색"
-                className="w-48 rounded-full border border-black/5 bg-white py-2 pl-9 pr-4 text-sm shadow-md focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/30"
+                className="w-48 rounded-full border border-black/5 bg-white py-2 pl-9 pr-4 text-base shadow-md focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/30"
               />
             </div>
             <button
@@ -741,12 +772,14 @@ export function MapExplorer({
       <MobileSearch
         open={searchPageOpen}
         initialQuery={appliedQRef.current}
+        userLoc={userLoc}
         onClose={() => setSearchPageOpen(false)}
         onSubmit={(q) => {
           setQInput(q);
           runSearch(q);
           setSearchPageOpen(false);
         }}
+        onPickHospital={pickHospital}
       />
     </div>
   );

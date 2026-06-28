@@ -28,6 +28,7 @@ export function MapHospitalList({
   onFocus,
   onHover,
   idPrefix = "d",
+  scrollable = true,
 }: {
   items: Hospital[];
   hasPanel: boolean;
@@ -44,6 +45,8 @@ export function MapHospitalList({
   onFocus: (h: Hospital) => void;
   onHover: (id: string | null) => void;
   idPrefix?: string;
+  /** false면 내부 스크롤 비활성 — 바텀시트가 완전히 펼쳐지기 전엔 위 스와이프가 시트 확장이 되도록 */
+  scrollable?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -64,7 +67,10 @@ export function MapHospitalList({
   }, [regionActive, canLoadMore, onLoadMore]);
 
   return (
-    <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+    <div
+      ref={scrollRef}
+      className={`min-h-0 flex-1 ${scrollable ? "overflow-y-auto" : "overflow-hidden"}`}
+    >
       <div className="sticky top-0 z-10 border-b border-line bg-white px-4 py-3">
         {hasPanel ? (
           <div className="flex items-center justify-between gap-2">

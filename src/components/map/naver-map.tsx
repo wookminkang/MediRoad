@@ -327,7 +327,10 @@ export function NaverMap({
     const naver = (window as any).naver;
     const map = mapRef.current;
     if (!naver || !map || !focus) return;
-    map.morph(new naver.maps.LatLng(focus.lat, focus.lng), focus.zoom ?? 16);
+    // 즉시 이동(애니메이션 없음) — morph는 먼 거리일수록 느려 체감 지연이 큼
+    const ll = new naver.maps.LatLng(focus.lat, focus.lng);
+    map.setZoom(focus.zoom ?? 16, false);
+    map.setCenter(ll);
   }, [focus]);
 
   // 리스트 hover → 해당 마커 강조 (주황 점 + 글로우)
