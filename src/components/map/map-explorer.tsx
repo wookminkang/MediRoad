@@ -15,6 +15,7 @@ import type { Hospital } from "@/types/hospital";
 
 import { FilterDropdown } from "./filter-dropdown";
 import { MapHospitalList } from "./map-hospital-list";
+import { MobileSearch } from "./mobile-search";
 import { type Bounds, type ClusterPoint, NaverMap } from "./naver-map";
 
 const DEFAULT_CENTER = { lat: 37.4979, lng: 127.0276 }; // 강남역
@@ -58,6 +59,8 @@ export function MapExplorer({
   } | null>(null);
   // 모바일 바텀시트 활성 스냅 포인트(0.5=절반, 1=전체)
   const [snap, setSnap] = useState<number | string | null>(0.5);
+  // 모바일 검색 전용 화면 표시 여부
+  const [searchPageOpen, setSearchPageOpen] = useState(false);
   // 마지막 선택 시각 — 선택 직후 탭의 미세드래그(dragstart)로 시트가 내려가는 race 방지
   const lastSelectRef = useRef(0);
   /** 마커/지역/검색 선택 시 시트를 절반으로 올리고, 직후 드래그-내림을 잠시 억제 */
@@ -102,6 +105,9 @@ export function MapExplorer({
 
   const viewRef = useRef<{ b: Bounds; zoom: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 요청 순번 + 진행 중 요청 취소 — 빠른 팬/줌 시 이전 응답이 최신을 덮어쓰는 race 방지
+  const reqSeqRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchForView = useCallback(async (b: Bounds, zoom: number, f: Filters) => {
     const common = new URLSearchParams({
@@ -116,24 +122,35 @@ export function MapExplorer({
     if (openOnlyRef.current) common.set("open", "1"); // 클러스터/그리드 영업중 필터
     if (nightOnlyRef.current) common.set("night", "1"); // 야간진료 필터
 
+    // 이전 요청 취소 + 이번 요청 순번 발급
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    const seq = ++reqSeqRef.current;
+    const isStale = () => seq !== reqSeqRef.current; // 더 새 요청이 시작됐으면 폐기
+
     // 하단 "이 지역 N곳" 카운트 (행 미반환 head count)
-    fetch(`/api/hospitals/count?${common}`)
+    fetch(`/api/hospitals/count?${common}`, { signal: ac.signal })
       .then((r) => r.json())
-      .then((j) => setViewCount(j.count ?? 0))
+      .then((j) => {
+        if (!isStale()) setViewCount(j.count ?? 0);
+      })
       .catch(() => {});
 
     setLoading(true);
     try {
       if (zoom >= INDIVIDUAL_ZOOM) {
-        const res = await fetch(`/api/hospitals/bounds?${common}`);
+        const res = await fetch(`/api/hospitals/bounds?${common}`, { signal: ac.signal });
         const json = await res.json();
+        if (isStale()) return;
         setHospitals(json.items ?? []);
         setMode("marker");
         // marker 모드 드래그 중엔 선택 유지 (초기화하지 않음)
       } else if (zoom >= GRID_MIN_ZOOM) {
         common.set("step", String(gridStep(zoom)));
-        const res = await fetch(`/api/hospitals/grid?${common}`);
+        const res = await fetch(`/api/hospitals/grid?${common}`, { signal: ac.signal });
         const json = await res.json();
+        if (isStale()) return;
         setClusters(
           (json.clusters ?? []).map(
             (g: { lat: number; lng: number; cnt: number }) => ({
@@ -146,8 +163,9 @@ export function MapExplorer({
         setMode("grid");
       } else {
         common.set("level", zoom <= SIDO_ZOOM ? "sido" : "sigungu");
-        const res = await fetch(`/api/hospitals/clusters?${common}`);
+        const res = await fetch(`/api/hospitals/clusters?${common}`, { signal: ac.signal });
         const json = await res.json();
+        if (isStale()) return;
         // 지역 중심이 화면 밖이면 라벨을 화면 안(가장자리)으로 클램프 → 항상 보이게
         const padLat = (b.maxLat - b.minLat) * 0.08;
         const padLng = (b.maxLng - b.minLng) * 0.08;
@@ -164,8 +182,13 @@ export function MapExplorer({
         );
         setMode("cluster");
       }
+    } catch (e) {
+      // 취소(AbortError)는 정상 — 그 외만 무시(다음 뷰에서 재시도)
+      if ((e as Error)?.name !== "AbortError") {
+        /* noop: 네트워크 일시오류는 다음 idle에서 회복 */
+      }
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   }, []);
 
@@ -495,12 +518,44 @@ export function MapExplorer({
       {/* 지도 + 상단 필터바 — isolate로 naver 로고/저작권 z-index를 이 컨텍스트에 가둠 */}
       <div className="relative isolate flex-1">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-center gap-2 px-3 py-3">
+          {/* 모바일 검색 트리거 — 탭하면 검색 전용 화면 / 검색중이면 쿼리+닫기 표시 */}
+          <div className="pointer-events-auto flex w-full items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={() => setSearchPageOpen(true)}
+              className="flex flex-1 items-center gap-2 rounded-full border border-black/5 bg-white py-2.5 pl-4 pr-3 text-left shadow-md"
+            >
+              <svg className="shrink-0 text-subtle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <span className={`flex-1 truncate text-sm ${searchActive ? "font-medium text-neutral" : "text-subtle"}`}>
+                {searchActive ? appliedQRef.current : "병원 이름 검색"}
+              </span>
+              {searchActive && (
+                <span
+                  role="button"
+                  aria-label="검색 닫기"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearSearch();
+                  }}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/10 text-neutral"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden>
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          </div>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
               runSearch(qInput);
             }}
-            className="pointer-events-auto flex items-center gap-1.5"
+            className="pointer-events-auto hidden items-center gap-1.5 md:flex"
           >
             <div className="relative">
               <svg
@@ -532,7 +587,11 @@ export function MapExplorer({
               검색
             </button>
           </form>
-          <div className="pointer-events-auto flex items-center gap-2">
+          <div
+            className={`pointer-events-auto items-center gap-2 ${
+              searchActive ? "hidden md:flex" : "flex"
+            }`}
+          >
             <FilterDropdown
               label="종별"
               value={filters.type}
@@ -660,7 +719,36 @@ export function MapExplorer({
             </div>
           </div>
         )}
+
+        {/* 모바일: 검색 결과 상태에서 "이 지역 검색하기" — 현재 화면 영역의 병원 보기 */}
+        {searchActive && (
+          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center md:hidden">
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-[#26282c] px-4 py-2 text-sm font-bold text-white shadow-lg"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              이 지역 검색하기
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* 모바일 검색 전용 화면 */}
+      <MobileSearch
+        open={searchPageOpen}
+        initialQuery={appliedQRef.current}
+        onClose={() => setSearchPageOpen(false)}
+        onSubmit={(q) => {
+          setQInput(q);
+          runSearch(q);
+          setSearchPageOpen(false);
+        }}
+      />
     </div>
   );
 }
