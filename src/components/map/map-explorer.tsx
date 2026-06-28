@@ -58,6 +58,13 @@ export function MapExplorer({
   } | null>(null);
   // 모바일 바텀시트 활성 스냅 포인트(0.5=절반, 1=전체)
   const [snap, setSnap] = useState<number | string | null>(0.5);
+  // 마지막 선택 시각 — 선택 직후 탭의 미세드래그(dragstart)로 시트가 내려가는 race 방지
+  const lastSelectRef = useRef(0);
+  /** 마커/지역/검색 선택 시 시트를 절반으로 올리고, 직후 드래그-내림을 잠시 억제 */
+  const raiseSheet = () => {
+    lastSelectRef.current = Date.now();
+    setSnap(0.5);
+  };
   const [openOnly, setOpenOnly] = useState(false); // 영업중만 보기
   const [nightOnly, setNightOnly] = useState(false); // 야간진료만 보기
   // fetchForView(useCallback []) 에서 최신 토글값 읽기용 ref
@@ -242,7 +249,7 @@ export function MapExplorer({
 
   // 지역 클러스터 클릭 → 그 지역 병원 전체 로드
   const onSelectRegion = (c: ClusterPoint) => {
-    setSnap(0.5); // 지역 선택 → 바텀시트 절반으로 올림
+    raiseSheet(); // 지역 선택 → 바텀시트 절반으로 올림
     const isSido = c.region === c.sido;
     const rm = {
       label: `${c.region} ${c.cnt.toLocaleString()}곳`,
@@ -286,7 +293,7 @@ export function MapExplorer({
 
   // 그리드 버블 클릭 → 그 셀(step 격자)의 병원 목록 로드
   const onSelectGrid = async (c: ClusterPoint) => {
-    setSnap(0.5); // 그리드 셀 선택 → 바텀시트 절반으로 올림
+    raiseSheet(); // 그리드 셀 선택 → 바텀시트 절반으로 올림
     const zoom = viewRef.current?.zoom ?? 15;
     const step = gridStep(zoom);
     const minLat = Math.floor(c.lat / step) * step;
@@ -406,7 +413,7 @@ export function MapExplorer({
       syncUrl(q, filters.type, filters.department);
       setSearchResults(items);
       setSelectedGroup(null);
-      setSnap(0.5); // 검색 결과 → 바텀시트 절반으로 올림
+      raiseSheet(); // 검색 결과 → 바텀시트 절반으로 올림
       const first = items.find((h) => h.location?.lat && h.location?.lng);
       if (first) setFocus({ lat: first.location.lat, lng: first.location.lng });
     } finally {
@@ -596,11 +603,15 @@ export function MapExplorer({
           onViewChanged={onViewChanged}
           onSelect={(hs) => {
             setSelectedGroup(hs);
-            setSnap(0.5); // 마커 탭 → 바텀시트 절반으로 올림
+            raiseSheet(); // 마커 탭 → 바텀시트 절반으로 올림
           }}
           onSelectRegion={onSelectRegion}
           onSelectGrid={onSelectGrid}
-          onMapDrag={() => setSnap(0.12)}
+          onMapDrag={() => {
+            // 선택 직후 600ms 내 dragstart(탭의 미세드래그)는 무시 → 시트 유지
+            if (Date.now() - lastSelectRef.current < 600) return;
+            setSnap(0.12);
+          }}
           panelOpen={hasPanel}
         />
 
