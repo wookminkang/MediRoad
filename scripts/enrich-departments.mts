@@ -3,6 +3,8 @@
  * 재실행 가능: 이미 진료과목이 있는 병원은 건너뜀(이어서 진행 → quota 분할 가능).
  * 실행: node --env-file=.env.local --import tsx scripts/enrich-departments.mts [최대처리수]
  */
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+
 import { createClient } from "@supabase/supabase-js";
 
 const EP = process.env.EGEN_API_ENDPOINT!;
@@ -73,7 +75,10 @@ async function upsertDepts(rows: { hospital_id: string; name: string }[]) {
   }
 }
 
-let after = "";
+// 재개 커서 — 마지막 처리 위치(id)를 파일에 저장해, 다음 실행 때 재훑기 생략
+const CURSOR = new URL("./.enrich-cursor", import.meta.url);
+let after = existsSync(CURSOR) ? readFileSync(CURSOR, "utf8").trim() : "";
+if (after) console.log(`커서 재개: id > ${after}`);
 let processed = 0;
 let enriched = 0;
 let deptRows = 0;
@@ -87,10 +92,15 @@ try {
       .order("id")
       .limit(PAGE);
     if (error) throw error;
-    if (!hs?.length) break;
+    if (!hs?.length) {
+      writeFileSync(CURSOR, ""); // 끝까지 완료 → 커서 리셋(다음 실행은 처음부터 재점검)
+      console.log("모든 병원 스캔 완료 — 커서 리셋");
+      break;
+    }
 
     const ids = hs.map((h) => h.id);
     after = ids[ids.length - 1];
+    writeFileSync(CURSOR, after); // 진행 위치 저장
 
     // 이미 진료과목 있는 병원 제외
     const { data: ex } = await sb.from("hospital_departments").select("hospital_id").in("hospital_id", ids);

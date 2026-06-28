@@ -39,7 +39,9 @@ export function Header() {
           <NavLink href="/hospitals">병원</NavLink>
           */}
           <NavLink href="/map">내 주변 병원</NavLink>
+          {/* 증상·질환 보류 — 다시 노출하려면 주석 해제
           <NavLink href="/conditions">증상·질환</NavLink>
+          */}
           <NavLink href="/health">건강정보</NavLink>
           <ActionButton asChild variant="brandSolid" size="small">
             <Link href="/map">병원 찾기</Link>

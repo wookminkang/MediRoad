@@ -7,7 +7,8 @@ import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/map", label: "내 주변 병원" },
-  { href: "/conditions", label: "증상·질환" },
+  // 증상·질환 보류 — 다시 노출하려면 주석 해제
+  // { href: "/conditions", label: "증상·질환" },
   { href: "/health", label: "건강정보" },
 ];
 

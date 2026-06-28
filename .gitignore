@@ -44,3 +44,9 @@ next-env.d.ts
 # 일일 발행 아티팩트
 scripts/daily-publish.log
 content/columns/_ingested/
+
+# enrich 재개 커서(런타임)
+scripts/.enrich-cursor
+
+# Claude Code 런타임 락
+.claude/scheduled_tasks.lock
