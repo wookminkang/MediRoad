@@ -207,40 +207,39 @@ export function NaverMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 오버레이(마커/클러스터) 갱신
+  // 오버레이(마커/클러스터) 갱신 — 마커 풀 재사용(파괴/재생성 최소화로 팬·줌 부드럽게)
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const naver = (window as any).naver;
     const map = mapRef.current;
     if (!naver || !map) return;
-    overlaysRef.current.forEach((o) => o.setMap(null));
+
+    type Spec = {
+      lat: number;
+      lng: number;
+      content: string;
+      ax: number;
+      ay: number;
+      kind: "cluster" | "grid" | "single" | "group";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payload: any;
+    };
+    const specs: Spec[] = [];
 
     if (mode === "cluster" || mode === "grid") {
-      overlaysRef.current = clusters.map((c) => {
-        const mk = new naver.maps.Marker({
-          position: new naver.maps.LatLng(c.lat, c.lng),
-          map,
-          icon: {
-            content: mode === "grid" ? gridHtml(c.cnt) : clusterHtml(c),
-            anchor: new naver.maps.Point(0, 0),
-          },
+      for (const c of clusters) {
+        specs.push({
+          lat: c.lat,
+          lng: c.lng,
+          content: mode === "grid" ? gridHtml(c.cnt) : clusterHtml(c),
+          ax: 0,
+          ay: 0,
+          kind: mode,
+          payload: c,
         });
-        naver.maps.Event.addListener(mk, "click", () => {
-          // 지역 라벨(cluster) → 그 지역 병원 목록 로드
-          if (mode === "cluster") {
-            onSelectRegionRef.current?.(c);
-            return;
-          }
-          // 그리드 버블(grid) → 그 셀의 병원 목록 로드
-          onSelectGridRef.current?.(c);
-        });
-        return mk;
-      });
+      }
     } else {
-      markersByIdRef.current = {};
-      prevSelectedRef.current = [];
       // 화면(픽셀) 근접 마커 그룹화 → 단독은 이름 라벨, 다중은 카운트 버블.
-      // 확대할수록 같은 px 거리가 더 넓은 실거리를 덮지 않으므로 자연스럽게 풀림(네이버 부동산식).
       const withCoords = hospitals.filter((h) => h.location.lat && h.location.lng);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const proj = map.getProjection();
@@ -260,37 +259,78 @@ export function NaverMap({
         if (arr) arr.push(h);
         else groups.set(key, [h]);
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const overlays: any[] = [];
       groups.forEach((arr) => {
         const single = arr.length === 1;
-        // 단독은 실제 위치, 그룹은 멤버 평균 위치(버블 중심)
         const lat = single
           ? arr[0].location.lat
           : arr.reduce((s, h) => s + h.location.lat, 0) / arr.length;
         const lng = single
           ? arr[0].location.lng
           : arr.reduce((s, h) => s + h.location.lng, 0) / arr.length;
-        const mk = new naver.maps.Marker({
-          position: new naver.maps.LatLng(lat, lng),
-          map,
-          title: single ? arr[0].name : `${arr.length}곳`,
-          icon: single
-            ? { content: markerHtml(arr[0].name, false), anchor: new naver.maps.Point(7, 7) }
-            : { content: buildingHtml(arr.length, false), anchor: new naver.maps.Point(0, 0) },
+        specs.push({
+          lat,
+          lng,
+          content: single
+            ? markerHtml(arr[0].name, false)
+            : buildingHtml(arr.length, false),
+          ax: single ? 7 : 0,
+          ay: single ? 7 : 0,
+          kind: single ? "single" : "group",
+          payload: arr,
         });
-        naver.maps.Event.addListener(mk, "click", () => onSelectRef.current?.(arr));
+      });
+    }
+
+    // 풀 재사용 reconcile — 위치/아이콘만 갱신, 객체 생성·제거 최소화
+    const pool = overlaysRef.current;
+    markersByIdRef.current = {};
+    prevSelectedRef.current = [];
+
+    for (let i = 0; i < specs.length; i++) {
+      const s = specs[i];
+      let mk = pool[i];
+      if (!mk) {
+        mk = new naver.maps.Marker({
+          position: new naver.maps.LatLng(s.lat, s.lng),
+          map: null,
+        });
+        // 단일 위임 클릭 핸들러 — 클릭 시점의 최신 스펙(__spec)으로 분기(리스너 누적 방지)
+        naver.maps.Event.addListener(mk, "click", () => {
+          const spec = mk.__spec as Spec | undefined;
+          if (!spec) return;
+          if (spec.kind === "cluster") onSelectRegionRef.current?.(spec.payload);
+          else if (spec.kind === "grid") onSelectGridRef.current?.(spec.payload);
+          else onSelectRef.current?.(spec.payload);
+        });
+        pool[i] = mk;
+      }
+      mk.__spec = s;
+      if (mk.__lat !== s.lat || mk.__lng !== s.lng) {
+        mk.setPosition(new naver.maps.LatLng(s.lat, s.lng));
+        mk.__lat = s.lat;
+        mk.__lng = s.lng;
+      }
+      if (mk.__content !== s.content) {
+        mk.setIcon({ content: s.content, anchor: new naver.maps.Point(s.ax, s.ay) });
+        mk.__content = s.content;
+      }
+      if (mk.getMap() !== map) mk.setMap(map);
+
+      if (s.kind === "single" || s.kind === "group") {
+        const arr = s.payload as Hospital[];
         for (const h of arr) {
           markersByIdRef.current[h.id] = {
             mk,
-            kind: single ? "single" : "group",
-            name: h.name,
+            kind: s.kind === "single" ? "single" : "group",
+            name: arr[0].name,
             cnt: arr.length,
           };
         }
-        overlays.push(mk);
-      });
-      overlaysRef.current = overlays;
+      }
+    }
+    // 남는 풀 마커는 지도에서만 숨김(파괴 X → 다음에 재사용)
+    for (let i = specs.length; i < pool.length; i++) {
+      if (pool[i]?.getMap()) pool[i].setMap(null);
     }
   }, [mode, hospitals, clusters]);
 
@@ -302,17 +342,13 @@ export function NaverMap({
     const apply = (id: string, on: boolean) => {
       const entry = markersByIdRef.current[id];
       if (!entry) return;
-      if (entry.kind === "group") {
-        entry.mk.setIcon({
-          content: buildingHtml(entry.cnt, on),
-          anchor: new naver.maps.Point(0, 0),
-        });
-      } else {
-        entry.mk.setIcon({
-          content: markerHtml(entry.name, on),
-          anchor: new naver.maps.Point(7, 7),
-        });
-      }
+      const content =
+        entry.kind === "group"
+          ? buildingHtml(entry.cnt, on)
+          : markerHtml(entry.name, on);
+      const ax = entry.kind === "group" ? 0 : 7;
+      entry.mk.setIcon({ content, anchor: new naver.maps.Point(ax, ax) });
+      entry.mk.__content = content; // 풀 메모 동기화(다음 reconcile이 기본 아이콘 복원하도록)
       if (on) entry.mk.setZIndex(900);
     };
     prevSelectedRef.current.forEach((id) => apply(id, false));
