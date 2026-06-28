@@ -481,7 +481,6 @@ export function MapExplorer({
           setActiveSnapPoint={setSnap}
           modal={false}
           dismissible
-          handleOnly
         >
           <DrawerPositioner
             className="seed-bottom-sheet__positioner pointer-events-none"
