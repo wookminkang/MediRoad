@@ -191,3 +191,10 @@ select:not(:disabled),
   background: var(--seed-color-bg-neutral-weak);
   font-size: 0.9em;
 }
+
+/* type=search 브라우저 기본 X(취소) 버튼 제거 — 커스텀 X 버튼만 사용(영역 삐짐 방지) */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
