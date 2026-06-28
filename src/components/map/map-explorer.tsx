@@ -373,21 +373,17 @@ export function MapExplorer({
   }, [hasPanel]);
 
   // 지도 페이지 동안 페이지 스크롤 잠금 (모바일 주소창/오버스크롤로 영역 들썩임 방지)
+  // 이탈(언마운트) 시엔 무조건 해제 — 다른 페이지에서 스크롤 막히는 문제 방지
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
-    const prev = {
-      htmlOverflow: html.style.overflow,
-      bodyOverflow: body.style.overflow,
-      overscroll: body.style.overscrollBehavior,
-    };
     html.style.overflow = "hidden";
     body.style.overflow = "hidden";
     body.style.overscrollBehavior = "none";
     return () => {
-      html.style.overflow = prev.htmlOverflow;
-      body.style.overflow = prev.bodyOverflow;
-      body.style.overscrollBehavior = prev.overscroll;
+      html.style.overflow = "";
+      body.style.overflow = "";
+      body.style.overscrollBehavior = "";
     };
   }, []);
 
@@ -510,6 +506,8 @@ export function MapExplorer({
           setActiveSnapPoint={setSnap}
           modal={false}
           dismissible
+          snapToSequentialPoint
+          scrollLockTimeout={100}
         >
           <DrawerPositioner
             className="seed-bottom-sheet__positioner pointer-events-none"
