@@ -24,6 +24,47 @@ export function buildHospitalSummary(h: Hospital): string {
   return parts.join(" · ");
 }
 
+/** 한글 받침 유무 → 은/는, 이/가 등 조사 선택용 */
+function hasJongseong(word: string): boolean {
+  const c = word.charCodeAt(word.length - 1);
+  if (c < 0xac00 || c > 0xd7a3) return false; // 한글 음절이 아니면 받침 없음 취급
+  return (c - 0xac00) % 28 !== 0;
+}
+const eunNeun = (w: string) => (hasJongseong(w) ? "은" : "는");
+
+/**
+ * 자동 소개 문단 — 공공데이터(지역·유형·진료과목·지하철·진료시간)로 사실 기반 생성.
+ * 관리자 입력(description)이 없을 때 상세페이지를 채우는 폴백. 과장 표현 없이 사실만.
+ */
+export function buildAutoDescription(h: Hospital): string {
+  const loc = `${h.region.sido} ${h.region.sigungu}`;
+  const parts: string[] = [
+    `${h.name}${eunNeun(h.name)} ${loc}에 위치한 ${h.type}입니다.`,
+  ];
+
+  if (h.nearestStation?.name) {
+    const m = h.nearestStation.distanceM ?? 0;
+    const min = Math.max(1, Math.round(m / 67)); // 도보 약 67m/분
+    const raw = h.nearestStation.name.trim();
+    const st = raw.endsWith("역") ? raw : `${raw}역`;
+    parts.push(`${st}에서 도보 약 ${min}분 거리입니다.`);
+  }
+
+  if (h.departments.length > 0) {
+    parts.push(`${h.departments.slice(0, 6).join(", ")} 진료를 봅니다.`);
+  }
+
+  const weekday = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
+  if (weekday) {
+    parts.push(`평일 진료시간은 ${weekday.open}~${weekday.close}입니다.`);
+  }
+
+  parts.push(
+    "정확한 진료시간·휴진 여부는 방문 전 전화로 확인하시는 것을 권장합니다.",
+  );
+  return parts.join(" ");
+}
+
 /**
  * 동적 키워드 (지역·역·과목 조합 + 검색 의도). (WIREFRAME 4-3 hospitalKeywords)
  */

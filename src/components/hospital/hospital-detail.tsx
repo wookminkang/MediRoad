@@ -4,22 +4,36 @@ import Link from "next/link";
 
 import { ActionButton, ActionChip, Badge, Text } from "@seed-design/react";
 
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
 import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 
-import { HospitalGridCard } from "./hospital-grid-card";
 import { HospitalMiniMap } from "./hospital-mini-map";
+import { SectionNav } from "./section-nav";
 import { TodayStatus } from "./today-status";
 import { isPartnerHospital } from "@/constants/partners";
+import { buildAutoDescription } from "@/lib/hospital";
 import type { Hospital } from "@/types/hospital";
 
 import { OpeningHoursTable } from "./opening-hours-table";
 
-/** 시간 관련 편의(검색수요 큼)는 강조(positive) 배지로 */
 const TIME_AMENITIES = new Set(["야간진료", "일요일진료", "공휴일진료"]);
 
-/** 병원 상세 본문 — 당근 동네업체 프로필형 (상단 사진 + 2열 + 후기). */
+/** 두 좌표 간 거리(m) — Haversine */
+function distM(a?: { lat: number; lng: number }, b?: { lat: number; lng: number }) {
+  if (!a?.lat || !b?.lat) return null;
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+const fmtDist = (m: number) =>
+  m < 1000 ? `${Math.round(m)}m` : `${(m / 1000).toFixed(1)}km`;
+
+/** 병원 상세 — 좌측 섹션 내비 + 우측 카드 스택 레이아웃 */
 export function HospitalDetail({
   hospital: h,
   related = [],
@@ -28,18 +42,25 @@ export function HospitalDetail({
   related?: Hospital[];
 }) {
   const dept = h.departments[0];
+  const addr = h.roadAddress ?? h.address;
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
-  const photos = h.photos?.length ? h.photos.slice(0, 5) : [];
+  const st = h.nearestStation;
+  const stWalk = st ? Math.max(1, Math.round(st.distanceM / 80)) : 0;
+
+  const navItems = [
+    { id: "intro", label: "소개", icon: <DocIcon /> },
+    { id: "hours", label: "진료시간", icon: <ClockMiniIcon /> },
+    { id: "location", label: "위치", icon: <PinMiniIcon /> },
+    ...(related.length > 0
+      ? [{ id: "nearby", label: "주변 병원", icon: <BuildingIcon /> }]
+      : []),
+  ];
 
   return (
     <article>
       {/* breadcrumb */}
-      <nav aria-label="경로 안내">
-        <Text
-          as="span"
-          textStyle="t3Regular"
-          style={{ color: "var(--seed-color-fg-neutral-muted)" }}
-        >
+      <nav aria-label="경로 안내" className="mb-4">
+        <Text as="span" textStyle="t3Regular" className="text-subtle">
           <Link href="/">홈</Link>
           {" › "}
           <Link href={`/area/${h.region.sigungu}`}>{h.region.sigungu}</Link>
@@ -54,281 +75,266 @@ export function HospitalDetail({
         </Text>
       </nav>
 
-      {/* 상단 사진 갤러리 — 사진이 있을 때만 노출 (없으면 미노출) */}
-      {photos.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-          {photos.map((photo, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={i}
-              src={photo.url}
-              alt={photo.alt ?? `${h.name} 사진 ${i + 1}`}
-              className="aspect-[4/3] w-full rounded-xl object-cover"
-            />
-          ))}
-        </div>
-      )}
-
-      {/* 타이틀 블록 */}
-      <header className="mt-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <Text as="h1" textStyle="t8Bold">
-            {h.name}
-          </Text>
-          {isPartnerHospital(h.id) && (
-            <Badge variant="solid" tone="brand">
-              제휴
-            </Badge>
-          )}
-        </div>
-
-        {/* 종별·지역 (평점·후기는 준비 중 — 잠시 숨김) */}
-        <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-          <span>{h.type}</span>
-          <span className="text-subtle">·</span>
-          <span>{h.region.sigungu}</span>
-        </div>
-
-        {h.hours && h.hours.length > 0 && (
-          <div className="mt-3">
-            <TodayStatus hours={h.hours} />
-          </div>
-        )}
-
-        {h.amenities && h.amenities.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {h.amenities.map((a) => (
-              <Badge
-                key={a}
-                variant="weak"
-                tone={TIME_AMENITIES.has(a) ? "positive" : "neutral"}
-              >
-                {a}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </header>
-
-      {/* 2열: 본문(좌) + 정보 사이드바(우) */}
-      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-        {/* 본문 (좌) */}
-        <div className="flex min-w-0 flex-col gap-10">
-          {h.description && (
-            <Section title="소개">
-              <Text as="p" textStyle="t5Regular" style={{ lineHeight: 1.8 }}>
-                {h.description}
-              </Text>
-            </Section>
-          )}
-
-          {h.symptoms && h.symptoms.length > 0 && (
-            <Section title="진료 키워드">
-              <div className="flex flex-wrap gap-2">
-                {h.symptoms.map((s) => (
-                  <ActionChip key={s} asChild size="small">
-                    <Link href={`/hospitals?q=${encodeURIComponent(s)}`}>{s}</Link>
-                  </ActionChip>
-                ))}
-              </div>
-            </Section>
-          )}
-
-          {h.hours && (
-            <Section title="진료시간">
-              <OpeningHoursTable hours={h.hours} holidayClosed={h.holidayClosed} />
-            </Section>
-          )}
-
-          {h.doctors && h.doctors.length > 0 && (
-            <Section title="의료진">
-              <ul className="flex flex-col gap-2">
-                {h.doctors.map((d) => (
-                  <li key={d.name}>
-                    <Text as="span" textStyle="t5Medium">
-                      {d.title} {d.name}
-                    </Text>{" "}
-                    <Text
-                      as="span"
-                      textStyle="t4Regular"
-                      style={{ color: "var(--seed-color-fg-neutral-muted)" }}
-                    >
-                      · {d.specialty}
-                    </Text>
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          )}
-
-          {h.faqs && h.faqs.length > 0 && (
-            <Section title="자주 묻는 질문">
-              <FaqAccordion faqs={h.faqs} />
-            </Section>
-          )}
-
-          {/* 후기 (준비 중 — 잠시 숨김) */}
-          {/* <ReviewSection /> */}
-        </div>
-
-        {/* 정보 사이드바 (우) */}
-        <aside className="flex flex-col gap-4 lg:sticky lg:top-20 lg:self-start">
-          <div className="flex flex-col gap-4 rounded-2xl border border-line p-5">
-            {/* 진료시간 요약 */}
-            {h.hours && h.hours.length > 0 && (
-              <div className="flex items-start gap-2">
-                <span className="mt-0.5 shrink-0 text-subtle">
-                  <ClockMiniIcon />
-                </span>
-                <div>
+      <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
+        {/* 카드 스택 */}
+        <div className="flex min-w-0 flex-col gap-6 lg:order-2">
+          {/* 소개 — 상호명 헤더(카드 밖) + 본문 카드 */}
+          <section id="intro" className="scroll-mt-24">
+            <div className="px-1">
+              {h.hours && h.hours.length > 0 && (
+                <div className="mb-3">
                   <TodayStatus hours={h.hours} />
                 </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <Text as="h1" textStyle="t8Bold">
+                  {h.name}
+                </Text>
+                {isPartnerHospital(h.id) && (
+                  <Badge variant="solid" tone="brand">
+                    제휴
+                  </Badge>
+                )}
               </div>
-            )}
-
-            {/* 전화 */}
-            {h.phone && (
-              <div className="flex items-center gap-2">
-                <span className="shrink-0 text-subtle">
-                  <PhoneIcon />
-                </span>
-                <a href={`tel:${h.phone}`} className="text-sm text-neutral">
-                  {h.phone}
-                </a>
-              </div>
-            )}
-
-            {/* 주소 */}
-            <div className="flex items-start gap-2">
-              <span className="mt-0.5 shrink-0 text-subtle">
-                <PinMiniIcon />
-              </span>
-              <p className="text-sm text-neutral">{h.roadAddress ?? h.address}</p>
+              <p className="mt-1.5 text-sm text-muted">
+                {h.type} · {h.region.sigungu}
+              </p>
+              {h.amenities && h.amenities.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {h.amenities.map((a) => (
+                    <Badge
+                      key={a}
+                      variant="weak"
+                      tone={TIME_AMENITIES.has(a) ? "positive" : "neutral"}
+                    >
+                      {a}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* 미니맵 (좌표 있으면 실지도 + 마커) */}
-            {h.location?.lat && h.location?.lng ? (
-              <HospitalMiniMap
-                lat={h.location.lat}
-                lng={h.location.lng}
-                className="h-44 w-full overflow-hidden rounded-xl"
-              />
-            ) : (
-              <MapPlaceholder className="min-h-[9rem] rounded-xl" />
-            )}
-
-            {/* 지도 아래: 가까운 지하철역 + 도보 분 */}
-            {h.nearestStation && (
-              <div className="flex items-start gap-2">
-                <span className="mt-0.5 shrink-0 text-subtle">
-                  <SubwayIcon />
-                </span>
-                <p className="text-sm text-neutral">
-                  <span className="inline-flex flex-wrap items-center gap-1.5">
-                    {h.nearestStation.line && (
-                      <LineBadge line={h.nearestStation.line} />
-                    )}
-                    <span className="font-bold">{h.nearestStation.name}</span>
-                    {h.nearestStation.exit && (
-                      <span className="text-muted">
-                        {h.nearestStation.exit}번 출구
-                      </span>
-                    )}
-                  </span>
-                  <span className="mt-0.5 block text-muted">
-                    도보 약 {Math.max(1, Math.round(h.nearestStation.distanceM / 80))}분
-                    ({h.nearestStation.distanceM}m)
-                  </span>
+            <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              {/* 좌: 정보 */}
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] leading-relaxed text-neutral">
+                  {h.description ?? buildAutoDescription(h)}
                 </p>
-              </div>
-            )}
 
-            {/* 액션 */}
-            {h.phone && (
-              <ActionButton asChild variant="brandSolid" size="large" className="w-full">
-                <a href={`tel:${h.phone}`}>전화 문의</a>
-              </ActionButton>
-            )}
-            <div className="grid grid-cols-3 gap-2">
-              <ActionTile href={naverUrl} icon={<NavIcon />} label="길찾기" />
-              {h.links?.naverBooking && (
-                <ActionTile
-                  href={h.links.naverBooking}
-                  icon={<CalendarIcon />}
-                  label="예약"
+                {/* 정보 칩: 지하철 / 주소 */}
+                <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                  {st && (
+                    <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
+                      <span className="mt-0.5 shrink-0 text-subtle">
+                        <SubwayIcon />
+                      </span>
+                      <span className="text-[13px] text-neutral">
+                        {st.name}역
+                        {st.exit && ` ${st.exit}번 출구`} 도보 약 {stWalk}분 (
+                        {st.distanceM}m)
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
+                    <span className="mt-0.5 shrink-0 text-subtle">
+                      <PinMiniIcon />
+                    </span>
+                    <span className="text-[13px] text-neutral">{addr}</span>
+                  </div>
+                </div>
+
+                {h.departments.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {h.departments.map((d) => (
+                      <ActionChip key={d} asChild size="small">
+                        <Link
+                          href={`/hospitals?department=${encodeURIComponent(d)}`}
+                        >
+                          {d}
+                        </Link>
+                      </ActionChip>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 우: 전화 박스 */}
+              <div className="shrink-0 rounded-2xl border border-line p-5 lg:w-64">
+                {h.phone ? (
+                  <>
+                    <div className="flex items-center justify-center gap-2 text-neutral">
+                      <PhoneIcon />
+                      <span className="text-lg font-bold">{h.phone}</span>
+                    </div>
+                    <ActionButton
+                      asChild
+                      variant="brandSolid"
+                      size="large"
+                      className="mt-3 w-full"
+                    >
+                      <a href={`tel:${h.phone}`}>전화 문의</a>
+                    </ActionButton>
+                  </>
+                ) : (
+                  <p className="text-center text-sm text-muted">
+                    전화번호 정보가 없습니다
+                  </p>
+                )}
+                {(h.links?.naverBooking || h.links?.homepage) && (
+                  <div className="mt-3 flex justify-center gap-4 text-sm">
+                    {h.links?.naverBooking && (
+                      <a
+                        href={h.links.naverBooking}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-brand"
+                      >
+                        예약
+                      </a>
+                    )}
+                    {h.links?.homepage && (
+                      <a
+                        href={h.links.homepage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-brand"
+                      >
+                        홈페이지
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            </div>
+          </section>
+
+          {/* 진료시간 카드 */}
+          {h.hours && h.hours.length > 0 && (
+            <Card id="hours" title="진료시간" icon={<ClockMiniIcon />}>
+              <OpeningHoursTable hours={h.hours} holidayClosed={h.holidayClosed} />
+            </Card>
+          )}
+
+          {/* 위치 카드 */}
+          <Card id="location" title="위치" icon={<PinMiniIcon />}>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="flex flex-col gap-3">
+                <p className="text-[15px] text-neutral">{addr}</p>
+                {st && (
+                  <p className="flex flex-wrap items-center gap-1.5 text-sm">
+                    {st.line && <LineBadge line={st.line} />}
+                    <span className="font-bold text-neutral">{st.name}역</span>
+                    <span className="text-muted">
+                      {st.exit && `${st.exit}번 출구 `}도보 약 {stWalk}분 (
+                      {st.distanceM}m)
+                    </span>
+                  </p>
+                )}
+                <div>
+                  <ActionButton asChild variant="neutralWeak" size="medium">
+                    <a href={naverUrl} target="_blank" rel="noopener noreferrer">
+                      길찾기
+                    </a>
+                  </ActionButton>
+                </div>
+              </div>
+              {h.location?.lat && h.location?.lng ? (
+                <HospitalMiniMap
+                  lat={h.location.lat}
+                  lng={h.location.lng}
+                  className="h-52 w-full overflow-hidden rounded-xl"
                 />
-              )}
-              {h.links?.homepage && (
-                <ActionTile
-                  href={h.links.homepage}
-                  icon={<GlobeIcon />}
-                  label="홈페이지"
-                />
+              ) : (
+                <MapPlaceholder className="min-h-[13rem] rounded-xl" />
               )}
             </div>
-          </div>
+          </Card>
 
+          {/* 자주 묻는 질문 (데이터 있을 때만) */}
+          {h.faqs && h.faqs.length > 0 && (
+            <Card title="자주 묻는 질문">
+              <FaqAccordion faqs={h.faqs} />
+            </Card>
+          )}
+
+          {/* 주변 병원 카드 */}
+          {related.length > 0 && (
+            <Card id="nearby" title="이 근처 추천 병원">
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {related.map((r) => {
+                  const d = distM(h.location, r.location);
+                  return (
+                    <li key={r.id}>
+                      <Link
+                        href={`/hospitals/${r.slug}`}
+                        className="flex items-center gap-3 rounded-2xl border border-line p-4 transition-colors hover:border-brand hover:bg-neutral-weak"
+                      >
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
+                          <BuildingIcon />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[15px] font-bold text-neutral">
+                            {r.name}
+                          </span>
+                          <span className="block text-[13px] text-muted">
+                            {r.type}
+                          </span>
+                          <span className="block truncate text-xs text-subtle">
+                            {r.region.sigungu}
+                            {r.region.emdong ? ` · ${r.region.emdong}` : ""}
+                            {d != null ? ` ${fmtDist(d)}` : ""}
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          )}
+
+          {/* 출처 푸터 */}
+          <footer className="px-1 pt-1">
+            <Text as="p" textStyle="t3Regular" className="text-subtle">
+              {h.updatedAt ? `정보 업데이트: ${h.updatedAt} · ` : ""}출처 건강보험심사평가원(HIRA)
+            </Text>
+          </footer>
+        </div>
+
+        {/* 좌측 섹션 내비 (lg 이상) */}
+        <aside className="hidden lg:order-1 lg:block">
+          <SectionNav items={navItems} />
         </aside>
       </div>
-
-      {/* 주변 비슷한 병원 */}
-      {related.length > 0 && (
-        <section aria-labelledby="nearby" className="mt-14">
-          <Text as="h2" id="nearby" textStyle="t7Bold">
-            이 근처 {h.region.sigungu} 병원
-          </Text>
-          <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map((r) => (
-              <li key={r.id}>
-                <HospitalGridCard hospital={r} />
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {h.updatedAt && (
-        <footer className="mt-14">
-          <Text as="p" textStyle="t3Regular" className="text-subtle">
-            정보 업데이트: {h.updatedAt} · 출처 건강보험심사평가원(HIRA)
-          </Text>
-        </footer>
-      )}
     </article>
   );
 }
 
-/** 후기 섹션 — 공간만(준비 중). 구조 스켈레톤 + 빈 이미지. */
-function ReviewSection() {
+function Card({
+  id,
+  title,
+  icon,
+  children,
+}: {
+  id?: string;
+  title: string;
+  icon?: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <section aria-labelledby="reviews">
-      <div className="flex items-center justify-between border-b-2 border-neutral pb-3">
-        <Text as="h2" id="reviews" textStyle="t7Bold">
-          후기
+    <section id={id} className="scroll-mt-24">
+      {/* 제목은 카드 밖 */}
+      <div className="mb-3 flex items-center gap-2 px-1">
+        {icon && <span className="text-brand">{icon}</span>}
+        <Text as="h2" textStyle="t7Bold">
+          {title}
         </Text>
-        <span className="text-sm text-subtle">준비 중</span>
       </div>
-      <ul className="mt-4 flex flex-col gap-6">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <li key={i} className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <ImagePlaceholder rounded="rounded-full" className="h-9 w-9" />
-              <div className="flex flex-col gap-1.5">
-                <span className="block h-3 w-24 rounded bg-neutral-weak" />
-                <span className="block h-2.5 w-32 rounded bg-neutral-weak" />
-              </div>
-            </div>
-            <ImagePlaceholder className="aspect-[3/2] w-40" rounded="rounded-lg" />
-            <div className="flex flex-col gap-1.5">
-              <span className="block h-2.5 w-full max-w-md rounded bg-neutral-weak" />
-              <span className="block h-2.5 w-2/3 max-w-sm rounded bg-neutral-weak" />
-            </div>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-6 text-center text-sm text-subtle">
-        후기 기능은 준비 중이에요.
-      </p>
+      <div className="rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
+        {children}
+      </div>
     </section>
   );
 }
@@ -354,7 +360,7 @@ function LineBadge({ line }: { line: string }) {
   const color = LINE_COLORS[line] ?? "var(--seed-color-fg-neutral)";
   return (
     <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold text-white"
+      className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold text-white"
       style={{ backgroundColor: color }}
     >
       {line}
@@ -362,38 +368,9 @@ function LineBadge({ line }: { line: string }) {
   );
 }
 
-function ActionTile({
-  href,
-  icon,
-  label,
-}: {
-  href: string;
-  icon: ReactNode;
-  label: string;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex flex-col items-center gap-2 rounded-2xl py-3 transition-colors hover:bg-neutral-weak active:scale-95"
-    >
-      <span
-        aria-hidden
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-weak text-brand"
-      >
-        {icon}
-      </span>
-      <Text as="span" textStyle="t3Medium" className="text-muted">
-        {label}
-      </Text>
-    </a>
-  );
-}
-
 const iconProps = {
-  width: 20,
-  height: 20,
+  width: 18,
+  height: 18,
   viewBox: "0 0 24 24",
   fill: "none",
   stroke: "currentColor",
@@ -402,29 +379,19 @@ const iconProps = {
   strokeLinejoin: "round" as const,
 };
 
-function NavIcon() {
+function DocIcon() {
   return (
     <svg {...iconProps}>
-      <polygon points="3 11 22 2 13 21 11 13 3 11" />
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6M8 13h8M8 17h6" />
     </svg>
   );
 }
-function CalendarIcon() {
+function BuildingIcon() {
   return (
     <svg {...iconProps}>
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
-function GlobeIcon() {
-  return (
-    <svg {...iconProps}>
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      <path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+      <path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" />
     </svg>
   );
 }
@@ -456,28 +423,6 @@ function SubwayIcon() {
     <svg {...iconProps}>
       <rect x="4" y="3" width="16" height="14" rx="3" />
       <path d="M8 17l-2 4M16 17l2 4M6 13h12" />
-      <circle cx="8.5" cy="9" r="0.5" fill="currentColor" />
-      <circle cx="15.5" cy="9" r="0.5" fill="currentColor" />
     </svg>
-  );
-}
-function StarIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-warning" aria-hidden>
-      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-  );
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <div className="border-b-2 border-neutral pb-3">
-        <Text as="h2" textStyle="t7Bold">
-          {title}
-        </Text>
-      </div>
-      <div className="mt-4">{children}</div>
-    </section>
   );
 }
