@@ -131,7 +131,7 @@ export function MobileSearch({
       } finally {
         setLoading(false);
       }
-    }, 250);
+    }, 180);
     return () => {
       clearTimeout(t);
       ac.abort();
@@ -270,6 +270,11 @@ export function MobileSearch({
               );
             })}
 
+            {loading && results.length === 0 && (
+              <li className="px-4 py-10 text-center text-sm text-muted">
+                검색 중…
+              </li>
+            )}
             {!loading && results.length === 0 && (
               <li className="px-4 py-10 text-center text-sm text-muted">
                 검색 결과가 없습니다
