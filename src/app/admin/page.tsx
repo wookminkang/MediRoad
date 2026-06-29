@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getCurrentUser } from "@/lib/supabase/auth-server";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 
-import { SignOutButton } from "./sign-out-button";
+import { logout } from "./login/actions";
 
 export const metadata: Metadata = {
   title: "관리자",
@@ -23,23 +22,19 @@ async function searchHospitals(q: string) {
   return data ?? [];
 }
 
-export default async function AdminPage({
-  searchParams,
-}: {
-  searchParams: SP;
-}) {
+export default async function AdminPage({ searchParams }: { searchParams: SP }) {
   const { q = "" } = await searchParams;
-  const user = await getCurrentUser();
   const results = await searchHospitals(q);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral">관리자</h1>
-          <p className="mt-1 text-sm text-muted">{user?.email}</p>
-        </div>
-        <SignOutButton />
+        <h1 className="text-2xl font-bold text-neutral">관리자</h1>
+        <form action={logout}>
+          <button className="rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-neutral transition-colors hover:bg-neutral-weak">
+            로그아웃
+          </button>
+        </form>
       </div>
 
       <form className="mt-8" action="/admin">
@@ -74,16 +69,12 @@ export default async function AdminPage({
                 className="flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-neutral-weak"
               >
                 <span className="min-w-0">
-                  <span className="block truncate font-bold text-neutral">
-                    {h.name}
-                  </span>
+                  <span className="block truncate font-bold text-neutral">{h.name}</span>
                   <span className="block text-sm text-muted">
                     {h.type} · {h.sido} {h.sigungu}
                   </span>
                 </span>
-                <span className="shrink-0 text-sm font-medium text-brand">
-                  편집 →
-                </span>
+                <span className="shrink-0 text-sm font-medium text-brand">편집 →</span>
               </Link>
             </li>
           ))}

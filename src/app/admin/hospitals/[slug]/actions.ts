@@ -6,16 +6,14 @@ import { revalidatePath } from "next/cache";
 
 import sharp from "sharp";
 
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminAuthed } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { getCurrentUser } from "@/lib/supabase/auth-server";
 
 const BUCKET = "hospital-images";
 const MAX = 5;
 
 async function requireAdmin() {
-  const user = await getCurrentUser();
-  if (!user || !isAdminEmail(user.email)) {
+  if (!(await isAdminAuthed())) {
     throw new Error("관리자 권한이 필요합니다.");
   }
 }
