@@ -85,7 +85,7 @@ export function HospitalDetail({
         <div className="flex min-w-0 flex-col gap-6 lg:order-2">
           {/* 병원 사진 (있을 때만) — 4열 그리드 */}
           {photos.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
               {photos.map((p, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
