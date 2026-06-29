@@ -8,7 +8,7 @@ import { ActionButton, Text } from "@seed-design/react";
 import { getColumns } from "@/api/column";
 import { getLatestHospitalPosts } from "@/api/hospital-post";
 import { ColumnCard } from "@/components/column/column-card";
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
+// import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
 /** 진료과목 (원형 카드) */
 const CONCERNS: { dept: string; hint: string; icon: string }[] = [
@@ -340,7 +340,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* CTA 밴드 */}
+      {/* CTA 밴드 — 보류(주석 처리). 다시 노출하려면 주석 해제
       <section className="bg-brand-solid">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-8 px-4 py-16 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -363,6 +363,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      */}
     </>
   );
 }

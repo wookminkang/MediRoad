@@ -470,10 +470,10 @@ export function MapExplorer({
   };
 
   return (
-    <div className="flex h-[100dvh] md:h-[calc(100vh-3.5rem)]">
-      {/* 데스크톱 좌측 사이드바 — md 이상에서만, 클릭 시 노출 */}
+    <div className="relative h-[100dvh] md:h-[calc(100vh-3.5rem)]">
+      {/* 데스크톱 좌측 리스트 — 지도 위에 떠 있는 플로팅 패널(지도 레이아웃 안 밀림) */}
       {hasPanel && (
-        <aside className="hidden w-80 shrink-0 flex-col border-r border-line bg-white md:flex">
+        <aside className="absolute bottom-3 left-3 top-[4.25rem] z-20 hidden w-80 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
           <MapHospitalList
             idPrefix="d"
             items={listItems}
@@ -543,8 +543,8 @@ export function MapExplorer({
         </DrawerRoot>
       </div>
 
-      {/* 지도 + 상단 필터바 — isolate로 naver 로고/저작권 z-index를 이 컨텍스트에 가둠 */}
-      <div className="relative isolate flex-1">
+      {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시) */}
+      <div className="relative isolate h-full w-full">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-center gap-2 px-3 py-3">
           {/* 모바일 검색 트리거 — 탭하면 검색 전용 화면 / 검색중이면 쿼리+닫기 표시 */}
           <div className="pointer-events-auto flex w-full items-center gap-2 md:hidden">
