@@ -14,6 +14,7 @@ import { MEDICAL_DEPARTMENTS } from "@/constants/hospital";
 import type { Hospital } from "@/types/hospital";
 
 import { FilterDropdown } from "./filter-dropdown";
+import { MapHospitalDetail } from "./map-hospital-detail";
 import { MapHospitalList } from "./map-hospital-list";
 import { MobileSearch } from "./mobile-search";
 import { type Bounds, type ClusterPoint, NaverMap } from "./naver-map";
@@ -47,6 +48,10 @@ export function MapExplorer({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   // 마커/건물버블 클릭 시 좌측엔 그 그룹(같은 건물이면 여러 곳)만 노출
   const [selectedGroup, setSelectedGroup] = useState<Hospital[] | null>(null);
+  // 좌측 리스트에서 병원 클릭 시 상세 패널(PC) — 풀 디테일 fetch
+  const [detailHospital, setDetailHospital] = useState<Hospital | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const detailSeqRef = useRef(0);
   // 검색 모드: 지도에 검색 결과 마커만 표시 (뷰포트 재조회 안 함)
   const [searchResults, setSearchResults] = useState<Hospital[] | null>(null);
   const searchActiveRef = useRef(false);
@@ -218,6 +223,29 @@ export function MapExplorer({
     }
   };
 
+  // 리스트 항목 클릭(PC) → 지도 포커스 + 상세 패널 열고 풀 디테일 fetch
+  const openDetail = (h: Hospital) => {
+    focusHospital(h);
+    setDetailHospital(h); // 우선 리스트 데이터로 즉시 표시
+    const seq = ++detailSeqRef.current;
+    setDetailLoading(true);
+    fetch(`/api/hospitals/${encodeURIComponent(h.slug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (seq !== detailSeqRef.current) return; // 더 최근 선택이 있으면 무시
+        if (d?.hospital) setDetailHospital(d.hospital as Hospital);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (seq === detailSeqRef.current) setDetailLoading(false);
+      });
+  };
+  const closeDetail = () => {
+    detailSeqRef.current++;
+    setDetailHospital(null);
+    setDetailLoading(false);
+  };
+
   // URL 쿼리파라미터 동기화 (q·type·department) — replaceState로 가볍게
   const syncUrl = (q: string, type: string, department: string) => {
     const sp = new URLSearchParams();
@@ -239,6 +267,9 @@ export function MapExplorer({
   const clearSearch = () => {
     searchActiveRef.current = false;
     appliedQRef.current = "";
+    detailSeqRef.current++;
+    setDetailHospital(null);
+    setDetailLoading(false);
     setSearchResults(null);
     setSelectedGroup(null);
     setRegionMode(null);
@@ -474,23 +505,33 @@ export function MapExplorer({
       {/* 데스크톱 좌측 리스트 — 지도 위에 떠 있는 플로팅 패널(지도 레이아웃 안 밀림) */}
       {hasPanel && (
         <aside className="absolute bottom-3 left-3 top-[4.25rem] z-20 hidden w-80 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
-          <MapHospitalList
-            idPrefix="d"
-            items={listItems}
-            hasPanel={hasPanel}
-            regionActive={regionActive}
-            searchActive={searchActive}
-            mode={mode}
-            regionLabel={regionMode?.label}
-            regionLoading={regionLoading}
-            regionTotal={regionTotal}
-            regionShown={regionItems.length}
-            canLoadMore={canLoadMore}
-            onLoadMore={loadMore}
-            onClose={clearSearch}
-            onFocus={focusHospital}
-            onHover={setHoveredId}
-          />
+          {detailHospital ? (
+            <MapHospitalDetail
+              hospital={detailHospital}
+              loading={detailLoading}
+              onBack={closeDetail}
+              onClose={clearSearch}
+            />
+          ) : (
+            <MapHospitalList
+              idPrefix="d"
+              items={listItems}
+              hasPanel={hasPanel}
+              regionActive={regionActive}
+              searchActive={searchActive}
+              mode={mode}
+              regionLabel={regionMode?.label}
+              regionLoading={regionLoading}
+              regionTotal={regionTotal}
+              regionShown={regionItems.length}
+              canLoadMore={canLoadMore}
+              onLoadMore={loadMore}
+              onClose={clearSearch}
+              onFocus={focusHospital}
+              onOpenDetail={openDetail}
+              onHover={setHoveredId}
+            />
+          )}
         </aside>
       )}
 
@@ -689,6 +730,7 @@ export function MapExplorer({
           focus={focus}
           onViewChanged={onViewChanged}
           onSelect={(hs) => {
+            closeDetail(); // 새 마커 선택 → 상세 닫고 목록으로
             setSelectedGroup(hs);
             raiseSheet(); // 마커 탭 → 바텀시트 절반으로 올림
           }}
