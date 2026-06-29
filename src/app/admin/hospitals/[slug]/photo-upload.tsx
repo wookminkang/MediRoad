@@ -90,7 +90,7 @@ export function PhotoUpload({
         disabled={pending}
         className="mt-3 rounded-lg bg-[#1E5BD6] px-5 py-2 text-sm font-bold text-white hover:bg-[#1a4fbb] disabled:opacity-60"
       >
-        {pending ? "업로드 중…" : "업로드"}
+        {pending ? "저장 중…" : "저장"}
       </button>
 
       {error && <p className="mt-2 text-sm text-warning">{error}</p>}

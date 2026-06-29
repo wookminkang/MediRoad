@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
-import { deletePhoto, setPrimaryPhoto, updateInfo } from "./actions";
+import { deletePhoto, setPrimaryPhoto } from "./actions";
 import { PhotoUpload } from "./photo-upload";
 
 export const metadata: Metadata = {
@@ -116,59 +116,6 @@ export default async function AdminHospitalEditPage({
         {photoList.length < 5 && (
           <PhotoUpload slug={slug} remaining={5 - photoList.length} />
         )}
-      </section>
-
-      {/* 정보 편집 */}
-      <section className="mt-6 rounded-2xl border border-line p-6">
-        <h2 className="text-lg font-bold text-neutral">병원 정보</h2>
-        <form action={updateInfo.bind(null, slug)} className="mt-4 flex flex-col gap-4">
-          <label className="text-sm font-medium text-neutral">
-            소개
-            <textarea
-              name="description"
-              defaultValue={h.description ?? ""}
-              rows={4}
-              placeholder="비우면 공공데이터 기반 자동 소개가 표시됩니다."
-              className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 text-base focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/20"
-            />
-          </label>
-          <label className="text-sm font-medium text-neutral">
-            전화번호
-            <input
-              name="phone"
-              defaultValue={h.phone ?? ""}
-              className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 text-base focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/20"
-            />
-          </label>
-          <label className="text-sm font-medium text-neutral">
-            홈페이지 URL
-            <input
-              name="homepage_url"
-              type="url"
-              defaultValue={h.homepage_url ?? ""}
-              placeholder="https://"
-              className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 text-base focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/20"
-            />
-          </label>
-          <label className="text-sm font-medium text-neutral">
-            예약 링크 URL
-            <input
-              name="booking_url"
-              type="url"
-              defaultValue={h.booking_url ?? ""}
-              placeholder="https://"
-              className="mt-1.5 w-full rounded-lg border border-line px-3 py-2.5 text-base focus:border-[#1E5BD6] focus:outline-none focus:ring-2 focus:ring-[#1E5BD6]/20"
-            />
-          </label>
-          <div>
-            <button
-              type="submit"
-              className="rounded-lg bg-[#1E5BD6] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#1a4fbb]"
-            >
-              정보 저장
-            </button>
-          </div>
-        </form>
       </section>
     </div>
   );
