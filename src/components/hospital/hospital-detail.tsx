@@ -51,7 +51,6 @@ export function HospitalDetail({
   const photos = [...(h.photos ?? [])]
     .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
     .slice(0, 5);
-  const [cover, ...restPhotos] = photos;
 
   const navItems = [
     { id: "intro", label: "소개", icon: <DocIcon /> },
@@ -84,30 +83,18 @@ export function HospitalDetail({
       <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
         {/* 카드 스택 */}
         <div className="flex min-w-0 flex-col gap-6 lg:order-2">
-          {/* 병원 사진 (있을 때만) — 대표 1장 크게 + 나머지 썸네일 */}
-          {cover && (
-            <div>
-              <div className="overflow-hidden rounded-2xl">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* 병원 사진 (있을 때만) — 4열 그리드 */}
+          {photos.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {photos.map((p, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={cover.url}
-                  alt={cover.alt ?? `${h.name} 병원 사진`}
-                  className="aspect-[16/9] w-full object-cover"
+                  key={i}
+                  src={p.url}
+                  alt={p.alt ?? `${h.name} 병원 사진 ${i + 1}`}
+                  className="aspect-square w-full rounded-xl object-cover"
                 />
-              </div>
-              {restPhotos.length > 0 && (
-                <div className="mt-2 grid grid-cols-4 gap-2">
-                  {restPhotos.map((p, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={p.url}
-                      alt={p.alt ?? `${h.name} 병원 사진 ${i + 2}`}
-                      className="aspect-square w-full rounded-lg object-cover"
-                    />
-                  ))}
-                </div>
-              )}
+              ))}
             </div>
           )}
 

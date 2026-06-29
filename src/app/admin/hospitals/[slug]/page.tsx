@@ -4,12 +4,8 @@ import { notFound } from "next/navigation";
 
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
-import {
-  deletePhoto,
-  setPrimaryPhoto,
-  updateInfo,
-  uploadPhotos,
-} from "./actions";
+import { deletePhoto, setPrimaryPhoto, updateInfo } from "./actions";
+import { PhotoUpload } from "./photo-upload";
 
 export const metadata: Metadata = {
   title: "병원 편집 · 관리자",
@@ -118,25 +114,7 @@ export default async function AdminHospitalEditPage({
         )}
 
         {photoList.length < 5 && (
-          <form action={uploadPhotos.bind(null, slug)} className="mt-4">
-            <input
-              type="file"
-              name="photos"
-              accept="image/*"
-              multiple
-              required
-              className="block w-full text-sm text-neutral file:mr-3 file:rounded-lg file:border-0 file:bg-brand-weak file:px-4 file:py-2 file:text-sm file:font-bold file:text-brand"
-            />
-            <button
-              type="submit"
-              className="mt-3 rounded-lg bg-[#1E5BD6] px-5 py-2 text-sm font-bold text-white hover:bg-[#1a4fbb]"
-            >
-              업로드
-            </button>
-            <p className="mt-2 text-xs text-subtle">
-              최대 5장. 자동으로 리사이즈·webp 변환됩니다. 첫 사진이 대표로 지정돼요.
-            </p>
-          </form>
+          <PhotoUpload slug={slug} remaining={5 - photoList.length} />
         )}
       </section>
 

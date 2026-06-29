@@ -88,7 +88,6 @@ export async function uploadPhotos(slug: string, formData: FormData) {
     if (error) throw error;
   }
   refresh(slug);
-  redirect(`/admin/hospitals/${slug}?saved=photos`);
 }
 
 /** 사진 삭제 (Storage + DB) */
