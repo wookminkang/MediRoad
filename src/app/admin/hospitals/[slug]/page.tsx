@@ -17,14 +17,18 @@ export const metadata: Metadata = {
 };
 
 type Params = Promise<{ slug: string }>;
+type SP = Promise<{ saved?: string }>;
 
 export default async function AdminHospitalEditPage({
   params,
+  searchParams,
 }: {
   params: Params;
+  searchParams: SP;
 }) {
   const { slug: raw } = await params;
   const slug = decodeURIComponent(raw);
+  const { saved } = await searchParams;
   const sb = getSupabaseAdmin();
   const { data: h } = await sb
     .from("hospitals")
@@ -58,6 +62,12 @@ export default async function AdminHospitalEditPage({
       >
         상세페이지 보기 ↗
       </Link>
+
+      {saved && (
+        <p className="mt-4 rounded-lg border border-[#1E5BD6]/30 bg-brand-weak px-4 py-2.5 text-sm font-medium text-brand">
+          {saved === "photos" ? "사진이 저장되었습니다." : "정보가 저장되었습니다."}
+        </p>
+      )}
 
       {/* 사진 관리 */}
       <section className="mt-8 rounded-2xl border border-line p-6">

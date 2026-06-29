@@ -3,6 +3,7 @@
 import "server-only";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import sharp from "sharp";
 
@@ -87,6 +88,7 @@ export async function uploadPhotos(slug: string, formData: FormData) {
     if (error) throw error;
   }
   refresh(slug);
+  redirect(`/admin/hospitals/${slug}?saved=photos`);
 }
 
 /** 사진 삭제 (Storage + DB) */
@@ -146,4 +148,5 @@ export async function updateInfo(slug: string, formData: FormData) {
     })
     .eq("slug", slug);
   refresh(slug);
+  redirect(`/admin/hospitals/${slug}?saved=info`);
 }
