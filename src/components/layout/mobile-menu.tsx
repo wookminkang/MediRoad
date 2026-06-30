@@ -10,6 +10,7 @@ const ITEMS = [
   // 증상·질환 보류 — 다시 노출하려면 주석 해제
   // { href: "/conditions", label: "증상·질환" },
   { href: "/health", label: "건강정보" },
+  { href: "/faq", label: "FAQ" },
 ];
 
 /** 모바일 헤더 메뉴 — 햄버거 토글 + 드로어. (md 미만에서만 노출) */

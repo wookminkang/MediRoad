@@ -43,6 +43,7 @@ export function Header() {
           <NavLink href="/conditions">증상·질환</NavLink>
           */}
           <NavLink href="/health">건강정보</NavLink>
+          <NavLink href="/faq">FAQ</NavLink>
           <ActionButton asChild variant="brandSolid" size="small">
             <Link href="/map">병원 찾기</Link>
           </ActionButton>

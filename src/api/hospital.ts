@@ -231,7 +231,8 @@ export async function getHospitals(
   const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
   const start = (page - 1) * pageSize;
 
-  const baseSel = "*, hospital_hours(day,open,close,closed)";
+  const baseSel =
+    "*, hospital_hours(day,open,close,closed), hospital_photos(url,alt,category,is_primary,sort_order)";
   let query = getSupabaseServer()
     .from("hospitals")
     .select(

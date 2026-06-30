@@ -514,7 +514,7 @@ export function MapExplorer({
   };
 
   return (
-    <div className="relative h-[100dvh] md:h-[calc(100vh-3.5rem)]">
+    <div className="relative h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-3.5rem)]">
       {/* 데스크톱 좌측 리스트 — 지도 위에 떠 있는 플로팅 패널(지도 레이아웃 안 밀림) */}
       {hasPanel && (
         <aside className="absolute bottom-3 left-3 top-[4.25rem] z-20 hidden w-80 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">

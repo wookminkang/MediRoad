@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 
-import { Text } from "@seed-design/react";
+import {
+  Badge,
+  CalloutContent,
+  CalloutDescription,
+  CalloutRoot,
+  CalloutTitle,
+  Text,
+} from "@seed-design/react";
 
-import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { PageContainer } from "@/components/ui/page-container";
 import { buildFaqLd } from "@/lib/seo/faq";
+
+import { FaqGroups } from "./faq-groups";
 
 export const metadata: Metadata = {
   title: "자주 묻는 질문",
@@ -95,22 +103,33 @@ export default function FaqPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqLd(ALL_FAQS)) }}
       />
 
-      <Text as="h1" textStyle="t9Bold">
-        자주 묻는 질문
-      </Text>
-      <Text as="p" textStyle="t5Regular" className="mt-2 text-subtle">
-        메디로드 이용에 대해 가장 많이 묻는 질문을 모았습니다.
-      </Text>
+      {/* 헤더 */}
+      <div className="flex flex-col items-start gap-3">
+        <Badge size="medium" variant="weak" tone="brand">
+          도움말
+        </Badge>
+        <Text as="h1" textStyle="t9Bold">
+          자주 묻는 질문
+        </Text>
+        <Text as="p" textStyle="t5Regular" className="text-subtle">
+          메디로드 이용에 대해 가장 많이 묻는 질문을 모았습니다.
+        </Text>
+      </div>
 
-      <div className="mt-10 flex flex-col gap-12">
-        {FAQ_GROUPS.map((group) => (
-          <section key={group.category}>
-            <Text as="h2" textStyle="t6Bold" className="mb-5 text-brand">
-              {group.category}
-            </Text>
-            <FaqAccordion faqs={group.items} />
-          </section>
-        ))}
+      {/* 안내 Callout */}
+      <CalloutRoot tone="informative" className="mt-6">
+        <CalloutContent>
+          <CalloutTitle>찾는 답이 없으신가요?</CalloutTitle>
+          <CalloutDescription>
+            고객센터 010-7665-4418 (평일 09:00~18:00) 으로 문의해 주세요.
+            병원 정보 오류 제보도 환영합니다.
+          </CalloutDescription>
+        </CalloutContent>
+      </CalloutRoot>
+
+      {/* 카테고리별 아코디언 */}
+      <div className="mt-10">
+        <FaqGroups groups={FAQ_GROUPS} />
       </div>
     </PageContainer>
   );

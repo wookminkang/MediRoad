@@ -75,9 +75,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <AppProviders>
           <SkipLink />
-          <ChromeOnMap>
-            <Header />
-          </ChromeOnMap>
+          <Header />
           <main id="main" className="flex-1">
             {children}
           </main>
