@@ -43,29 +43,29 @@ export function OpeningHoursTable({
         return (
           <div
             key={day}
-            className={`flex items-center gap-3 border-b border-line py-2.5 last:border-b-0 ${
-              isToday ? "rounded-xl bg-brand-weak/50 px-2" : ""
+            className={`flex items-center gap-2.5 border-b border-line py-1.5 last:border-b-0 ${
+              isToday ? "rounded-lg bg-brand-weak/50 px-2" : ""
             }`}
           >
             <DayChip today={isToday}>{DAY_LABELS[day]}</DayChip>
             {isToday && (
-              <span className="rounded-md bg-[#1E5BD6] px-1.5 py-0.5 text-[11px] font-bold text-white">
+              <span className="rounded bg-[#1E5BD6] px-1.5 py-0.5 text-[10px] font-bold text-white">
                 오늘
               </span>
             )}
             {closed ? (
               <ClosedBadge />
             ) : (
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`text-lg font-bold tracking-tight ${
+                  className={`text-sm font-bold tracking-tight ${
                     isToday ? "text-[#1E5BD6]" : "text-neutral"
                   }`}
                 >
                   {h.open}–{h.close}
                 </span>
                 {h.lunch && (
-                  <span className="text-sm text-muted">점심 {h.lunch}</span>
+                  <span className="text-xs text-muted">점심 {h.lunch}</span>
                 )}
                 {night && <NightBadge />}
               </div>
@@ -92,7 +92,7 @@ function DayChip({
 }) {
   return (
     <span
-      className={`flex w-14 shrink-0 items-center justify-center rounded-xl py-2.5 text-[15px] font-bold ${
+      className={`flex w-10 shrink-0 items-center justify-center rounded-lg py-1.5 text-[13px] font-bold ${
         today ? "bg-[#1E5BD6] text-white" : "bg-[#F3F5FB] text-neutral"
       }`}
     >
@@ -103,8 +103,8 @@ function DayChip({
 
 function NightBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-lg bg-[#EEF1FE] px-2.5 py-1 text-sm font-bold text-[#1E5BD6]">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <span className="inline-flex items-center gap-1 rounded-md bg-[#EEF1FE] px-2 py-0.5 text-xs font-bold text-[#1E5BD6]">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
         <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
       </svg>
       야간
@@ -114,10 +114,10 @@ function NightBadge() {
 
 function ClosedBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-lg bg-[#FBEEE1] px-2.5 py-1 text-sm font-bold text-[#B9670E]">
+    <span className="inline-flex items-center gap-1 rounded-md bg-[#FBEEE1] px-2 py-0.5 text-xs font-bold text-[#B9670E]">
       <svg
-        width="14"
-        height="14"
+        width="12"
+        height="12"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
