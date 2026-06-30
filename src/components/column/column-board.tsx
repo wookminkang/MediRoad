@@ -23,7 +23,7 @@ export function ColumnBoard({ active, columns, total, q }: Props) {
         <Text as="h1" textStyle="t9Bold">
           건강정보
         </Text>
-        <Text as="p" textStyle="t5Regular" className="mt-3 text-[#9CA3AF]">
+        <Text as="p" textStyle="t5Regular" className="mt-4 text-[#9CA3AF]">
           의료진이 감수한 믿을 수 있는 건강 정보 — 증상·질환·관리법을 쉽게 풀어드립니다.
         </Text>
       </header>
