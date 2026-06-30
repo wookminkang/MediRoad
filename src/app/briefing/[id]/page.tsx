@@ -7,19 +7,24 @@ import { PageContainer } from "@/components/ui/page-container";
 import { anyCategoryLabel } from "@/constants/briefing";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
 import {
-  buildColumnArticleLd,
-  buildColumnBreadcrumbLd,
-} from "@/lib/seo/column-jsonld";
+  buildBriefingArticleLd,
+  buildBriefingBreadcrumbLd,
+} from "@/lib/seo/briefing-jsonld";
 import { buildFaqLd } from "@/lib/seo/faq";
 
 type Params = Promise<{ id: string }>;
 
-// ISR — 새 글은 첫 요청 시 on-demand, 기존 글은 1시간마다 재생성(재배포 불필요)
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const ids = await getAllColumnIds();
+  const ids = await getAllColumnIds("briefing");
   return ids.map((id) => ({ id }));
+}
+
+/** briefing 콘텐츠만 허용 (다른 kind면 404) */
+async function getBriefing(id: string) {
+  const c = await getColumnById(id);
+  return c && c.kind === "briefing" ? c : null;
 }
 
 export async function generateMetadata({
@@ -27,11 +32,14 @@ export async function generateMetadata({
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const c = await getColumnById((await params).id);
+  const c = await getBriefing((await params).id);
   if (!c) {
-    return { title: "칼럼을 찾을 수 없어요", robots: { index: false, follow: false } };
+    return {
+      title: "브리핑을 찾을 수 없어요",
+      robots: { index: false, follow: false },
+    };
   }
-  const url = `${SITE_URL}/health/${c.id}`;
+  const url = `${SITE_URL}/briefing/${c.id}`;
   const title = c.seo?.title ?? c.title;
   const description = c.seo?.description ?? c.excerpt;
 
@@ -40,11 +48,11 @@ export async function generateMetadata({
     description,
     keywords: c.seo?.keywords ?? [
       anyCategoryLabel(c.category),
-      "건강정보",
-      "건강 칼럼",
+      "메디브리핑",
+      "의료 이슈",
       ...(c.tags ?? []),
     ],
-    authors: [{ name: c.author }, { name: c.reviewedBy.name }],
+    authors: [{ name: c.author }],
     creator: SITE_NAME,
     publisher: SITE_NAME,
     alternates: { canonical: url },
@@ -58,7 +66,6 @@ export async function generateMetadata({
       locale: "ko_KR",
       publishedTime: c.publishedAt,
       modifiedTime: c.updatedAt,
-      authors: [c.reviewedBy.name],
       ...(c.thumbnail && { images: [{ url: c.thumbnail }] }),
     },
     other: {
@@ -68,23 +75,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function ColumnDetailPage({
-  params,
-}: {
-  params: Params;
-}) {
-  const c = await getColumnById((await params).id);
+export default async function BriefingDetailPage({ params }: { params: Params }) {
+  const c = await getBriefing((await params).id);
   if (!c) notFound();
 
   const jsonLd = [
-    buildColumnArticleLd(c),
-    buildColumnBreadcrumbLd(c),
+    buildBriefingArticleLd(c),
+    buildBriefingBreadcrumbLd(c),
     ...(c.faqs?.length ? [buildFaqLd(c.faqs)] : []),
   ];
 
   return (
     <PageContainer maxWidth="max-w-5xl">
-      <ColumnDetail column={c} />
+      <ColumnDetail column={c} basePath="/briefing" backLabel="메디브리핑 더 보기" />
       {jsonLd.map((ld, i) => (
         <script
           key={i}

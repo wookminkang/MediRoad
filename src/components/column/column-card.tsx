@@ -3,19 +3,25 @@ import Link from "next/link";
 import { Badge } from "@seed-design/react";
 
 import { PhotoFrame } from "@/components/ui/photo-frame";
-import { categoryLabel } from "@/constants/column";
+import { anyCategoryLabel } from "@/constants/briefing";
 import type { Column } from "@/types/column";
 import { formatDate } from "@/utils/format";
 
-/** 칼럼 카드 — 목록 재사용. 썸네일은 PhotoFrame(없으면 플레이스홀더). (WIREFRAME 4-6) */
-export function ColumnCard({ column: c }: { column: Column }) {
+/** 칼럼/브리핑 카드 — 목록 재사용. basePath로 칼럼(/health)·브리핑(/briefing) 공용. */
+export function ColumnCard({
+  column: c,
+  basePath = "/health",
+}: {
+  column: Column;
+  basePath?: string;
+}) {
   return (
-    <Link href={`/health/${c.id}`} className="flex w-full flex-col gap-2">
+    <Link href={`${basePath}/${c.id}`} className="flex w-full flex-col gap-2">
       <PhotoFrame src={c.thumbnail} alt={c.title} ratio={1} borderRadius="r4" />
 
       <div>
         <Badge variant="weak" tone="brand">
-          {categoryLabel(c.category)}
+          {anyCategoryLabel(c.category)}
         </Badge>
       </div>
 

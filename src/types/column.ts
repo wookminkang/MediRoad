@@ -1,7 +1,14 @@
+import type { BriefingCategory } from "@/constants/briefing";
 import type { ColumnCategory } from "@/constants/column";
 import type { MedicalDepartment } from "@/constants/hospital";
 
 export type ColumnStatus = "published" | "draft" | "hidden";
+
+/** 콘텐츠 종류 — 건강칼럼(상시) / 메디브리핑(시의성) */
+export type ColumnKind = "column" | "briefing";
+
+/** 카테고리 — 칼럼/브리핑 양쪽 */
+export type AnyCategory = ColumnCategory | BriefingCategory;
 
 export type ColumnReviewer = {
   name: string;
@@ -23,8 +30,10 @@ export type ColumnSeo = {
 /** 건강 칼럼 (Mock·실API 공통 계약) */
 export type Column = {
   id: string;
+  /** 콘텐츠 종류 (기본 column). briefing이면 메디브리핑 */
+  kind?: ColumnKind;
   title: string;
-  category: ColumnCategory;
+  category: AnyCategory;
   tags?: string[];
   excerpt: string; // 목록 요약(1~2줄)
   summary: string[]; // 핵심 요약(TL;DR 불릿)
@@ -44,7 +53,8 @@ export type Column = {
 
 export type ColumnFilters = {
   q?: string;
-  category?: ColumnCategory;
+  category?: AnyCategory;
+  kind?: ColumnKind;
   page?: number;
   pageSize?: number;
 };

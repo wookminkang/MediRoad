@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { PostActions } from "@/components/hospital/post-actions";
-import { categoryLabel } from "@/constants/column";
+import { anyCategoryLabel } from "@/constants/briefing";
 import type { Column } from "@/types/column";
 
 import { Markdown } from "./markdown";
@@ -18,16 +18,24 @@ const toPlain = (md: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-/** 건강 칼럼 상세 — 뉴스룸형 에디토리얼 (포스트 상세와 동일 UI). */
-export function ColumnDetail({ column: c }: { column: Column }) {
+/** 칼럼/브리핑 상세 — 뉴스룸형 에디토리얼. basePath로 /health·/briefing 공용. */
+export function ColumnDetail({
+  column: c,
+  basePath = "/health",
+  backLabel = "건강정보 더 보기",
+}: {
+  column: Column;
+  basePath?: string;
+  backLabel?: string;
+}) {
   return (
     <article>
       {/* 카테고리 */}
       <Link
-        href={`/health?category=${c.category}`}
+        href={`${basePath}?category=${c.category}`}
         className="text-sm font-bold text-brand hover:underline"
       >
-        {categoryLabel(c.category)}
+        {anyCategoryLabel(c.category)}
       </Link>
 
       {/* 제목 */}
@@ -65,7 +73,7 @@ export function ColumnDetail({ column: c }: { column: Column }) {
           {c.tags.map((t) => (
             <Link
               key={t}
-              href={`/health?q=${encodeURIComponent(t)}`}
+              href={`${basePath}?q=${encodeURIComponent(t)}`}
               className="rounded-full border border-line px-3.5 py-1.5 text-sm text-neutral transition-colors hover:bg-neutral-weak"
             >
               {t}
@@ -125,10 +133,10 @@ export function ColumnDetail({ column: c }: { column: Column }) {
       {/* 목록으로 */}
       <div className="mt-10 text-center">
         <Link
-          href="/health"
+          href={basePath}
           className="inline-flex items-center gap-1 rounded-full border border-line px-5 py-2.5 text-sm font-medium text-neutral transition-colors hover:bg-neutral-weak"
         >
-          건강정보 더 보기
+          {backLabel}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="m9 18 6-6-6-6" />
           </svg>

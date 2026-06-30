@@ -13,6 +13,7 @@ const DEFAULT_PAGE_SIZE = 12;
 // --- Supabase row → Column 매핑 ---
 type ColumnRow = {
   id: string;
+  kind: Column["kind"] | null;
   title: string;
   category: Column["category"];
   excerpt: string;
@@ -38,6 +39,13 @@ type ColumnRow = {
 
 const isoDate = (v: string | null) => (v ? v.slice(0, 10) : "");
 
+/** kind 컬럼 미존재(마이그레이션 0020 전) 에러 감지 → 필터 생략 폴백 */
+function isMissingKindColumn(err: { code?: string; message?: string }): boolean {
+  return (
+    err?.code === "42703" || /column .*kind.* does not exist/i.test(err?.message ?? "")
+  );
+}
+
 /** 분리된 SEO 컬럼 → Column.seo 객체로 복원(전부 비면 undefined) */
 function rowToSeo(r: ColumnRow): Column["seo"] {
   const seo = {
@@ -53,6 +61,7 @@ function rowToSeo(r: ColumnRow): Column["seo"] {
 function rowToColumn(r: ColumnRow): Column {
   return {
     id: r.id,
+    kind: r.kind ?? "column",
     title: r.title,
     category: r.category,
     excerpt: r.excerpt,
@@ -86,8 +95,10 @@ function mockMatchesQuery(c: Column, q: string): boolean {
 }
 
 function mockGetColumns(filters: ColumnFilters): Paginated<Column> {
-  const { q, category, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
+  const { q, category, kind = "column", page = 1, pageSize = DEFAULT_PAGE_SIZE } =
+    filters;
   const results = MOCK_COLUMNS.filter((c) => c.status === "published")
+    .filter((c) => (c.kind ?? "column") === kind)
     .filter((c) => (category ? c.category === category : true))
     .filter((c) => (q ? mockMatchesQuery(c, q) : true))
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
@@ -105,24 +116,34 @@ export async function getColumns(
 ): Promise<Paginated<Column>> {
   if (!isSupabaseConfigured) return mockGetColumns(filters);
 
-  const { q, category, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
+  const { q, category, kind = "column", page = 1, pageSize = DEFAULT_PAGE_SIZE } =
+    filters;
   const start = (page - 1) * pageSize;
 
-  let query = getSupabaseServer()
-    .from("columns")
-    .select("*", { count: "exact" })
-    .eq("status", "published")
-    .order("published_at", { ascending: false })
-    .range(start, start + pageSize - 1);
+  // kind 컬럼이 마이그레이션 전이면 필터 생략(배포-마이그레이션 공백 대비)
+  const build = (withKind: boolean) => {
+    let query = getSupabaseServer()
+      .from("columns")
+      .select("*", { count: "exact" })
+      .eq("status", "published");
+    if (withKind) query = query.eq("kind", kind);
+    query = query
+      .order("published_at", { ascending: false })
+      .range(start, start + pageSize - 1);
+    if (category) query = query.eq("category", category);
+    if (q) {
+      const safe = q.replace(/[,()%]/g, " ").trim();
+      if (safe) query = query.or(`title.ilike.%${safe}%,excerpt.ilike.%${safe}%`);
+    }
+    return query;
+  };
 
-  if (category) query = query.eq("category", category);
-  if (q) {
-    // .or 구문 깨짐 방지용 escape
-    const safe = q.replace(/[,()%]/g, " ").trim();
-    if (safe) query = query.or(`title.ilike.%${safe}%,excerpt.ilike.%${safe}%`);
+  let { data, count, error } = await build(true);
+  if (error && isMissingKindColumn(error)) {
+    // 마이그레이션 전: 브리핑은 빈 목록, 칼럼은 kind 없이 전체
+    if (kind === "briefing") return { items: [], total: 0, page, pageSize };
+    ({ data, count, error } = await build(false));
   }
-
-  const { data, count, error } = await query;
   if (error) throw error;
 
   return {
@@ -151,17 +172,27 @@ export async function getColumnById(id: string): Promise<Column | null> {
   return data ? rowToColumn(data as ColumnRow) : null;
 }
 
-/** generateStaticParams 용 — published 칼럼 ID */
-export async function getAllColumnIds(): Promise<string[]> {
+/** generateStaticParams 용 — published 칼럼 ID (kind 기본 column) */
+export async function getAllColumnIds(
+  kind: Column["kind"] = "column",
+): Promise<string[]> {
   if (!isSupabaseConfigured) {
-    return MOCK_COLUMNS.filter((c) => c.status === "published").map((c) => c.id);
+    return MOCK_COLUMNS.filter(
+      (c) => c.status === "published" && (c.kind ?? "column") === kind,
+    ).map((c) => c.id);
   }
 
-  const { data, error } = await getSupabaseServer()
+  const sb = getSupabaseServer();
+  let { data, error } = await sb
     .from("columns")
     .select("id")
-    .eq("status", "published");
-
+    .eq("status", "published")
+    .eq("kind", kind);
+  if (error && isMissingKindColumn(error)) {
+    // 마이그레이션 전: kind 필터 없이(브리핑은 빈 목록처럼 동작)
+    if (kind === "briefing") return [];
+    ({ data, error } = await sb.from("columns").select("id").eq("status", "published"));
+  }
   if (error) throw error;
   return (data as { id: string }[]).map((r) => r.id);
 }
