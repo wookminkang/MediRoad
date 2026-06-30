@@ -18,12 +18,13 @@ type Props = {
 export function BriefingBoard({ active, items, total, q }: Props) {
   return (
     <>
-      <header className="mb-6">
-        <Text as="p" textStyle="t4Bold" className="text-brand">
+      {/* 페이지 헤더 — 타이틀 + 보조문구 */}
+      <header className="mb-7">
+        <Text as="h1" textStyle="t9Bold">
           메디브리핑
         </Text>
-        <Text as="p" textStyle="t5Regular" className="mt-1 text-subtle">
-          의료·건강 이슈를 한눈에. 정책·트렌드·공공 건강정보를 정리해 전합니다.
+        <Text as="p" textStyle="t5Regular" className="mt-3 text-[#9CA3AF]">
+          의료·건강 이슈를 한눈에 — 정책·트렌드·공공 건강정보를 정리해 전합니다.
         </Text>
       </header>
 
@@ -38,7 +39,7 @@ export function BriefingBoard({ active, items, total, q }: Props) {
       </nav>
 
       <section aria-labelledby="briefing-list" className="mt-8">
-        <Text as="h1" id="briefing-list" textStyle="t8Bold">
+        <Text as="h2" id="briefing-list" textStyle="t6Bold">
           {active ? `${briefingCategoryLabel(active)}` : "전체 브리핑"} {total}건
         </Text>
         <div className="mt-3">
