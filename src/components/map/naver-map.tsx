@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Hospital } from "@/types/hospital";
 
@@ -31,7 +31,11 @@ function loadNaver(): Promise<void> {
     s.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${CLIENT_ID}`;
     s.async = true;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error("네이버 지도 로드 실패"));
+    s.onerror = () => {
+      scriptPromise = null; // 실패 캐시 비움 → 재시도 시 새로 로드
+      s.remove();
+      reject(new Error("네이버 지도 로드 실패"));
+    };
     document.head.appendChild(s);
   });
   return scriptPromise;
@@ -113,6 +117,8 @@ export function NaverMap({
   panelOpen?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,10 +146,11 @@ export function NaverMap({
   const onMapDragRef = useRef(onMapDrag);
   onMapDragRef.current = onMapDrag;
 
-  // 지도 초기화 (1회)
+  // 지도 초기화 (1회, 로드 실패 시 reloadKey로 재시도)
   useEffect(() => {
     if (!CLIENT_ID) return;
     let cancelled = false;
+    setLoadError(false);
     loadNaver()
       .then(() => {
         if (cancelled || !ref.current) return;
@@ -194,7 +201,9 @@ export function NaverMap({
         );
         emit();
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      });
     return () => {
       cancelled = true;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -205,7 +214,7 @@ export function NaverMap({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [reloadKey]);
 
   // 오버레이(마커/클러스터) 갱신 — 마커 풀 재사용(파괴/재생성 최소화로 팬·줌 부드럽게)
   useEffect(() => {
@@ -420,6 +429,24 @@ export function NaverMap({
   return (
     <div className="relative h-full w-full">
       <div ref={ref} className="h-full w-full" />
+
+      {/* 지도 로드 실패 — 재시도 */}
+      {loadError && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-neutral-weak px-6 text-center">
+          <p className="text-sm font-medium text-neutral">
+            지도를 불러오지 못했어요.
+            <br />
+            네트워크 상태를 확인해 주세요.
+          </p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((k) => k + 1)}
+            className="rounded-lg bg-[#1E5BD6] px-5 py-2 text-sm font-bold text-white hover:bg-[#1a4fbb]"
+          >
+            다시 시도
+          </button>
+        </div>
+      )}
 
       {/* 커스텀 줌 / 내 위치 컨트롤 */}
       <div

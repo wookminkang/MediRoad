@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DrawerContent,
@@ -107,8 +107,21 @@ export function MapExplorer({
   // 좌측 리스트: 지역 모드 > 검색 결과 > 마커 클릭 그룹
   const shown = searchResults ?? selectedGroup;
   const hasPanel = regionActive || shown !== null;
-  const listItems = openFilter(regionActive ? regionItems : (shown ?? []));
-  const selectedIds = selectedGroup?.map((h) => h.id) ?? null;
+  const listItems = useMemo(
+    () => openFilter(regionActive ? regionItems : (shown ?? [])),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [regionActive, regionItems, shown, openOnly, nightOnly],
+  );
+  // 지도에 넘길 마커 배열 — 새 참조가 매 렌더 생기면 마커 reconcile이 헛돌므로 메모.
+  const mapHospitals = useMemo(
+    () => openFilter(searchActive ? (searchResults ?? []) : hospitals),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchActive, searchResults, hospitals, openOnly, nightOnly],
+  );
+  const selectedIds = useMemo(
+    () => selectedGroup?.map((h) => h.id) ?? null,
+    [selectedGroup],
+  );
 
   const viewRef = useRef<{ b: Bounds; zoom: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -719,14 +732,26 @@ export function MapExplorer({
 
         {/* 로딩 표시 — 흐름에서 분리(absolute)해 필터 바 재배치(깜빡임) 방지 */}
         {loading && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-40 h-0.5 overflow-hidden">
-            <div className="h-full w-full animate-pulse bg-[#1E5BD6]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-40 h-0.5 overflow-hidden bg-[#1E5BD6]/15">
+            <div
+              className="h-full w-full bg-[#1E5BD6]"
+              style={{ animation: "mediroad-indeterminate 1.1s ease-in-out infinite" }}
+            />
+          </div>
+        )}
+
+        {/* 마커 500개 캡 안내 — 너무 많으면 일부만 표시되므로 확대 유도 */}
+        {!searchActive && mode === "marker" && mapHospitals.length >= 500 && (
+          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center px-4 md:top-16">
+            <span className="pointer-events-auto rounded-full bg-[#26282c]/90 px-3.5 py-1.5 text-xs font-medium text-white shadow-lg">
+              병원이 많아 일부만 표시돼요. 확대하면 더 정확해요
+            </span>
           </div>
         )}
 
         <NaverMap
           mode={searchActive ? "marker" : mode}
-          hospitals={openFilter(searchActive ? (searchResults ?? []) : hospitals)}
+          hospitals={mapHospitals}
           clusters={clusters}
           center={DEFAULT_CENTER}
           highlightId={hoveredId}
