@@ -23,8 +23,8 @@ export function BriefingBoard({ active, items, total, q }: Props) {
         <Text as="h1" textStyle="t9Bold">
           메디브리핑
         </Text>
-        <div className="mt-4">
-          <Text as="p" textStyle="t5Regular" style={{ color: "#9CA3AF" }}>
+        <div className="mt-2">
+          <Text as="p" textStyle="t5Regular" style={{ color: "#6B7280" }}>
             의료·건강 이슈를 한눈에 — 정책·트렌드·공공 건강정보를 정리해 전합니다.
           </Text>
         </div>
