@@ -160,15 +160,6 @@ export function MapHospitalDetail({
             </Row>
           )}
 
-          {/* 전화 */}
-          {h.phone && (
-            <Row icon={<PhoneIcon />}>
-              <a href={`tel:${h.phone}`} className="text-[15px] font-medium text-neutral">
-                {h.phone}
-              </a>
-            </Row>
-          )}
-
           {/* 링크 */}
           {(h.links?.homepage || h.links?.naverBooking || h.links?.kakaoChannel) && (
             <Row icon={<GlobeIcon />}>
