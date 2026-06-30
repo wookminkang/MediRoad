@@ -48,6 +48,7 @@ export function HospitalInfiniteList({
     });
 
   const items = data.pages.flatMap((p) => p.items);
+  const total = data.pages[0]?.total ?? items.length;
 
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -72,6 +73,10 @@ export function HospitalInfiniteList({
 
   return (
     <>
+      <p className="mb-4 text-sm text-muted">
+        총 <span className="font-bold text-neutral">{total.toLocaleString()}</span>곳
+      </p>
+
       <ul className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-4">
         {items.map((h) => (
           <li key={h.id}>

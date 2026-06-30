@@ -1,5 +1,7 @@
 "use client";
 
+import { useTransition } from "react";
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 /** 검색박스 하단 — 현재 적용된 필터를 칩으로 표시 + X로 개별/전체 해제 */
@@ -7,6 +9,7 @@ export function ActiveFilterChips() {
   const sp = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const [, startTransition] = useTransition();
 
   const chips: { id: string; label: string; keys: string[] }[] = [];
   const q = sp.get("q");
@@ -33,7 +36,7 @@ export function ActiveFilterChips() {
     const next = new URLSearchParams(sp.toString());
     keys.forEach((k) => next.delete(k));
     const qs = next.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname);
+    startTransition(() => router.push(qs ? `${pathname}?${qs}` : pathname));
   };
 
   return (
@@ -54,7 +57,7 @@ export function ActiveFilterChips() {
       {chips.length > 1 && (
         <button
           type="button"
-          onClick={() => router.push(pathname)}
+          onClick={() => startTransition(() => router.push(pathname))}
           className="ml-1 text-sm text-subtle hover:text-neutral"
         >
           전체 해제

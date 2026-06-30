@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -9,6 +9,7 @@ export function HospitalSearchBox() {
   const router = useRouter();
   const sp = useSearchParams();
   const [value, setValue] = useState(sp.get("q") ?? "");
+  const [pending, startTransition] = useTransition();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +18,8 @@ export function HospitalSearchBox() {
     if (v) params.set("q", v);
     else params.delete("q");
     const qs = params.toString();
-    router.push(qs ? `/hospitals?${qs}` : "/hospitals");
+    // 트랜지션으로 현재 결과를 유지한 채 갱신(스켈레톤 플래시 방지)
+    startTransition(() => router.push(qs ? `/hospitals?${qs}` : "/hospitals"));
   };
 
   return (
@@ -47,9 +49,10 @@ export function HospitalSearchBox() {
       </div>
       <button
         type="submit"
-        className="shrink-0 rounded-full bg-[#1E5BD6] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a4fbb]"
+        disabled={pending}
+        className="shrink-0 rounded-full bg-[#1E5BD6] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1a4fbb] disabled:opacity-70"
       >
-        검색
+        {pending ? "검색 중…" : "검색"}
       </button>
     </form>
   );
