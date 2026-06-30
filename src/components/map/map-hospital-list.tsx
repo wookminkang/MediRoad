@@ -27,6 +27,7 @@ export function MapHospitalList({
   onClose,
   onFocus,
   onOpenDetail,
+  activeId,
   onHover,
   idPrefix = "d",
   scrollable = true,
@@ -46,6 +47,8 @@ export function MapHospitalList({
   onFocus: (h: Hospital) => void;
   /** 항목 클릭 시 상세 패널 열기(PC). 없으면 onFocus만 동작(모바일) */
   onOpenDetail?: (h: Hospital) => void;
+  /** 현재 상세 패널에 열려 있는 병원 id — 리스트에서 강조 */
+  activeId?: string | null;
   onHover: (id: string | null) => void;
   idPrefix?: string;
   /** false면 내부 스크롤 비활성 — 바텀시트가 완전히 펼쳐지기 전엔 위 스와이프가 시트 확장이 되도록 */
@@ -114,7 +117,9 @@ export function MapHospitalList({
             <li
               key={h.id}
               id={`maplist-${idPrefix}-${h.id}`}
-              className="cursor-pointer border-b border-line px-4 py-3.5 transition-colors hover:bg-neutral-weak"
+              className={`cursor-pointer border-b border-line px-4 py-3.5 transition-colors hover:bg-neutral-weak ${
+                activeId === h.id ? "bg-brand-weak/60" : ""
+              }`}
               onMouseEnter={() => onHover(h.id)}
               onMouseLeave={() => onHover(null)}
               onClick={() => (onOpenDetail ?? onFocus)(h)}

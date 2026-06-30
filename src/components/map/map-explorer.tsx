@@ -505,33 +505,37 @@ export function MapExplorer({
       {/* 데스크톱 좌측 리스트 — 지도 위에 떠 있는 플로팅 패널(지도 레이아웃 안 밀림) */}
       {hasPanel && (
         <aside className="absolute bottom-3 left-3 top-[4.25rem] z-20 hidden w-80 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
-          {detailHospital ? (
-            <MapHospitalDetail
-              hospital={detailHospital}
-              loading={detailLoading}
-              onBack={closeDetail}
-              onClose={clearSearch}
-            />
-          ) : (
-            <MapHospitalList
-              idPrefix="d"
-              items={listItems}
-              hasPanel={hasPanel}
-              regionActive={regionActive}
-              searchActive={searchActive}
-              mode={mode}
-              regionLabel={regionMode?.label}
-              regionLoading={regionLoading}
-              regionTotal={regionTotal}
-              regionShown={regionItems.length}
-              canLoadMore={canLoadMore}
-              onLoadMore={loadMore}
-              onClose={clearSearch}
-              onFocus={focusHospital}
-              onOpenDetail={openDetail}
-              onHover={setHoveredId}
-            />
-          )}
+          <MapHospitalList
+            idPrefix="d"
+            items={listItems}
+            hasPanel={hasPanel}
+            regionActive={regionActive}
+            searchActive={searchActive}
+            mode={mode}
+            regionLabel={regionMode?.label}
+            regionLoading={regionLoading}
+            regionTotal={regionTotal}
+            regionShown={regionItems.length}
+            canLoadMore={canLoadMore}
+            onLoadMore={loadMore}
+            onClose={clearSearch}
+            onFocus={focusHospital}
+            onOpenDetail={openDetail}
+            activeId={detailHospital?.id ?? null}
+            onHover={setHoveredId}
+          />
+        </aside>
+      )}
+
+      {/* 데스크톱 상세 패널 — 리스트 오른쪽에 별도 패널로 표시 */}
+      {detailHospital && (
+        <aside className="absolute bottom-3 left-[21.25rem] top-[4.25rem] z-30 hidden w-96 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
+          <MapHospitalDetail
+            hospital={detailHospital}
+            loading={detailLoading}
+            onBack={closeDetail}
+            onClose={closeDetail}
+          />
         </aside>
       )}
 
