@@ -161,37 +161,40 @@ export function MapHospitalList({
                 </div>
                 <HospitalThumb hospital={h} />
               </div>
-              <div className="mt-2.5 flex gap-1.5">
-                {h.phone ? (
+              {/* 액션 버튼 — 모바일(상세 패널 없음)에서만. PC는 클릭 시 우측 상세 패널로 대체 */}
+              {!onOpenDetail && (
+                <div className="mt-2.5 flex gap-1.5">
+                  {h.phone ? (
+                    <a
+                      href={`tel:${h.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
+                    >
+                      전화
+                    </a>
+                  ) : (
+                    <span className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-subtle">
+                      전화
+                    </span>
+                  )}
                   <a
-                    href={`tel:${h.phone}`}
+                    href={`https://map.naver.com/p/search/${encodeURIComponent(h.name)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-brand transition-colors hover:bg-brand-weak"
+                  >
+                    길찾기
+                  </a>
+                  <Link
+                    href={`/hospitals/${h.slug}`}
                     onClick={(e) => e.stopPropagation()}
                     className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
                   >
-                    전화
-                  </a>
-                ) : (
-                  <span className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-subtle">
-                    전화
-                  </span>
-                )}
-                <a
-                  href={`https://map.naver.com/p/search/${encodeURIComponent(h.name)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-brand transition-colors hover:bg-brand-weak"
-                >
-                  길찾기
-                </a>
-                <Link
-                  href={`/hospitals/${h.slug}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
-                >
-                  상세
-                </Link>
-              </div>
+                    상세
+                  </Link>
+                </div>
+              )}
             </li>
           ))}
         </ul>
