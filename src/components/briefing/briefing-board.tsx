@@ -25,7 +25,7 @@ export function BriefingBoard({ active, items, total, q }: Props) {
         </Text>
         <div className="mt-2">
           <Text as="p" textStyle="t5Regular" style={{ color: "#6B7280" }}>
-            의료·건강 이슈를 한눈에 — 정책·트렌드·공공 건강정보를 정리해 전합니다.
+            의료·건강 이슈를 한눈에, 정책·트렌드·공공 건강정보를 정리해 전해드려요.
           </Text>
         </div>
       </header>

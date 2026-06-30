@@ -25,7 +25,7 @@ export function ColumnBoard({ active, columns, total, q }: Props) {
         </Text>
         <div className="mt-2">
           <Text as="p" textStyle="t5Regular" style={{ color: "#6B7280" }}>
-            의료진이 감수한 믿을 수 있는 건강 정보 — 증상·질환·관리법을 쉽게 풀어드립니다.
+            의료진이 감수한 믿을 수 있는 건강 정보, 증상·질환·관리법을 쉽게 풀어드려요.
           </Text>
         </div>
       </header>
