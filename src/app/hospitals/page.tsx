@@ -7,6 +7,7 @@ import { Text } from "@seed-design/react";
 import { getHospitals } from "@/api/hospital";
 import { HospitalInfiniteList } from "@/components/hospital/hospital-infinite-list";
 import { ActiveFilterChips } from "@/components/search/active-filter-chips";
+import { DepartmentFilter } from "@/components/search/department-filter";
 import { FilterSidebar } from "@/components/search/filter-sidebar";
 import { HospitalSearchBox } from "@/components/search/hospital-search-box";
 import { PageContainer } from "@/components/ui/page-container";
@@ -101,6 +102,11 @@ export default async function HospitalsPage({
       <div className="mt-4">
         <HospitalSearchBox />
         <ActiveFilterChips />
+      </div>
+
+      {/* 진료과목 카테고리 — 빠른 필터 */}
+      <div className="mt-4 overflow-x-auto">
+        <DepartmentFilter q={q} active={department} />
       </div>
 
       {/* 필터 + 무한스크롤 그리드 */}

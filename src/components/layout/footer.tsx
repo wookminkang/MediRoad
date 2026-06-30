@@ -23,7 +23,7 @@ export function Footer() {
             </Text>
             <div className="mt-4 flex gap-2">
               <ActionButton asChild variant="brandSolid" size="medium">
-                <Link href="/health">FAQ</Link>
+                <Link href="/faq">FAQ</Link>
               </ActionButton>
             </div>
           </div>
@@ -62,7 +62,7 @@ export function Footer() {
           </FooterCol>
 
           <FooterCol title="고객지원">
-            <FooterLink href="#">자주 묻는 질문(FAQ)</FooterLink>
+            <FooterLink href="/faq">자주 묻는 질문(FAQ)</FooterLink>
             <FooterLink href="#">고객의 소리</FooterLink>
           </FooterCol>
         </div>
