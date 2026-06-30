@@ -1,7 +1,13 @@
 -- 지도 마커 클릭 리스트 썸네일 — hospitals_in_bounds 가 대표 사진을 함께 반환하도록.
 -- 기존 함수는 사진을 반환하지 않아 리스트가 항상 플레이스홀더로 표시됨.
 -- 반환 컬럼에 hospital_photos(jsonb) 추가 → rowToHospital 이 그대로 매핑.
-create or replace function hospitals_in_bounds(
+-- 반환 타입 변경이라 create or replace 불가 → 기존 함수 DROP 후 재생성.
+drop function if exists hospitals_in_bounds(
+  double precision, double precision, double precision, double precision,
+  text, text, text, integer
+);
+
+create function hospitals_in_bounds(
   p_min_lat double precision,
   p_min_lng double precision,
   p_max_lat double precision,
