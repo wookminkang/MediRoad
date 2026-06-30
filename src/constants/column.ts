@@ -7,6 +7,9 @@ export const COLUMN_CATEGORIES = [
   { id: "oriental-medicine", label: "한방" },
   { id: "hair-loss", label: "탈모" },
   { id: "skin", label: "피부" },
+  { id: "dental", label: "치과" },
+  { id: "eye", label: "안과" },
+  { id: "ent", label: "이비인후과" },
   { id: "procedure", label: "기타 시술" },
 ] as const;
 
