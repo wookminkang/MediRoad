@@ -51,20 +51,21 @@ export function TodayStatus({ hours }: { hours: OpeningHours[] }) {
     !tmr || tmr.closed || !tmr.open ? "내일 휴진" : `내일 ${tmr.open} 진료 시작`;
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col items-start gap-2">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[15px] font-bold"
+        style={{
+          backgroundColor: open ? "#E7F7EC" : "#F2F4F6",
+          color: open ? "#0F8A43" : "#5B6470",
+        }}
+      >
         <span
-          className={`inline-block h-2 w-2 rounded-full ${open ? "bg-positive" : "bg-subtle"}`}
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: open ? "#12A150" : "#9AA0A8" }}
           aria-hidden
         />
-        <Text
-          as="span"
-          textStyle="t5Bold"
-          className={open ? "text-positive" : "text-muted"}
-        >
-          {label}
-        </Text>
-      </div>
+        {label}
+      </span>
       <Text as="span" textStyle="t4Regular" style={{ color: "#9AA0A8" }}>
         {tomorrowLabel}
       </Text>

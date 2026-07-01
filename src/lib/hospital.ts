@@ -124,31 +124,18 @@ export function hospitalKeywords(h: Hospital): string[] {
 export function buildHospitalSummaryBullets(h: Hospital): string[] {
   const b: string[] = [];
 
-  const depts = h.departments.slice(0, 3).join(", ");
   b.push(
-    `${h.region.sido} ${h.region.sigungu}에 위치한 ${h.type}${
-      depts ? ` — ${depts}${h.departments.length > 3 ? " 외" : ""}` : ""
-    }`,
+    `${h.name}${eunNeun(h.name)} ${h.region.sido} ${h.region.sigungu}에 위치한 ${h.type}입니다.`,
   );
 
-  if (h.nearestStation?.name) {
-    const m = h.nearestStation.distanceM ?? 0;
-    const min = Math.max(1, Math.round(m / 67));
-    const line = h.nearestStation.line ? `${h.nearestStation.line} ` : "";
-    b.push(`${line}${h.nearestStation.name}에서 도보 약 ${min}분 (${m}m)`);
+  if (h.departments.length > 0) {
+    b.push(`${h.departments.slice(0, 6).join(", ")} 진료를 봅니다.`);
   }
 
   const wd = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
-  if (wd?.open && wd?.close) b.push(`평일 ${wd.open}–${wd.close} 진료`);
+  if (wd?.open && wd?.close) b.push(`평일 진료시간은 ${wd.open}~${wd.close}입니다.`);
 
-  const night = h.hours?.some((d) => !d.closed && d.close && d.close >= "20:00");
-  if (night) b.push("야간 진료 가능 (20시 이후 진료)");
-
-  const sun = h.hours?.find((d) => d.day === 0 && !d.closed && d.open);
-  if (sun) b.push("일요일 진료");
-
-  if (h.phone) b.push(`전화 문의: ${h.phone}`);
-  if (h.links?.naverBooking) b.push("온라인 예약 가능");
+  b.push("정확한 진료시간·휴진 여부는 방문 전 전화로 확인하시는 것을 권장합니다.");
 
   return b;
 }
