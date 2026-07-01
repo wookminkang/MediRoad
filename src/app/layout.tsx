@@ -12,7 +12,9 @@ import { SITE_NAME, SITE_URL } from "@/constants/site";
 import AppProviders from "@/providers/app-providers";
 
 const GOOGLE_VERIFY = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
-const NAVER_VERIFY = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
+const NAVER_VERIFY =
+  process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION ??
+  "9300c3be7933bbd4a0ef49326fb4f0673be37dd9";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
