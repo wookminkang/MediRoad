@@ -427,7 +427,7 @@ function Card({
       <div className="mb-3 px-1">
         <div className="flex items-center gap-2">
           {icon && <span className="text-brand">{icon}</span>}
-          <Text as="h2" textStyle="t7Bold">
+          <Text as="h2" textStyle="t8Bold">
             {title}
           </Text>
         </div>
