@@ -283,7 +283,12 @@ export function HospitalDetail({
                   </p>
                 )}
                 <div>
-                  <ActionButton asChild variant="brandSolid" size="medium">
+                  <ActionButton
+                    asChild
+                    variant="brandSolid"
+                    size="medium"
+                    className="w-full sm:w-auto"
+                  >
                     <a
                       href={naverUrl}
                       target="_blank"
