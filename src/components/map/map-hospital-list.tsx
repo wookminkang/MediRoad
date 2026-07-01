@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { isPartnerHospital } from "@/constants/partners";
 import type { Hospital } from "@/types/hospital";
@@ -25,7 +26,6 @@ export function MapHospitalList({
   canLoadMore,
   onLoadMore,
   onClose,
-  onFocus,
   onOpenDetail,
   activeId,
   onHover,
@@ -57,6 +57,7 @@ export function MapHospitalList({
   /** false면 내부 스크롤 비활성 — 바텀시트가 완전히 펼쳐지기 전엔 위 스와이프가 시트 확장이 되도록 */
   scrollable?: boolean;
 }) {
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   // 스크롤 최상단에서 아래로 당기면 시트 내리기(한 제스처당 1회)
@@ -99,25 +100,26 @@ export function MapHospitalList({
     >
       <div className="sticky top-0 z-10 border-b border-line bg-white px-4 py-3">
         {hasPanel ? (
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="shrink-0 text-sm font-medium text-brand"
-            >
-              ←{" "}
-              {regionActive
-                ? "지역 닫기"
-                : searchActive
-                  ? "검색 닫기"
-                  : "전체 목록 보기"}
-            </button>
-            {regionActive && regionLabel && (
-              <span className="truncate text-sm font-bold text-neutral">
-                {regionLabel}
-              </span>
-            )}
-          </div>
+          regionActive || searchActive ? (
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="shrink-0 text-sm font-medium text-brand"
+              >
+                ← {regionActive ? "지역 닫기" : "검색 닫기"}
+              </button>
+              {regionActive && regionLabel && (
+                <span className="truncate text-sm font-bold text-neutral">
+                  {regionLabel}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm font-medium text-neutral">
+              이 위치의 병원 {items.length}곳
+            </p>
+          )
         ) : (
           <p className="text-sm text-muted">
             {mode === "marker"
@@ -137,14 +139,19 @@ export function MapHospitalList({
             <li
               key={h.id}
               id={`maplist-${idPrefix}-${h.id}`}
-              className={`cursor-pointer border-b border-line px-4 py-3.5 transition-colors hover:bg-neutral-weak ${
+              className={`cursor-pointer border-b border-black/[0.05] px-4 py-3.5 transition-colors hover:bg-neutral-weak ${
                 activeId === h.id ? "bg-brand-weak/60" : ""
               }`}
               onMouseEnter={() => onHover(h.id)}
               onMouseLeave={() => onHover(null)}
-              onClick={() => (onOpenDetail ?? onFocus)(h)}
+              onClick={() => {
+                // PC: 우측 상세 패널 / 모바일: 바로 상세 페이지로 이동
+                if (onOpenDetail) onOpenDetail(h);
+                else router.push(`/hospitals/${h.slug}`);
+              }}
             >
               <div className="flex gap-3">
+                <HospitalThumb hospital={h} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <Link
@@ -179,42 +186,7 @@ export function MapHospitalList({
                     {h.roadAddress ?? h.address}
                   </p>
                 </div>
-                <HospitalThumb hospital={h} />
               </div>
-              {/* 액션 버튼 — 모바일(상세 패널 없음)에서만. PC는 클릭 시 우측 상세 패널로 대체 */}
-              {!onOpenDetail && (
-                <div className="mt-2.5 flex gap-1.5">
-                  {h.phone ? (
-                    <a
-                      href={`tel:${h.phone}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
-                    >
-                      전화
-                    </a>
-                  ) : (
-                    <span className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-subtle">
-                      전화
-                    </span>
-                  )}
-                  <a
-                    href={`https://map.naver.com/p/search/${encodeURIComponent(h.name)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-brand transition-colors hover:bg-brand-weak"
-                  >
-                    길찾기
-                  </a>
-                  <Link
-                    href={`/hospitals/${h.slug}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
-                  >
-                    상세
-                  </Link>
-                </div>
-              )}
             </li>
           ))}
         </ul>
