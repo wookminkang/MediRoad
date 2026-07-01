@@ -254,9 +254,18 @@ export function HospitalDetail({
             </Card>
           )}
 
-          {/* 위치 카드 */}
-          <Card id="location" title="위치" icon={<PinMiniIcon />}>
+          {/* 위치 카드 — 지도 좌측 배치 */}
+          <Card id="location" title="위치">
             <div className="grid gap-5 lg:grid-cols-2">
+              {h.location?.lat && h.location?.lng ? (
+                <HospitalMiniMap
+                  lat={h.location.lat}
+                  lng={h.location.lng}
+                  className="h-52 w-full overflow-hidden rounded-xl"
+                />
+              ) : (
+                <MapPlaceholder className="min-h-[13rem] rounded-xl" />
+              )}
               <div className="flex flex-col gap-3">
                 <p className="text-[15px] text-neutral">{addr}</p>
                 {st && (
@@ -281,15 +290,6 @@ export function HospitalDetail({
                   </ActionButton>
                 </div>
               </div>
-              {h.location?.lat && h.location?.lng ? (
-                <HospitalMiniMap
-                  lat={h.location.lat}
-                  lng={h.location.lng}
-                  className="h-52 w-full overflow-hidden rounded-xl"
-                />
-              ) : (
-                <MapPlaceholder className="min-h-[13rem] rounded-xl" />
-              )}
             </div>
           </Card>
 
@@ -307,7 +307,7 @@ export function HospitalDetail({
               title="이 근처 추천 병원"
               subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
             >
-              <ul className="grid gap-[1.125rem] sm:grid-cols-2">
+              <ul className="grid gap-[1.225rem] sm:grid-cols-2">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
                   return (
@@ -343,7 +343,9 @@ export function HospitalDetail({
                               {d != null && (
                                 <TagGroupItem tone="brand">
                                   <TagGroupItemLabel
-                                    style={{ color: "var(--seed-color-fg-brand)" }}
+                                    style={{
+                                      color: "var(--seed-color-fg-brand)",
+                                    }}
                                   >
                                     {fmtDist(d)}
                                   </TagGroupItemLabel>
@@ -460,7 +462,17 @@ function BuildingIcon() {
 }
 function ChevronRightIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
       <path d="m9 18 6-6-6-6" />
     </svg>
   );
