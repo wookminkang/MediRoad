@@ -284,8 +284,12 @@ export function HospitalDetail({
                           {st.exit ? `${st.exit}번 출구 ` : ""}도보 약 {stWalk}분
                         </TagGroupItemLabel>
                       </TagGroupItem>
-                      <TagGroupItem>
-                        <TagGroupItemLabel>{st.distanceM}m</TagGroupItemLabel>
+                      <TagGroupItem tone="brand">
+                        <TagGroupItemLabel
+                          style={{ color: "var(--seed-color-fg-brand)" }}
+                        >
+                          {st.distanceM}m
+                        </TagGroupItemLabel>
                       </TagGroupItem>
                     </TagGroupRoot>
                   </div>
