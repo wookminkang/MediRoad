@@ -64,6 +64,9 @@ export function Footer() {
 
           <FooterCol title="고객지원">
             <FooterLink href="/faq">자주 묻는 질문(FAQ)</FooterLink>
+            <FooterLink href="mailto:oper2068@announcego.com?subject=%5B메디로드%5D%20문의">
+              문의하기
+            </FooterLink>
           </FooterCol>
         </div>
 
