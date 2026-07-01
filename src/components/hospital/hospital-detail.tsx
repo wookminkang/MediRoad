@@ -316,7 +316,7 @@ export function HospitalDetail({
                         href={`/hospitals/${r.slug}`}
                         className="group flex items-center gap-3"
                       >
-                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
                           <BuildingIcon />
                         </span>
                         <div className="min-w-0 flex-1">
