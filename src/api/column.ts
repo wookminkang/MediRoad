@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { MOCK_COLUMNS } from "@/api/mock/columns";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { Paginated } from "@/types";
@@ -153,6 +155,16 @@ export async function getColumns(
     pageSize,
   };
 }
+
+/**
+ * 목록 캐시판 — 동적 렌더(/health·/briefing는 searchParams로 동적)라도 DB 조회를
+ * 요청마다 하지 않도록 1시간 캐시. 인자(필터)별로 캐시 키 분리.
+ */
+export const getColumnsCached = unstable_cache(
+  (filters: ColumnFilters = {}) => getColumns(filters),
+  ["columns-list"],
+  { revalidate: 3600, tags: ["columns"] },
+);
 
 /** 상세 — published만 반환(그 외 null → 페이지에서 notFound) */
 export async function getColumnById(id: string): Promise<Column | null> {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { getColumns } from "@/api/column";
+import { getColumnsCached } from "@/api/column";
 import { BriefingBoard } from "@/components/briefing/briefing-board";
 import { PageContainer } from "@/components/ui/page-container";
 import {
@@ -50,7 +50,7 @@ export default async function BriefingPage({
   const sp = await searchParams;
   const q = toStr(sp.q);
   const category = toCategory(sp.category);
-  const { items, total } = await getColumns({
+  const { items, total } = await getColumnsCached({
     kind: "briefing",
     q,
     category,

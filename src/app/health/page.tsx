@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { getColumns } from "@/api/column";
+import { getColumnsCached } from "@/api/column";
 import { ColumnBoard } from "@/components/column/column-board";
 import { PageContainer } from "@/components/ui/page-container";
 import { isColumnCategory, type ColumnCategory } from "@/constants/column";
@@ -47,7 +47,7 @@ export default async function HealthPage({
   const sp = await searchParams;
   const q = toStr(sp.q);
   const category = toCategory(sp.category);
-  const { items, total } = await getColumns({ q, category, pageSize: 50 });
+  const { items, total } = await getColumnsCached({ q, category, pageSize: 50 });
 
   return (
     <PageContainer maxWidth="max-w-7xl">
