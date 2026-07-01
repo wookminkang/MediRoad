@@ -16,7 +16,14 @@ const toMin = (s: string) => {
  * 오늘 기준 실시간 영업상태. SSG 페이지 정합성을 위해 현재 시각은 클라이언트에서 계산.
  * (네이버 플레이스 "영업중 · 18:00 종료" UX)
  */
-export function TodayStatus({ hours }: { hours: OpeningHours[] }) {
+export function TodayStatus({
+  hours,
+  prominent = false,
+}: {
+  hours: OpeningHours[];
+  /** true면 배지 + 내일 안내(AI요약 모달용), false면 본문용 심플 텍스트 */
+  prominent?: boolean;
+}) {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => setNow(new Date()), []);
   if (!now) return null; // 하이드레이션 불일치 방지
@@ -45,7 +52,26 @@ export function TodayStatus({ hours }: { hours: OpeningHours[] }) {
     }
   }
 
-  // 내일 진료 시작 (또는 휴진)
+  // 본문용 — 심플 텍스트(원래대로)
+  if (!prominent) {
+    return (
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-block h-2 w-2 rounded-full ${open ? "bg-positive" : "bg-subtle"}`}
+          aria-hidden
+        />
+        <Text
+          as="span"
+          textStyle="t5Bold"
+          className={open ? "text-positive" : "text-muted"}
+        >
+          {label}
+        </Text>
+      </div>
+    );
+  }
+
+  // AI요약 모달용 — 눈에 띄는 배지 + 내일 안내
   const tmr = hours.find((h) => h.day === (now.getDay() + 1) % 7);
   const tomorrowLabel =
     !tmr || tmr.closed || !tmr.open ? "내일 휴진" : `내일 ${tmr.open} 진료 시작`;

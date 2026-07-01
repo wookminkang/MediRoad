@@ -142,7 +142,7 @@ export function HospitalDetail({
                     showPrint={false}
                     statusSlot={
                       h.hours && h.hours.length > 0 ? (
-                        <TodayStatus hours={h.hours} />
+                        <TodayStatus hours={h.hours} prominent />
                       ) : undefined
                     }
                   />
