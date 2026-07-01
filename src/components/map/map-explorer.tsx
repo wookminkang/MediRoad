@@ -219,6 +219,7 @@ export function MapExplorer({
   }, []);
 
   const firstLoadRef = useRef(true);
+  const prevFetchZoomRef = useRef<number | null>(null);
   const onViewChanged = useCallback(
     (b: Bounds, zoom: number) => {
       viewRef.current = { b, zoom };
@@ -229,10 +230,17 @@ export function MapExplorer({
       // 첫 로딩은 디바운스 없이 즉시 조회 (초기 진입 지연 제거)
       if (firstLoadRef.current) {
         firstLoadRef.current = false;
+        prevFetchZoomRef.current = zoom;
         fetchForView(b, zoom, filters);
         return;
       }
-      debounceRef.current = setTimeout(() => fetchForView(b, zoom, filters), 350);
+      // 줌 변경(모드 전환 가능)은 즉시, 단순 팬은 디바운스로 과다요청 억제
+      const zoomChanged = prevFetchZoomRef.current !== zoom;
+      prevFetchZoomRef.current = zoom;
+      debounceRef.current = setTimeout(
+        () => fetchForView(b, zoom, filters),
+        zoomChanged ? 0 : 250,
+      );
     },
     [fetchForView, filters],
   );
