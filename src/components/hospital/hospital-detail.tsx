@@ -121,15 +121,27 @@ export function HospitalDetail({
                   <TodayStatus hours={h.hours} />
                 </div>
               )}
-              <div className="flex flex-wrap items-center gap-2">
-                <Text as="h1" textStyle="t8Bold">
-                  {h.name}
-                </Text>
-                {isPartnerHospital(h.id) && (
-                  <Badge variant="solid" tone="brand">
-                    제휴
-                  </Badge>
-                )}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Text as="h1" textStyle="t8Bold">
+                    {h.name}
+                  </Text>
+                  {isPartnerHospital(h.id) && (
+                    <Badge variant="solid" tone="brand">
+                      제휴
+                    </Badge>
+                  )}
+                </div>
+                {/* AI 요약 · 공유 — 상호명 행 우측(별도 영역 차지 X) */}
+                <div className="shrink-0">
+                  <PostActions
+                    title={h.name}
+                    summary={summaryBullets}
+                    bodyText={introText}
+                    showSpeak={false}
+                    showPrint={false}
+                  />
+                </div>
               </div>
               <p className="mt-1.5 text-sm text-muted">
                 {h.type} · {h.region.sigungu}
@@ -147,17 +159,6 @@ export function HospitalDetail({
                   ))}
                 </div>
               )}
-
-              {/* AI 요약 · 공유 (우측 정렬) */}
-              <div className="mt-4 flex justify-end">
-                <PostActions
-                  title={h.name}
-                  summary={summaryBullets}
-                  bodyText={introText}
-                  showSpeak={false}
-                  showPrint={false}
-                />
-              </div>
             </div>
 
             <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
