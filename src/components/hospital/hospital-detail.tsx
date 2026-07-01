@@ -246,7 +246,7 @@ export function HospitalDetail({
 
           {/* 진료시간 카드 */}
           {h.hours && h.hours.length > 0 && (
-            <Card id="hours" title="진료시간" icon={<ClockMiniIcon />}>
+            <Card id="hours" title="진료시간">
               <OpeningHoursTable
                 hours={h.hours}
                 holidayClosed={h.holidayClosed}
