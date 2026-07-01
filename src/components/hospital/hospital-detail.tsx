@@ -28,7 +28,10 @@ import { OpeningHoursTable } from "./opening-hours-table";
 const TIME_AMENITIES = new Set(["야간진료", "일요일진료", "공휴일진료"]);
 
 /** 두 좌표 간 거리(m) — Haversine */
-function distM(a?: { lat: number; lng: number }, b?: { lat: number; lng: number }) {
+function distM(
+  a?: { lat: number; lng: number },
+  b?: { lat: number; lng: number },
+) {
   if (!a?.lat || !b?.lat) return null;
   const R = 6371000;
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -144,107 +147,110 @@ export function HospitalDetail({
             </div>
 
             <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              {/* 좌: 정보 */}
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] leading-relaxed text-neutral">
-                  {h.description ?? buildAutoDescription(h)}
-                </p>
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                {/* 좌: 정보 */}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[15px] leading-relaxed text-neutral">
+                    {h.description ?? buildAutoDescription(h)}
+                  </p>
 
-                {/* 정보 칩: 지하철 / 주소 */}
-                <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                  {st && (
+                  {/* 정보 칩: 지하철 / 주소 */}
+                  <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                    {st && (
+                      <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
+                        <span className="mt-0.5 shrink-0 text-subtle">
+                          <SubwayIcon />
+                        </span>
+                        <span className="text-[13px] text-neutral">
+                          {st.name}
+                          {st.exit && ` ${st.exit}번 출구`} 도보 약 {stWalk}분 (
+                          {st.distanceM}m)
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
                       <span className="mt-0.5 shrink-0 text-subtle">
-                        <SubwayIcon />
+                        <PinMiniIcon />
                       </span>
-                      <span className="text-[13px] text-neutral">
-                        {st.name}
-                        {st.exit && ` ${st.exit}번 출구`} 도보 약 {stWalk}분 (
-                        {st.distanceM}m)
-                      </span>
+                      <span className="text-[13px] text-neutral">{addr}</span>
+                    </div>
+                  </div>
+
+                  {h.departments.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {h.departments.map((d) => (
+                        <ActionChip key={d} asChild size="small">
+                          <Link
+                            href={`/hospitals?department=${encodeURIComponent(d)}`}
+                          >
+                            {d}
+                          </Link>
+                        </ActionChip>
+                      ))}
                     </div>
                   )}
-                  <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
-                    <span className="mt-0.5 shrink-0 text-subtle">
-                      <PinMiniIcon />
-                    </span>
-                    <span className="text-[13px] text-neutral">{addr}</span>
-                  </div>
                 </div>
 
-                {h.departments.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {h.departments.map((d) => (
-                      <ActionChip key={d} asChild size="small">
-                        <Link
-                          href={`/hospitals?department=${encodeURIComponent(d)}`}
+                {/* 우: 전화 박스 */}
+                <div className="shrink-0 rounded-2xl border border-line p-5 lg:w-64">
+                  {h.phone ? (
+                    <>
+                      <div className="flex items-center justify-center gap-2 text-neutral">
+                        <PhoneIcon />
+                        <span className="text-lg font-bold">{h.phone}</span>
+                      </div>
+                      <div className="mt-5">
+                        <ActionButton
+                          asChild
+                          variant="brandSolid"
+                          size="large"
+                          className="w-full"
                         >
-                          {d}
-                        </Link>
-                      </ActionChip>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 우: 전화 박스 */}
-              <div className="shrink-0 rounded-2xl border border-line p-5 lg:w-64">
-                {h.phone ? (
-                  <>
-                    <div className="flex items-center justify-center gap-2 text-neutral">
-                      <PhoneIcon />
-                      <span className="text-lg font-bold">{h.phone}</span>
+                          <a href={`tel:${h.phone}`}>전화 문의</a>
+                        </ActionButton>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-center text-sm text-muted">
+                      전화번호 정보가 없습니다
+                    </p>
+                  )}
+                  {(h.links?.naverBooking || h.links?.homepage) && (
+                    <div className="mt-3 flex justify-center gap-4 text-sm">
+                      {h.links?.naverBooking && (
+                        <a
+                          href={h.links.naverBooking}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-brand"
+                        >
+                          예약
+                        </a>
+                      )}
+                      {h.links?.homepage && (
+                        <a
+                          href={h.links.homepage}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-brand"
+                        >
+                          홈페이지
+                        </a>
+                      )}
                     </div>
-                    <div className="mt-5">
-                      <ActionButton
-                        asChild
-                        variant="brandSolid"
-                        size="large"
-                        className="w-full"
-                      >
-                        <a href={`tel:${h.phone}`}>전화 문의</a>
-                      </ActionButton>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-center text-sm text-muted">
-                    전화번호 정보가 없습니다
-                  </p>
-                )}
-                {(h.links?.naverBooking || h.links?.homepage) && (
-                  <div className="mt-3 flex justify-center gap-4 text-sm">
-                    {h.links?.naverBooking && (
-                      <a
-                        href={h.links.naverBooking}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-brand"
-                      >
-                        예약
-                      </a>
-                    )}
-                    {h.links?.homepage && (
-                      <a
-                        href={h.links.homepage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-brand"
-                      >
-                        홈페이지
-                      </a>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
             </div>
           </section>
 
           {/* 진료시간 카드 */}
           {h.hours && h.hours.length > 0 && (
             <Card id="hours" title="진료시간" icon={<ClockMiniIcon />}>
-              <OpeningHoursTable hours={h.hours} holidayClosed={h.holidayClosed} />
+              <OpeningHoursTable
+                hours={h.hours}
+                holidayClosed={h.holidayClosed}
+              />
             </Card>
           )}
 
@@ -265,7 +271,11 @@ export function HospitalDetail({
                 )}
                 <div>
                   <ActionButton asChild variant="neutralWeak" size="medium">
-                    <a href={naverUrl} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={naverUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       길찾기
                     </a>
                   </ActionButton>
@@ -305,11 +315,11 @@ export function HospitalDetail({
                         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
                           <BuildingIcon />
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[15px] font-bold text-neutral">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[15px] font-bold leading-tight text-neutral">
                             {r.name}
-                          </span>
-                          <span className="mt-1 block">
+                          </p>
+                          <div className="mt-0.5 flex">
                             <TagGroupRoot size="t3" tone="neutralSubtle">
                               <TagGroupItem>
                                 <TagGroupItemLabel>{r.type}</TagGroupItemLabel>
@@ -327,15 +337,15 @@ export function HospitalDetail({
                                 </TagGroupItem>
                               )}
                               {d != null && (
-                                <TagGroupItem tone="brand">
+                                <TagGroupItem>
                                   <TagGroupItemLabel>
                                     {fmtDist(d)}
                                   </TagGroupItemLabel>
                                 </TagGroupItem>
                               )}
                             </TagGroupRoot>
-                          </span>
-                        </span>
+                          </div>
+                        </div>
                       </Link>
                     </li>
                   );
@@ -347,7 +357,8 @@ export function HospitalDetail({
           {/* 출처 푸터 */}
           <footer className="px-1 pt-1">
             <Text as="p" textStyle="t3Regular" className="text-subtle">
-              {h.updatedAt ? `정보 업데이트: ${h.updatedAt} · ` : ""}출처 건강보험심사평가원(HIRA)
+              {h.updatedAt ? `정보 업데이트: ${h.updatedAt} · ` : ""}출처
+              건강보험심사평가원(HIRA)
             </Text>
           </footer>
         </div>
