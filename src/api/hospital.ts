@@ -192,7 +192,9 @@ async function nearbyQuery(
   filters: HospitalSearchFilters,
 ): Promise<Paginated<Hospital>> {
   const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
-  const { data, error } = await getSupabaseServer().rpc("search_hospitals_nearby", {
+  const sb = getSupabaseServer();
+  // RPC(가까운 N개, KNN 조기종료)와 총개수(bbox planned, 가벼움)를 병렬 조회
+  const rpcCall = sb.rpc("search_hospitals_nearby", {
     p_lat: center!.lat,
     p_lng: center!.lng,
     p_radius_m: radiusKm ? radiusKm * 1000 : null,
@@ -204,13 +206,50 @@ async function nearbyQuery(
     p_limit: pageSize,
     p_offset: (page - 1) * pageSize,
   });
+  const [{ data, error }, total] = await Promise.all([
+    rpcCall,
+    page === 1 ? countNearby(center!, radiusKm, { q, department, type, sido }) : Promise.resolve(0),
+  ]);
   if (error) throw error;
-  const rows = (data ?? []) as unknown as (HospitalRow & { total_count: number })[];
+  const rows = (data ?? []) as unknown as HospitalRow[];
   let items = rows
     .map(rowToHospital)
     .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }));
   if (openNow) items = items.filter((h) => h.isOpenNow === true);
-  return { items, total: Number(rows[0]?.total_count ?? 0), page, pageSize };
+  return { items, total, page, pageSize };
+}
+
+/** 거리검색 총개수 — 반경을 bbox로 근사해 planned 카운트(빠름). RPC의 exact 카운트 대체 */
+async function countNearby(
+  center: { lat: number; lng: number },
+  radiusKm: number | undefined,
+  f: { q?: string; department?: string; type?: string; sido?: string },
+): Promise<number> {
+  const sb = getSupabaseServer();
+  let query = sb
+    .from("hospitals")
+    .select(
+      f.department ? "id, hospital_departments!inner(name)" : "id",
+      { count: "planned", head: true },
+    );
+  if (f.type) query = query.eq("type", f.type);
+  if (f.sido) query = query.eq("sido", f.sido);
+  if (f.department) query = query.eq("hospital_departments.name", f.department);
+  if (f.q) {
+    const s = f.q.replace(/[,()%]/g, " ").trim();
+    if (s) query = query.ilike("name", `%${s}%`);
+  }
+  if (radiusKm) {
+    const dLat = radiusKm / 111;
+    const dLng = radiusKm / (111 * Math.cos((center.lat * Math.PI) / 180));
+    query = query
+      .gte("lat", center.lat - dLat)
+      .lte("lat", center.lat + dLat)
+      .gte("lng", center.lng - dLng)
+      .lte("lng", center.lng + dLng);
+  }
+  const { count } = await query;
+  return count ?? 0;
 }
 
 /** 목록·검색·랜딩 공통 조회. center 있으면 거리순 RPC, 없으면 이름순. */

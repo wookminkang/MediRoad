@@ -149,14 +149,6 @@ export function MapExplorer({
     const seq = ++reqSeqRef.current;
     const isStale = () => seq !== reqSeqRef.current; // 더 새 요청이 시작됐으면 폐기
 
-    // 하단 "이 지역 N곳" 카운트 (행 미반환 head count)
-    fetch(`/api/hospitals/count?${common}`, { signal: ac.signal })
-      .then((r) => r.json())
-      .then((j) => {
-        if (!isStale()) setViewCount(j.count ?? 0);
-      })
-      .catch(() => {});
-
     setLoading(true);
     try {
       if (zoom >= INDIVIDUAL_ZOOM) {
@@ -182,8 +174,16 @@ export function MapExplorer({
         );
         setMode("grid");
       } else {
-        common.set("level", zoom <= SIDO_ZOOM ? "sido" : "sigungu");
-        const res = await fetch(`/api/hospitals/clusters?${common}`, { signal: ac.signal });
+        // 지역 클러스터(저줌)는 필터를 붙이면 넓은 영역을 즉석 집계해 느림(~1s).
+        // → 사전계산 통계(무필터, <200ms)만 사용. 필터는 그리드·마커(줌인) 단계에서 적용.
+        const cp = new URLSearchParams({
+          minLat: String(b.minLat),
+          minLng: String(b.minLng),
+          maxLat: String(b.maxLat),
+          maxLng: String(b.maxLng),
+          level: zoom <= SIDO_ZOOM ? "sido" : "sigungu",
+        });
+        const res = await fetch(`/api/hospitals/clusters?${cp}`, { signal: ac.signal });
         const json = await res.json();
         if (isStale()) return;
         // 지역 중심이 화면 밖이면 라벨을 화면 안(가장자리)으로 클램프 → 항상 보이게
