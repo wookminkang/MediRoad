@@ -307,7 +307,7 @@ export function HospitalDetail({
               title="이 근처 추천 병원"
               subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
             >
-              <ul className="grid gap-3 sm:grid-cols-2">
+              <ul className="grid gap-3.5 sm:grid-cols-2">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
                   return (
