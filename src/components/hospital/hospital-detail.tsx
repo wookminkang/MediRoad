@@ -140,6 +140,11 @@ export function HospitalDetail({
                     bodyText={introText}
                     showSpeak={false}
                     showPrint={false}
+                    statusSlot={
+                      h.hours && h.hours.length > 0 ? (
+                        <TodayStatus hours={h.hours} />
+                      ) : undefined
+                    }
                   />
                 </div>
               </div>

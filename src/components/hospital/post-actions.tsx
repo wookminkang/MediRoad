@@ -9,12 +9,15 @@ export function PostActions({
   bodyText,
   showSpeak = true,
   showPrint = true,
+  statusSlot,
 }: {
   title: string;
   summary: string[];
   bodyText: string;
   showSpeak?: boolean;
   showPrint?: boolean;
+  /** AI요약 모달 상단에 표시할 실시간 상태(예: 오늘 영업중/종료) */
+  statusSlot?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -160,7 +163,8 @@ export function PostActions({
                 </svg>
               </button>
             </div>
-            <p className="mt-6 text-[15px] font-medium leading-relaxed text-neutral">
+            {statusSlot && <div className="mt-5">{statusSlot}</div>}
+            <p className="mt-5 text-[15px] font-medium leading-relaxed text-neutral">
               {summary.join(" ")}
             </p>
             <hr className="my-6 border-line" />
