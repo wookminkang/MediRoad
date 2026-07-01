@@ -64,7 +64,6 @@ export function Footer() {
 
           <FooterCol title="고객지원">
             <FooterLink href="/faq">자주 묻는 질문(FAQ)</FooterLink>
-            <FooterLink href="#">고객의 소리</FooterLink>
           </FooterCol>
         </div>
 
