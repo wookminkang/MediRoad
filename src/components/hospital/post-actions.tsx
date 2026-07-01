@@ -7,10 +7,14 @@ export function PostActions({
   title,
   summary,
   bodyText,
+  showSpeak = true,
+  showPrint = true,
 }: {
   title: string;
   summary: string[];
   bodyText: string;
+  showSpeak?: boolean;
+  showPrint?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -109,15 +113,19 @@ export function PostActions({
         </button>
       )}
 
-      <CircleBtn label={speaking ? "음성 정지" : "음성 듣기"} onClick={toggleSpeak}>
-        <SpeakerIcon muted={!speaking} />
-      </CircleBtn>
+      {showSpeak && (
+        <CircleBtn label={speaking ? "음성 정지" : "음성 듣기"} onClick={toggleSpeak}>
+          <SpeakerIcon muted={!speaking} />
+        </CircleBtn>
+      )}
       <CircleBtn label="공유" onClick={openShare}>
         <ShareIcon />
       </CircleBtn>
-      <CircleBtn label="인쇄" onClick={() => window.print()}>
-        <PrintIcon />
-      </CircleBtn>
+      {showPrint && (
+        <CircleBtn label="인쇄" onClick={() => window.print()}>
+          <PrintIcon />
+        </CircleBtn>
+      )}
 
       {open && (
         <div

@@ -148,12 +148,14 @@ export function HospitalDetail({
                 </div>
               )}
 
-              {/* AI 요약 · 음성 · 공유 · 인쇄 */}
-              <div className="mt-4">
+              {/* AI 요약 · 공유 (우측 정렬) */}
+              <div className="mt-4 flex justify-end">
                 <PostActions
                   title={h.name}
                   summary={summaryBullets}
                   bodyText={introText}
+                  showSpeak={false}
+                  showPrint={false}
                 />
               </div>
             </div>
