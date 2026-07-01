@@ -40,6 +40,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${SITE_URL}/briefing`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/faq`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
   ];
 
   // 지역 랜딩 + 지역×과목 (화이트리스트 = generateStaticParams와 동일 소스)
@@ -80,6 +92,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // 메디브리핑 상세 (published)
+  const { items: briefings } = await getColumns({ kind: "briefing", pageSize: 1000 });
+  const briefingEntries: MetadataRoute.Sitemap = briefings.map((c) => ({
+    url: `${SITE_URL}/briefing/${c.id}`,
+    lastModified: lastmod(c.updatedAt),
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
   // 증상·질환 (published)
   const conditions = await getConditions();
   const conditionEntries: MetadataRoute.Sitemap = conditions.map((c) => ({
@@ -94,6 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...areaEntries,
     ...hospitalEntries,
     ...columnEntries,
+    ...briefingEntries,
     ...conditionEntries,
   ];
 }
