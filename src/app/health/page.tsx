@@ -31,7 +31,7 @@ export async function generateMetadata({
   const q = toStr(sp.q);
   const category = toCategory(sp.category);
   return {
-    title: q ? `"${q}" 칼럼 검색 결과` : "건강 칼럼",
+    title: q ? `"${q}" 건강정보 검색 결과` : "건강정보",
     description: "의료진이 감수한 믿을 수 있는 건강 정보 — 증상·질환·관리법.",
     // 검색(?q)·카테고리(?category) 필터 변형은 noindex, 전체 목록만 index. (SEO §1)
     robots: { index: !q && !category, follow: true },
