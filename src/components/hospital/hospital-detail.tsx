@@ -188,14 +188,16 @@ export function HospitalDetail({
                       <PhoneIcon />
                       <span className="text-lg font-bold">{h.phone}</span>
                     </div>
-                    <ActionButton
-                      asChild
-                      variant="brandSolid"
-                      size="large"
-                      className="mt-5 w-full"
-                    >
-                      <a href={`tel:${h.phone}`}>전화 문의</a>
-                    </ActionButton>
+                    <div className="mt-5">
+                      <ActionButton
+                        asChild
+                        variant="brandSolid"
+                        size="large"
+                        className="w-full"
+                      >
+                        <a href={`tel:${h.phone}`}>전화 문의</a>
+                      </ActionButton>
+                    </div>
                   </>
                 ) : (
                   <p className="text-center text-sm text-muted">
