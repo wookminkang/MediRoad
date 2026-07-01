@@ -85,12 +85,11 @@ const HIGHLIGHT_HTML = `<div style="width:52px;height:52px;pointer-events:none">
   <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:9999px;background:#1E5BD6;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>
 </div>`;
 
-// 내 위치 마커 — 정지된 병원 마커와 확실히 구분되도록 빠른 레이더 펄스 + 정적 헤일로.
-// 중심은 청록 액센트로 브랜드 블루(병원)와 색까지 차별화.
+// 내 위치 마커 — 정지된 병원 마커(브랜드 블루)와 확실히 구분되도록 빨강 + 빠른 레이더 펄스.
 const USER_LOC_HTML = `<div style="width:72px;height:72px;pointer-events:none">
-  <div style="position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:9999px;background:rgba(0,184,197,.30);animation:mediroad-ping 0.9s cubic-bezier(0,0,.2,1) infinite"></div>
-  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:9999px;background:rgba(0,184,197,.22)"></div>
-  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:9999px;background:#00B8C5;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.4)"></div>
+  <div style="position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:9999px;background:rgba(245,51,63,.28);animation:mediroad-ping 0.9s cubic-bezier(0,0,.2,1) infinite"></div>
+  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:30px;height:30px;border-radius:9999px;background:rgba(245,51,63,.20)"></div>
+  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:9999px;background:#F5333F;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.4)"></div>
 </div>`;
 
 export function NaverMap({
