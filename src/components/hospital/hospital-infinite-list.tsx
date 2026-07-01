@@ -43,8 +43,9 @@ export function HospitalInfiniteList({
         return (await res.json()) as Paginated<Hospital>;
       },
       initialPageParam: 1,
+      // total은 planned 추정치라 신뢰하지 않고, 페이지가 꽉 안 차면 종료(빈 페이지 무한요청 방지)
       getNextPageParam: (last) =>
-        last.page * last.pageSize < last.total ? last.page + 1 : undefined,
+        last.items.length < last.pageSize ? undefined : last.page + 1,
     });
 
   const items = data.pages.flatMap((p) => p.items);

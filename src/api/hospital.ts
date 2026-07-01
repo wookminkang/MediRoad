@@ -237,7 +237,8 @@ export async function getHospitals(
     .from("hospitals")
     .select(
       department ? `${baseSel}, hospital_departments!inner(name)` : baseSel,
-      { count: "exact" },
+      // exact count는 진료과목 조인 필터에서 매우 느림(수만 건 카운트) → planned 추정치로 15배↑
+      { count: "planned" },
     );
 
   if (type) query = query.eq("type", type);
