@@ -94,7 +94,7 @@ export function HospitalDetail({
 
       <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
         {/* 카드 스택 */}
-        <div className="flex min-w-0 flex-col gap-6 lg:order-2">
+        <div className="flex min-w-0 flex-col gap-10 lg:order-2">
           {/* 병원 사진 (있을 때만) — 4열 그리드 */}
           {photos.length > 0 && (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -246,7 +246,11 @@ export function HospitalDetail({
 
           {/* 진료시간 카드 */}
           {h.hours && h.hours.length > 0 && (
-            <Card id="hours" title="진료시간">
+            <Card
+              id="hours"
+              title="진료시간"
+              subtitle="요일별 진료시간이에요. 명절·임시 휴진은 다를 수 있어요."
+            >
               <OpeningHoursTable
                 hours={h.hours}
                 holidayClosed={h.holidayClosed}
