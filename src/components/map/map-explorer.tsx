@@ -123,6 +123,19 @@ export function MapExplorer({
     [selectedGroup],
   );
 
+  // 초기 지도 위치 — URL(lat/lng/zoom) 있으면 그 위치로(뒤로가기 복원·지역 딥링크)
+  const [initialView] = useState<{ lat: number; lng: number; zoom: number } | null>(
+    () => {
+      if (typeof window === "undefined") return null;
+      const sp = new URLSearchParams(window.location.search);
+      const lat = Number(sp.get("lat"));
+      const lng = Number(sp.get("lng"));
+      if (!lat || !lng) return null;
+      const zoom = Number(sp.get("zoom"));
+      return { lat, lng, zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : 15 };
+    },
+  );
+
   const viewRef = useRef<{ b: Bounds; zoom: number } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 요청 순번 + 진행 중 요청 취소 — 빠른 팬/줌 시 이전 응답이 최신을 덮어쓰는 race 방지
@@ -216,6 +229,8 @@ export function MapExplorer({
   const onViewChanged = useCallback(
     (b: Bounds, zoom: number) => {
       viewRef.current = { b, zoom };
+      // 현재 지도 중심·줌을 URL에 저장(뒤로가기 위치 복원용)
+      syncView((b.minLat + b.maxLat) / 2, (b.minLng + b.maxLng) / 2, zoom);
       if (searchActiveRef.current) return; // 검색 중엔 뷰포트 재조회 안 함
       if (debounceRef.current) clearTimeout(debounceRef.current);
       // 첫 로딩은 디바운스 없이 즉시 조회 (초기 진입 지연 제거)
@@ -259,14 +274,26 @@ export function MapExplorer({
     setDetailLoading(false);
   };
 
-  // URL 쿼리파라미터 동기화 (q·type·department) — replaceState로 가볍게
+  // URL 쿼리파라미터 동기화 (q·type·department) — replaceState. 지도 위치(lat/lng/zoom)는 보존.
   const syncUrl = (q: string, type: string, department: string) => {
-    const sp = new URLSearchParams();
+    const sp = new URLSearchParams(window.location.search);
     if (q) sp.set("q", q);
+    else sp.delete("q");
     if (type) sp.set("type", type);
+    else sp.delete("type");
     if (department) sp.set("department", department);
+    else sp.delete("department");
     const qs = sp.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+  };
+
+  // 지도 위치를 URL에 반영(replaceState) → 상세페이지 갔다 뒤로가기 시 그 위치 복원.
+  const syncView = (lat: number, lng: number, zoom: number) => {
+    const sp = new URLSearchParams(window.location.search);
+    sp.set("lat", lat.toFixed(5));
+    sp.set("lng", lng.toFixed(5));
+    sp.set("zoom", String(zoom));
+    window.history.replaceState(null, "", `?${sp.toString()}`);
   };
 
   const updateFilter = (patch: Partial<Filters>) => {
@@ -759,7 +786,8 @@ export function MapExplorer({
           mode={searchActive ? "marker" : mode}
           hospitals={mapHospitals}
           clusters={clusters}
-          center={DEFAULT_CENTER}
+          center={initialView ?? DEFAULT_CENTER}
+          initialZoom={initialView?.zoom}
           highlightId={hoveredId}
           selectedIds={selectedIds}
           focus={focus}

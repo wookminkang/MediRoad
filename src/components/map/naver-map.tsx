@@ -90,6 +90,7 @@ export function NaverMap({
   hospitals,
   clusters,
   center,
+  initialZoom,
   highlightId,
   selectedIds,
   focus,
@@ -104,6 +105,8 @@ export function NaverMap({
   hospitals: Hospital[];
   clusters: ClusterPoint[];
   center: { lat: number; lng: number };
+  /** 초기 줌 (URL 복원·딥링크). 없으면 기본 13 */
+  initialZoom?: number;
   highlightId?: string | null;
   selectedIds?: string[] | null;
   focus?: { lat: number; lng: number; zoom?: number } | null;
@@ -158,7 +161,7 @@ export function NaverMap({
         const naver = (window as any).naver;
         const map = new naver.maps.Map(ref.current, {
           center: new naver.maps.LatLng(center.lat, center.lng),
-          zoom: 13,
+          zoom: initialZoom ?? 13,
           scrollWheel: false, // 기본 휠 줌 비활성 → 아래 핸들러로 1단계씩
         });
         mapRef.current = map;
