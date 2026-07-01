@@ -300,21 +300,33 @@ export function HospitalDetail({
             </Card>
           )}
 
-          {/* 주변 병원 카드 */}
+          {/* 주변 병원 — 외곽 박스 없이 병원마다 개별 카드 리스트 */}
           {related.length > 0 && (
-            <Card
-              id="nearby"
-              title="이 근처 추천 병원"
-              subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
-            >
-              <ul className="grid gap-3 sm:grid-cols-2">
+            <section id="nearby" className="scroll-mt-24">
+              <div className="mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-brand">
+                    <BuildingIcon />
+                  </span>
+                  <Text as="h2" textStyle="t7Bold">
+                    이 근처 추천 병원
+                  </Text>
+                </div>
+                <div className="mt-1.5">
+                  <Text as="p" textStyle="t4Regular" style={{ color: "#6B7280" }}>
+                    같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요.
+                  </Text>
+                </div>
+              </div>
+
+              <ul className="flex flex-col gap-3">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
                   return (
                     <li key={r.id}>
                       <Link
                         href={`/hospitals/${r.slug}`}
-                        className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-neutral-weak"
+                        className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.04] transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.09)]"
                       >
                         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
                           <BuildingIcon />
@@ -352,12 +364,15 @@ export function HospitalDetail({
                             </TagGroupRoot>
                           </div>
                         </div>
+                        <span className="shrink-0 text-subtle">
+                          <ChevronRightIcon />
+                        </span>
                       </Link>
                     </li>
                   );
                 })}
               </ul>
-            </Card>
+            </section>
           )}
 
           {/* 출처 푸터 */}
@@ -452,6 +467,13 @@ function BuildingIcon() {
     <svg {...iconProps}>
       <path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
       <path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" />
+    </svg>
+  );
+}
+function ChevronRightIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="m9 18 6-6-6-6" />
     </svg>
   );
 }
