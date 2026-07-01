@@ -314,7 +314,7 @@ export function HospitalDetail({
                     <li key={r.id}>
                       <Link
                         href={`/hospitals/${r.slug}`}
-                        className="flex items-center gap-3 rounded-2xl border border-line p-4 transition-colors hover:border-brand hover:bg-neutral-weak"
+                        className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-neutral-weak"
                       >
                         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
                           <BuildingIcon />
