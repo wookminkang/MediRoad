@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "자주 묻는 질문",
   description:
     "메디로드 이용 방법, 병원 정보 출처와 정확도, 진료시간·진료과목·예약 관련 자주 묻는 질문을 안내합니다.",
-  alternates: { canonical: "https://mediroad.kr/faq" },
+  alternates: { canonical: "https://mediroad.io/faq" },
 };
 
 /** FAQ 그룹 — 카테고리별 질문/답변. JSON-LD는 전체를 평탄화해 1개 FAQPage로. */

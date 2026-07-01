@@ -49,7 +49,7 @@ export async function generateMetadata({
       ? `${label} 관련 병원을 메디로드 지도에서 찾아보세요. 위치·진료시간·연락처 안내.`
       : "병원·한의원·한방병원을 메디로드 지도에서 검색하세요.",
     robots: { index: false, follow: true }, // 검색결과 noindex (SEO §1)
-    alternates: { canonical: "https://mediroad.kr/hospitals" },
+    alternates: { canonical: "https://mediroad.io/hospitals" },
   };
 }
 
