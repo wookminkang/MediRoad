@@ -314,7 +314,7 @@ export function HospitalDetail({
                     <li key={r.id}>
                       <Link
                         href={`/hospitals/${r.slug}`}
-                        className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-neutral-weak"
+                        className="group flex items-center gap-3"
                       >
                         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
                           <BuildingIcon />
@@ -352,7 +352,7 @@ export function HospitalDetail({
                             </TagGroupRoot>
                           </div>
                         </div>
-                        <span className="shrink-0 text-subtle">
+                        <span className="shrink-0 text-subtle transition-transform group-hover:translate-x-0.5">
                           <ChevronRightIcon />
                         </span>
                       </Link>
