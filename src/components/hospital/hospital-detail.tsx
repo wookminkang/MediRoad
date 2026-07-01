@@ -192,7 +192,7 @@ export function HospitalDetail({
                       asChild
                       variant="brandSolid"
                       size="large"
-                      className="mt-3 w-full"
+                      className="mt-5 w-full"
                     >
                       <a href={`tel:${h.phone}`}>전화 문의</a>
                     </ActionButton>
