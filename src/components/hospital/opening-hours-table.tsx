@@ -4,9 +4,17 @@ import { useEffect, useState } from "react";
 
 import type { OpeningHours } from "@/types/hospital";
 
-const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
-// 월~일 순서로 표시
-const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+// E-Gen 요일: 1=월 … 7=일. 월~일 순서로 표시.
+const DAY_LABELS: Record<number, string> = {
+  1: "월",
+  2: "화",
+  3: "수",
+  4: "목",
+  5: "금",
+  6: "토",
+  7: "일",
+};
+const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 7];
 
 /** 마감 시각이 20시 이후면 야간진료로 판단 */
 function isNight(close?: string) {
@@ -30,7 +38,8 @@ export function OpeningHoursTable({
   const [today, setToday] = useState(-1);
 
   useEffect(() => {
-    setToday(new Date().getDay());
+    const d = new Date().getDay(); // 0=일 … 6=토
+    setToday(d === 0 ? 7 : d); // E-Gen(1=월 … 7=일)로 변환
   }, []);
 
   return (

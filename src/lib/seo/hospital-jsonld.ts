@@ -6,15 +6,16 @@ import type { Hospital } from "@/types/hospital";
  * 병원 상세 구조화 데이터 (JSON-LD). NAP(이름·주소·전화) 화면과 동일. (SEO §3-3)
  */
 
-const SCHEMA_DAYS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-] as const;
+// E-Gen 요일(1=월 … 7=일, 8=공휴일) → schema.org dayOfWeek
+const EGEN_TO_SCHEMA: Record<number, string> = {
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday",
+  7: "Sunday",
+};
 
 const naverMapUrl = (h: Hospital) =>
   `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
@@ -62,10 +63,10 @@ export function buildMedicalClinicLd(h: Hospital) {
     }),
     ...(h.hours?.some((d) => !d.closed) && {
       openingHoursSpecification: h.hours
-        .filter((d) => !d.closed && d.open && d.close)
+        .filter((d) => !d.closed && d.open && d.close && EGEN_TO_SCHEMA[d.day])
         .map((d) => ({
           "@type": "OpeningHoursSpecification",
-          dayOfWeek: SCHEMA_DAYS[d.day],
+          dayOfWeek: EGEN_TO_SCHEMA[d.day],
           opens: d.open,
           closes: d.close,
         })),

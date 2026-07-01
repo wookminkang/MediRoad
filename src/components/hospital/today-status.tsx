@@ -28,7 +28,9 @@ export function TodayStatus({
   useEffect(() => setNow(new Date()), []);
   if (!now) return null; // 하이드레이션 불일치 방지
 
-  const today = hours.find((h) => h.day === now.getDay());
+  // E-Gen 요일: 1=월 … 7=일 (JS getDay 0=일 → 7로 매핑)
+  const egenDay = now.getDay() === 0 ? 7 : now.getDay();
+  const today = hours.find((h) => h.day === egenDay);
   const cur = now.getHours() * 60 + now.getMinutes();
 
   let open = false;
@@ -71,8 +73,8 @@ export function TodayStatus({
     );
   }
 
-  // AI요약 모달용 — 눈에 띄는 배지 + 내일 안내
-  const tmr = hours.find((h) => h.day === (now.getDay() + 1) % 7);
+  // AI요약 모달용 — 눈에 띄는 배지 + 내일 안내 (내일 = egenDay 다음, 7 다음은 1)
+  const tmr = hours.find((h) => h.day === ((egenDay % 7) + 1));
   const tomorrowLabel =
     !tmr || tmr.closed || !tmr.open ? "내일 휴진" : `내일 ${tmr.open} 진료 시작`;
 
