@@ -4,24 +4,8 @@ import Link from "next/link";
 
 import { OpeningHoursTable } from "@/components/hospital/opening-hours-table";
 import { isPartnerHospital } from "@/constants/partners";
+import { lineColor } from "@/lib/station";
 import type { Hospital } from "@/types/hospital";
-
-/** 수도권 전철 노선별 공식 색상 (상세 페이지와 동일) */
-const LINE_COLORS: Record<string, string> = {
-  "1호선": "#0052A4",
-  "2호선": "#00A84D",
-  "3호선": "#EF7C1C",
-  "4호선": "#00A5DE",
-  "5호선": "#996CAC",
-  "6호선": "#CD7C2F",
-  "7호선": "#747F00",
-  "8호선": "#E6186C",
-  "9호선": "#BDB092",
-  수인분당선: "#FABE00",
-  신분당선: "#D4003B",
-  경의중앙선: "#77C4A3",
-  공항철도: "#0090D2",
-};
 
 /**
  * 지도 좌측 상세 패널 — 리스트에서 병원 클릭 시 표시(PC).
@@ -144,7 +128,7 @@ export function MapHospitalDetail({
             {st && (
               <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm">
                 {st.line && <LineBadge line={st.line} />}
-                <span className="font-bold text-neutral">{st.name}역</span>
+                <span className="font-bold text-neutral">{st.name}</span>
                 <span className="text-muted">
                   {st.exit && `${st.exit}번 출구 `}도보 약 {stWalk}분 ({st.distanceM}m)
                 </span>
@@ -254,7 +238,7 @@ function ActionChip({
 }
 
 function LineBadge({ line }: { line: string }) {
-  const color = LINE_COLORS[line] ?? "var(--seed-color-fg-neutral)";
+  const color = lineColor(line);
   return (
     <span
       className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold text-white"

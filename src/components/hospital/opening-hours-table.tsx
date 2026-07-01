@@ -103,8 +103,8 @@ function DayChip({
 
 function NightBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-[#EEF1FE] px-2 py-0.5 text-xs font-bold text-[#1E5BD6]">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <span className="inline-flex items-center gap-1 rounded-lg bg-[#EEF1FE] px-2.5 py-1 text-sm font-bold text-[#1E5BD6]">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
         <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 1 0 9.8 9.8z" />
       </svg>
       야간
@@ -114,10 +114,10 @@ function NightBadge() {
 
 function ClosedBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-[#FBEEE1] px-2 py-0.5 text-xs font-bold text-[#B9670E]">
+    <span className="inline-flex items-center gap-1 rounded-lg bg-[#FBEEE1] px-2.5 py-1 text-sm font-bold text-[#B9670E]">
       <svg
-        width="12"
-        height="12"
+        width="14"
+        height="14"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

@@ -1,4 +1,5 @@
 import { MOCK_HOSPITALS } from "@/api/mock/hospitals";
+import { normalizeLine, normalizeStationName } from "@/lib/station";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { Paginated } from "@/types";
 import type {
@@ -119,8 +120,8 @@ function rowToHospital(r: HospitalRow): Hospital {
       : undefined,
     nearestStation: r.station_name
       ? {
-          name: r.station_name,
-          line: r.station_line ?? undefined,
+          name: normalizeStationName(r.station_name),
+          line: r.station_line ? normalizeLine(r.station_line) : undefined,
           exit: r.station_exit ?? undefined,
           distanceM: r.station_distance_m ?? 0,
         }
