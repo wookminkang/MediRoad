@@ -337,8 +337,10 @@ export function HospitalDetail({
                                 </TagGroupItem>
                               )}
                               {d != null && (
-                                <TagGroupItem>
-                                  <TagGroupItemLabel>
+                                <TagGroupItem tone="brand">
+                                  <TagGroupItemLabel
+                                    style={{ color: "var(--seed-color-fg-brand)" }}
+                                  >
                                     {fmtDist(d)}
                                   </TagGroupItemLabel>
                                 </TagGroupItem>
