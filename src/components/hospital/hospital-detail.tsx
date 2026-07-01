@@ -255,7 +255,11 @@ export function HospitalDetail({
           )}
 
           {/* 위치 카드 — 지도 좌측 배치 */}
-          <Card id="location" title="위치">
+          <Card
+            id="location"
+            title="위치"
+            subtitle="지도에서 위치를 확인하고 길찾기로 바로 안내받으세요."
+          >
             <div className="grid gap-5 lg:grid-cols-2">
               {h.location?.lat && h.location?.lng ? (
                 <HospitalMiniMap
@@ -279,7 +283,7 @@ export function HospitalDetail({
                   </p>
                 )}
                 <div>
-                  <ActionButton asChild variant="neutralWeak" size="medium">
+                  <ActionButton asChild variant="brandSolid" size="medium">
                     <a
                       href={naverUrl}
                       target="_blank"
@@ -316,7 +320,7 @@ export function HospitalDetail({
                         href={`/hospitals/${r.slug}`}
                         className="group flex items-center gap-3"
                       >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
                           <BuildingIcon />
                         </span>
                         <div className="min-w-0 flex-1">
