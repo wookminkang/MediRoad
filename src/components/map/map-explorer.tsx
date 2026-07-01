@@ -407,15 +407,19 @@ export function MapExplorer({
   // 그리드 버블 클릭 → 그 셀(step 격자)의 병원 목록 로드
   const onSelectGrid = async (c: ClusterPoint) => {
     raiseSheet(); // 그리드 셀 선택 → 바텀시트 절반으로 올림
-    const zoom = viewRef.current?.zoom ?? 15;
+    const view = viewRef.current;
+    const zoom = view?.zoom ?? 15;
     const step = gridStep(zoom);
-    const minLat = Math.floor(c.lat / step) * step;
-    const minLng = Math.floor(c.lng / step) * step;
+    const cellMinLat = Math.floor(c.lat / step) * step;
+    const cellMinLng = Math.floor(c.lng / step) * step;
+    // 마커 카운트는 "셀 ∩ 현재 화면" 기준으로 집계되므로, 리스트도 같은 영역만 조회해야
+    // 개수가 일치한다(셀이 화면 밖으로 걸치면 전체 셀 조회 시 더 많이 잡혀 불일치).
+    const b = view?.b;
     const params = new URLSearchParams({
-      minLat: String(minLat),
-      minLng: String(minLng),
-      maxLat: String(minLat + step),
-      maxLng: String(minLng + step),
+      minLat: String(b ? Math.max(cellMinLat, b.minLat) : cellMinLat),
+      minLng: String(b ? Math.max(cellMinLng, b.minLng) : cellMinLng),
+      maxLat: String(b ? Math.min(cellMinLat + step, b.maxLat) : cellMinLat + step),
+      maxLng: String(b ? Math.min(cellMinLng + step, b.maxLng) : cellMinLng + step),
     });
     if (filters.type) params.set("type", filters.type);
     if (filters.department) params.set("department", filters.department);
