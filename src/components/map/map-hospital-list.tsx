@@ -168,12 +168,12 @@ export function MapHospitalList({
                     <a
                       href={`tel:${h.phone}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
+                      className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
                     >
                       전화
                     </a>
                   ) : (
-                    <span className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-subtle">
+                    <span className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-subtle">
                       전화
                     </span>
                   )}
@@ -182,14 +182,14 @@ export function MapHospitalList({
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-brand transition-colors hover:bg-brand-weak"
+                    className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-brand transition-colors hover:bg-brand-weak"
                   >
                     길찾기
                   </a>
                   <Link
                     href={`/hospitals/${h.slug}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 rounded-lg border border-line py-1.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
+                    className="flex-1 rounded-lg border border-line py-2.5 text-center text-[13px] font-medium text-neutral transition-colors hover:bg-neutral-weak"
                   >
                     상세
                   </Link>

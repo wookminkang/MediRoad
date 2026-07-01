@@ -26,7 +26,7 @@ export function HeroSearch({
       action={action}
       method="get"
       role="search"
-      className="flex items-center gap-3 rounded-full px-4 py-2.5"
+      className="flex items-center gap-3 rounded-full px-4 py-2.5 focus-within:ring-2 focus-within:ring-[#1E5BD6]/40"
       style={{
         backgroundColor: "var(--seed-color-bg-layer-default)",
         border: "1px solid var(--seed-color-stroke-neutral-weak)",

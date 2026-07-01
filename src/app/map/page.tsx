@@ -9,13 +9,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true }, // 인터랙티브 지도 UX → noindex
 };
 
-// 지도 페이지 한정: 인풋 포커스 시 자동 확대·핀치 줌 방지(지도 자체 줌 사용).
-// 콘텐츠 페이지(칼럼·병원상세)는 영향 없음 — 접근성 유지.
+// 접근성(WCAG 1.4.4 Resize Text): 사용자 확대 허용. 지도 캔버스는 자체 touch-action으로
+// 핀치 줌을 처리하고, 인풋 자동확대는 인풋 폰트 16px로 방지한다.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 // 초기 화면(강남, 시군구) 클러스터를 SSR로 미리 받아 지도 로드와 겹침 → 즉시 표시.

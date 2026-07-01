@@ -32,14 +32,18 @@ export default function NotFound() {
         404
       </p>
 
-      <Text as="h1" textStyle="t7Bold" className="mt-4">
-        페이지를 찾을 수 없어요
-      </Text>
-      <Text as="p" textStyle="t5Regular" className="mt-2 text-subtle">
-        주소가 바뀌었거나 삭제된 페이지일 수 있어요.
-        <br />
-        아래에서 길을 다시 찾아보세요.
-      </Text>
+      <div className="mt-4">
+        <Text as="h1" textStyle="t7Bold">
+          페이지를 찾을 수 없어요
+        </Text>
+      </div>
+      <div className="mt-2">
+        <Text as="p" textStyle="t5Regular" className="text-subtle">
+          주소가 바뀌었거나 삭제된 페이지일 수 있어요.
+          <br />
+          아래에서 길을 다시 찾아보세요.
+        </Text>
+      </div>
 
       {/* 액션 */}
       <div className="mt-8 flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-center">

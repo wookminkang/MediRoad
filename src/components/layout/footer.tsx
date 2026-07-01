@@ -18,9 +18,11 @@ export function Footer() {
             <Text as="p" textStyle="t6Bold">
               고객센터 010-7665-4418
             </Text>
-            <Text as="p" textStyle="t4Regular" className="mt-1 text-muted">
-              운영시간 : 평일 09:00 ~ 18:00 (점심시간 12:30 ~ 13:30 제외)
-            </Text>
+            <div className="mt-1">
+              <Text as="p" textStyle="t4Regular" className="text-muted">
+                운영시간 : 평일 09:00 ~ 18:00 (점심시간 12:30 ~ 13:30 제외)
+              </Text>
+            </div>
             <div className="mt-4 flex gap-2">
               <ActionButton asChild variant="brandSolid" size="medium">
                 <Link href="/faq">FAQ</Link>
@@ -80,9 +82,11 @@ export function Footer() {
           <Text as="p" textStyle="t3Regular" className="text-subtle">
             TEL : 02-3402-1070 · MOBILE : 010-8782-1285 · 이메일 : oper2068@kakao.com / oper2068@announcego.com
           </Text>
-          <Text as="p" textStyle="t3Regular" className="mt-2 text-subtle">
-            메디로드는 병원·의료기관 정보를 제공하는 플랫폼이며 직접 의료행위를 하지 않습니다. 제공되는 정보는 참고용이며, 의학적 판단은 반드시 전문의와 상담하시기 바랍니다.
-          </Text>
+          <div className="mt-2">
+            <Text as="p" textStyle="t3Regular" className="text-subtle">
+              메디로드는 병원·의료기관 정보를 제공하는 플랫폼이며 직접 의료행위를 하지 않습니다. 제공되는 정보는 참고용이며, 의학적 판단은 반드시 전문의와 상담하시기 바랍니다.
+            </Text>
+          </div>
           <Text as="p" textStyle="t3Regular" className="text-subtle">
             © 2026 MediRoad. All rights reserved.
           </Text>
