@@ -10,6 +10,9 @@ import { getLatestHospitalPosts } from "@/api/hospital-post";
 import { ColumnCard } from "@/components/column/column-card";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
+// ISR — 정적 프리렌더 + 10분마다 백그라운드 재생성(매 요청 DB 대기 제거 → 즉시 서빙)
+export const revalidate = 600;
+
 /** 진료과목 (원형 카드) */
 const CONCERNS: { dept: string; hint: string; icon: string }[] = [
   { dept: "내과", hint: "감기·소화기·만성질환", icon: "/내과.svg" },
