@@ -96,7 +96,7 @@ export function MobileMenu() {
 
             <div className="mt-auto border-t border-line p-4">
               <Link
-                href="/map"
+                href="/hospitals"
                 className="flex h-11 items-center justify-center rounded-xl bg-[#1E5BD6] text-[15px] font-bold text-white"
               >
                 병원 찾기
