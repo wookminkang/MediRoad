@@ -307,7 +307,7 @@ export function HospitalDetail({
               title="이 근처 추천 병원"
               subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
             >
-              <ul className="grid gap-4 sm:grid-cols-2">
+              <ul className="grid gap-[1.125rem] sm:grid-cols-2">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
                   return (
@@ -316,7 +316,7 @@ export function HospitalDetail({
                         href={`/hospitals/${r.slug}`}
                         className="group flex items-center gap-3"
                       >
-                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
                           <BuildingIcon />
                         </span>
                         <div className="min-w-0 flex-1">
