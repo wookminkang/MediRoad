@@ -280,6 +280,18 @@ export function NaverMap({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const proj = map.getProjection();
       const CELL = 54; // px — 이 격자 안의 마커는 한 버블로 묶음
+      // 팬(드래그)해도 그룹이 흔들리지 않도록 "고정 기준점" 기준의 픽셀 격자로 키 생성.
+      // fromCoordToOffset은 뷰포트 상대라 그대로 쓰면 팬마다 격자가 어긋나 카운트가 튐 →
+      // 기준점 오프셋을 빼면 팬과 무관한(줌에만 의존하는) 안정적 격자가 된다.
+      let refX = 0;
+      let refY = 0;
+      try {
+        const ref = proj.fromCoordToOffset(new naver.maps.LatLng(37.5, 127.0));
+        refX = ref.x;
+        refY = ref.y;
+      } catch {
+        /* 투영 불가 시 0 기준 */
+      }
       const groups = new Map<string, Hospital[]>();
       for (const h of withCoords) {
         let key: string;
@@ -287,7 +299,7 @@ export function NaverMap({
           const p = proj.fromCoordToOffset(
             new naver.maps.LatLng(h.location.lat, h.location.lng),
           );
-          key = `${Math.floor(p.x / CELL)}:${Math.floor(p.y / CELL)}`;
+          key = `${Math.floor((p.x - refX) / CELL)}:${Math.floor((p.y - refY) / CELL)}`;
         } catch {
           key = `${h.location.lat},${h.location.lng}`;
         }
