@@ -571,7 +571,7 @@ export function MapExplorer({
             className="seed-bottom-sheet__positioner pointer-events-none"
             style={{ "--sheet-z-index": 20 } as React.CSSProperties}
           >
-            <DrawerContent className="seed-bottom-sheet__content pointer-events-auto h-[90dvh] w-full touch-none">
+            <DrawerContent className="seed-bottom-sheet__content pointer-events-auto flex h-[90dvh] w-full flex-col">
               <DrawerTitle className="sr-only">병원 목록</DrawerTitle>
               {/* 핸들 — 넓은 터치 영역으로 지도와 겹쳐 드래그되는 문제 방지 */}
               <DrawerHandle className="flex w-full shrink-0 cursor-grab touch-none items-center justify-center py-3">
