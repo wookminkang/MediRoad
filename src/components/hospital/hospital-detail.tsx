@@ -2,7 +2,15 @@ import type { ReactNode } from "react";
 
 import Link from "next/link";
 
-import { ActionButton, ActionChip, Badge, Text } from "@seed-design/react";
+import {
+  ActionButton,
+  ActionChip,
+  Badge,
+  TagGroupItem,
+  TagGroupItemLabel,
+  TagGroupRoot,
+  Text,
+} from "@seed-design/react";
 
 import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
@@ -301,13 +309,31 @@ export function HospitalDetail({
                           <span className="block truncate text-[15px] font-bold text-neutral">
                             {r.name}
                           </span>
-                          <span className="block text-[13px] text-muted">
-                            {r.type}
-                          </span>
-                          <span className="block truncate text-xs text-subtle">
-                            {r.region.sigungu}
-                            {r.region.emdong ? ` · ${r.region.emdong}` : ""}
-                            {d != null ? ` ${fmtDist(d)}` : ""}
+                          <span className="mt-2 block">
+                            <TagGroupRoot size="t3" tone="neutralSubtle">
+                              <TagGroupItem>
+                                <TagGroupItemLabel>{r.type}</TagGroupItemLabel>
+                              </TagGroupItem>
+                              <TagGroupItem>
+                                <TagGroupItemLabel>
+                                  {r.region.sigungu}
+                                </TagGroupItemLabel>
+                              </TagGroupItem>
+                              {r.region.emdong && (
+                                <TagGroupItem>
+                                  <TagGroupItemLabel>
+                                    {r.region.emdong}
+                                  </TagGroupItemLabel>
+                                </TagGroupItem>
+                              )}
+                              {d != null && (
+                                <TagGroupItem tone="brand">
+                                  <TagGroupItemLabel>
+                                    {fmtDist(d)}
+                                  </TagGroupItemLabel>
+                                </TagGroupItem>
+                              )}
+                            </TagGroupRoot>
                           </span>
                         </span>
                       </Link>
