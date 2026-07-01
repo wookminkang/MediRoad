@@ -359,24 +359,44 @@ export async function getHospitalBySlug(slug: string): Promise<Hospital | null> 
   return byId.data ? rowToHospital(byId.data as unknown as HospitalRow) : null;
 }
 
-/** 주변 비슷한 병원 (같은 시군구 + 거리순, 같은 종별 우선) */
+/**
+ * 이 근처 추천 병원 — 현재 병원의 종별 + 진료과목을 접목해 가까운 순으로 추천(연계).
+ * geom KNN(search_hospitals_nearby)로 진짜 최근접을 뽑고, 부족하면 같은 종별로 폴백.
+ */
 export async function getRelatedHospitals(base: Hospital, limit = 4): Promise<Hospital[]> {
   if (!isSupabaseConfigured) {
     const { items } = mockGetHospitals({ region: base.region.sigungu, center: base.location, pageSize: 50 });
     return items.filter((h) => h.id !== base.id).slice(0, limit);
   }
-  const { data, error } = await getSupabaseServer()
-    .from("hospitals")
-    .select("*")
-    .eq("sigungu", base.region.sigungu)
-    .neq("id", base.id)
-    .limit(limit + 20);
-  if (error) throw error;
-  let pool = (data as unknown as HospitalRow[]).map(rowToHospital);
-  pool = pool
-    .sort((a, b) => distanceInMeters(base.location, a.location) - distanceInMeters(base.location, b.location))
-    .sort((a, b) => (a.type === base.type ? 0 : 1) - (b.type === base.type ? 0 : 1));
-  return pool.slice(0, limit);
+  const dept = base.departments[0] ?? null;
+  const nearby = (p_department: string | null, p_type: string | null) =>
+    getSupabaseServer().rpc("search_hospitals_nearby", {
+      p_lat: base.location.lat,
+      p_lng: base.location.lng,
+      p_radius_m: null,
+      p_sido: null,
+      p_sigungu: null,
+      p_type,
+      p_q: null,
+      p_department,
+      p_limit: limit + 5,
+      p_offset: 0,
+    });
+
+  const collected = new Map<string, Hospital>();
+  const push = (rows: unknown) => {
+    for (const r of (rows ?? []) as HospitalRow[]) {
+      if (r.id === base.id || collected.has(r.id)) continue;
+      collected.set(r.id, rowToHospital(r));
+      if (collected.size >= limit) return;
+    }
+  };
+
+  // 1) 같은 종별 + 같은 진료과목의 최근접
+  if (dept) push((await nearby(dept, base.type)).data);
+  // 2) 부족하면 같은 종별 최근접으로 채움
+  if (collected.size < limit) push((await nearby(null, base.type)).data);
+  return [...collected.values()].slice(0, limit);
 }
 
 export type LatLngBounds = {

@@ -302,7 +302,11 @@ export function HospitalDetail({
 
           {/* 주변 병원 카드 */}
           {related.length > 0 && (
-            <Card id="nearby" title="이 근처 추천 병원">
+            <Card
+              id="nearby"
+              title="이 근처 추천 병원"
+              subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
+            >
               <ul className="grid gap-3 sm:grid-cols-2">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
@@ -377,22 +381,33 @@ export function HospitalDetail({
 function Card({
   id,
   title,
+  subtitle,
   icon,
   children,
 }: {
   id?: string;
   title: string;
+  subtitle?: string;
   icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section id={id} className="scroll-mt-24">
       {/* 제목은 카드 밖 */}
-      <div className="mb-3 flex items-center gap-2 px-1">
-        {icon && <span className="text-brand">{icon}</span>}
-        <Text as="h2" textStyle="t7Bold">
-          {title}
-        </Text>
+      <div className="mb-3 px-1">
+        <div className="flex items-center gap-2">
+          {icon && <span className="text-brand">{icon}</span>}
+          <Text as="h2" textStyle="t7Bold">
+            {title}
+          </Text>
+        </div>
+        {subtitle && (
+          <div className="mt-1.5">
+            <Text as="p" textStyle="t4Regular" style={{ color: "#6B7280" }}>
+              {subtitle}
+            </Text>
+          </div>
+        )}
       </div>
       <div className="rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
         {children}
