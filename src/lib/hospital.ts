@@ -116,3 +116,39 @@ export function hospitalKeywords(h: Hospital): string[] {
 
   return Array.from(new Set(kw)).filter(Boolean).slice(0, 45);
 }
+
+/**
+ * AI 요약(TL;DR) 불릿 — 병원 데이터에서 자동 생성(무료·사실기반, 의료광고법 안전).
+ * PostActions "AI요약" 모달용. day 규약은 JS getDay(0=일…6=토) 기준.
+ */
+export function buildHospitalSummaryBullets(h: Hospital): string[] {
+  const b: string[] = [];
+
+  const depts = h.departments.slice(0, 3).join(", ");
+  b.push(
+    `${h.region.sido} ${h.region.sigungu}에 위치한 ${h.type}${
+      depts ? ` — ${depts}${h.departments.length > 3 ? " 외" : ""}` : ""
+    }`,
+  );
+
+  if (h.nearestStation?.name) {
+    const m = h.nearestStation.distanceM ?? 0;
+    const min = Math.max(1, Math.round(m / 67));
+    const line = h.nearestStation.line ? `${h.nearestStation.line} ` : "";
+    b.push(`${line}${h.nearestStation.name}에서 도보 약 ${min}분 (${m}m)`);
+  }
+
+  const wd = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
+  if (wd?.open && wd?.close) b.push(`평일 ${wd.open}–${wd.close} 진료`);
+
+  const night = h.hours?.some((d) => !d.closed && d.close && d.close >= "20:00");
+  if (night) b.push("야간 진료 가능 (20시 이후 진료)");
+
+  const sun = h.hours?.find((d) => d.day === 0 && !d.closed && d.open);
+  if (sun) b.push("일요일 진료");
+
+  if (h.phone) b.push(`전화 문의: ${h.phone}`);
+  if (h.links?.naverBooking) b.push("온라인 예약 가능");
+
+  return b;
+}

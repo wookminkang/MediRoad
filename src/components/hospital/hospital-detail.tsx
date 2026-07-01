@@ -18,8 +18,9 @@ import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { SectionNav } from "./section-nav";
 import { TodayStatus } from "./today-status";
+import { PostActions } from "@/components/hospital/post-actions";
 import { isPartnerHospital } from "@/constants/partners";
-import { buildAutoDescription } from "@/lib/hospital";
+import { buildAutoDescription, buildHospitalSummaryBullets } from "@/lib/hospital";
 import { lineColor } from "@/lib/station";
 import type { Hospital } from "@/types/hospital";
 
@@ -58,6 +59,8 @@ export function HospitalDetail({
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
   const st = h.nearestStation;
   const stWalk = st ? Math.max(1, Math.round(st.distanceM / 80)) : 0;
+  const introText = h.description ?? buildAutoDescription(h);
+  const summaryBullets = buildHospitalSummaryBullets(h);
 
   // 사진(최대 5, 대표 먼저) — 관리자 업로드분
   const photos = [...(h.photos ?? [])]
@@ -144,6 +147,15 @@ export function HospitalDetail({
                   ))}
                 </div>
               )}
+
+              {/* AI 요약 · 음성 · 공유 · 인쇄 */}
+              <div className="mt-4">
+                <PostActions
+                  title={h.name}
+                  summary={summaryBullets}
+                  bodyText={introText}
+                />
+              </div>
             </div>
 
             <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
@@ -151,7 +163,7 @@ export function HospitalDetail({
                 {/* 좌: 정보 */}
                 <div className="min-w-0 flex-1">
                   <p className="text-[15px] leading-relaxed text-neutral">
-                    {h.description ?? buildAutoDescription(h)}
+                    {introText}
                   </p>
 
                   {/* 정보 칩: 지하철 / 주소 */}
