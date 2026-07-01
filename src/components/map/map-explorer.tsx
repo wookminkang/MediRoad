@@ -2,20 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  DrawerContent,
-  DrawerHandle,
-  DrawerPositioner,
-  DrawerRoot,
-  DrawerTitle,
-} from "@seed-design/react-drawer";
-
 import { MEDICAL_DEPARTMENTS } from "@/constants/hospital";
 import type { Hospital } from "@/types/hospital";
 
 import { FilterDropdown } from "./filter-dropdown";
 import { MapHospitalDetail } from "./map-hospital-detail";
 import { MapHospitalList } from "./map-hospital-list";
+import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { MobileSearch } from "./mobile-search";
 import { type Bounds, type ClusterPoint, NaverMap } from "./naver-map";
 
@@ -579,60 +572,31 @@ export function MapExplorer({
         </aside>
       )}
 
-      {/* 모바일 바텀시트 — Seed Drawer(snapPoints), md 미만에서만 */}
-      <div className="md:hidden">
-        <DrawerRoot
-          open={hasPanel}
-          onOpenChange={(open) => {
-            if (!open) clearSearch();
-          }}
-          snapPoints={[0.12, 0.5, 1]}
-          activeSnapPoint={snap}
-          setActiveSnapPoint={setSnap}
-          modal={false}
-          dismissible
-          snapToSequentialPoint
-          scrollLockTimeout={100}
-        >
-          <DrawerPositioner
-            className="seed-bottom-sheet__positioner pointer-events-none"
-            style={{ "--sheet-z-index": 20 } as React.CSSProperties}
-          >
-            <DrawerContent className="seed-bottom-sheet__content pointer-events-auto flex h-[90dvh] w-full flex-col">
-              <DrawerTitle className="sr-only">병원 목록</DrawerTitle>
-              {/* 핸들 — 넓은 터치 영역으로 지도와 겹쳐 드래그되는 문제 방지 */}
-              <DrawerHandle className="flex w-full shrink-0 cursor-grab touch-none items-center justify-center py-3">
-                <span className="h-1.5 w-10 rounded-full bg-[#C7CDD6]" />
-              </DrawerHandle>
-              <MapHospitalList
-                idPrefix="m"
-                items={listItems}
-                hasPanel={hasPanel}
-                regionActive={regionActive}
-                searchActive={searchActive}
-                mode={mode}
-                regionLabel={regionMode?.label}
-                regionLoading={regionLoading}
-                regionTotal={regionTotal}
-                regionShown={regionItems.length}
-                canLoadMore={canLoadMore}
-                onLoadMore={loadMore}
-                onClose={clearSearch}
-                onFocus={focusHospital}
-                onHover={setHoveredId}
-                // 리스트 최상단에서 아래로 당기면 시트를 한 단계 내림(스크롤 더 올릴 게 없을 때)
-                onOverscrollDown={() => {
-                  const cur = Number(snap);
-                  if (cur >= 0.99) setSnap(0.5);
-                  else if (cur >= 0.5) setSnap(0.12);
-                }}
-                // 시트가 완전히 펼쳐졌을 때만 리스트 스크롤 허용 (그 전엔 위 스와이프=시트 확장)
-                scrollable={Number(snap) >= 0.99}
-              />
-            </DrawerContent>
-          </DrawerPositioner>
-        </DrawerRoot>
-      </div>
+      {/* 모바일 바텀시트 — 핸들바 드래그로 높이 제어(커스텀), md 미만에서만 */}
+      <MobileBottomSheet
+        open={hasPanel}
+        snap={typeof snap === "number" ? snap : 0.5}
+        onSnapChange={setSnap}
+        onClose={clearSearch}
+      >
+        <MapHospitalList
+          idPrefix="m"
+          items={listItems}
+          hasPanel={hasPanel}
+          regionActive={regionActive}
+          searchActive={searchActive}
+          mode={mode}
+          regionLabel={regionMode?.label}
+          regionLoading={regionLoading}
+          regionTotal={regionTotal}
+          regionShown={regionItems.length}
+          canLoadMore={canLoadMore}
+          onLoadMore={loadMore}
+          onClose={clearSearch}
+          onFocus={focusHospital}
+          onHover={setHoveredId}
+        />
+      </MobileBottomSheet>
 
       {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시) */}
       <div className="relative isolate h-full w-full">
@@ -791,6 +755,8 @@ export function MapExplorer({
           highlightId={hoveredId}
           selectedIds={selectedIds}
           focus={focus}
+          userLoc={userLoc}
+          onLocate={setUserLoc}
           onViewChanged={onViewChanged}
           onSelect={(hs) => {
             closeDetail(); // 새 마커 선택 → 상세 닫고 목록으로

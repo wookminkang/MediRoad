@@ -85,6 +85,12 @@ const HIGHLIGHT_HTML = `<div style="width:52px;height:52px;pointer-events:none">
   <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:9999px;background:#1E5BD6;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>
 </div>`;
 
+// 내 위치 마커 — 파란 점 + 잔잔한 펄스
+const USER_LOC_HTML = `<div style="width:44px;height:44px;pointer-events:none">
+  <div style="position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:9999px;background:rgba(30,91,214,.18);animation:mediroad-ping 1.8s cubic-bezier(0,0,.2,1) infinite"></div>
+  <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:9999px;background:#1E5BD6;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)"></div>
+</div>`;
+
 export function NaverMap({
   mode,
   hospitals,
@@ -94,11 +100,13 @@ export function NaverMap({
   highlightId,
   selectedIds,
   focus,
+  userLoc,
   onViewChanged,
   onSelect,
   onSelectRegion,
   onSelectGrid,
   onMapDrag,
+  onLocate,
   panelOpen = false,
 }: {
   mode: "marker" | "cluster" | "grid";
@@ -107,6 +115,10 @@ export function NaverMap({
   center: { lat: number; lng: number };
   /** 초기 줌 (URL 복원·딥링크). 없으면 기본 13 */
   initialZoom?: number;
+  /** 내 위치 — 있으면 지도에 파란 점 마커 표시 */
+  userLoc?: { lat: number; lng: number } | null;
+  /** '내 위치' 버튼으로 위치를 얻었을 때 상위에 전달(마커 표시·거리계산용) */
+  onLocate?: (loc: { lat: number; lng: number }) => void;
   highlightId?: string | null;
   selectedIds?: string[] | null;
   focus?: { lat: number; lng: number; zoom?: number } | null;
@@ -136,6 +148,8 @@ export function NaverMap({
   const prevSelectedRef = useRef<string[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const highlightRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userMarkerRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wheelListenerRef = useRef<any>(null);
   const onViewRef = useRef(onViewChanged);
@@ -404,6 +418,30 @@ export function NaverMap({
     }
   }, [highlightId, hospitals]);
 
+  // 내 위치 마커 — userLoc 있으면 파란 점 표시
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const naver = (window as any).naver;
+    const map = mapRef.current;
+    if (!naver || !map) return;
+    if (!userLoc) {
+      userMarkerRef.current?.setMap(null);
+      return;
+    }
+    const pos = new naver.maps.LatLng(userLoc.lat, userLoc.lng);
+    if (!userMarkerRef.current) {
+      userMarkerRef.current = new naver.maps.Marker({
+        position: pos,
+        map,
+        icon: { content: USER_LOC_HTML, anchor: new naver.maps.Point(22, 22) },
+        zIndex: 900,
+      });
+    } else {
+      userMarkerRef.current.setPosition(pos);
+      userMarkerRef.current.setMap(map);
+    }
+  }, [userLoc]);
+
   const zoomBy = (delta: number) => {
     const map = mapRef.current;
     if (map) map.setZoom(map.getZoom() + delta, true);
@@ -416,7 +454,9 @@ export function NaverMap({
     if (!navigator.geolocation || !naver || !map) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        map.morph(new naver.maps.LatLng(pos.coords.latitude, pos.coords.longitude), 16);
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        map.morph(new naver.maps.LatLng(loc.lat, loc.lng), 16);
+        onLocate?.(loc); // 상위에 전달 → userLoc 마커 표시
       },
       () => alert("현재 위치를 가져올 수 없습니다. 위치 권한을 확인해주세요."),
     );
