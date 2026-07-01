@@ -273,14 +273,22 @@ export function HospitalDetail({
               <div className="flex flex-col gap-3">
                 <p className="text-[15px] text-neutral">{addr}</p>
                 {st && (
-                  <p className="flex flex-wrap items-center gap-1.5 text-sm">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {st.line && <LineBadge line={st.line} />}
-                    <span className="font-bold text-neutral">{st.name}</span>
-                    <span className="text-muted">
-                      {st.exit && `${st.exit}번 출구 `}도보 약 {stWalk}분 (
-                      {st.distanceM}m)
-                    </span>
-                  </p>
+                    <TagGroupRoot size="t3" tone="neutralSubtle">
+                      <TagGroupItem>
+                        <TagGroupItemLabel>{st.name}</TagGroupItemLabel>
+                      </TagGroupItem>
+                      <TagGroupItem>
+                        <TagGroupItemLabel>
+                          {st.exit ? `${st.exit}번 출구 ` : ""}도보 약 {stWalk}분
+                        </TagGroupItemLabel>
+                      </TagGroupItem>
+                      <TagGroupItem>
+                        <TagGroupItemLabel>{st.distanceM}m</TagGroupItemLabel>
+                      </TagGroupItem>
+                    </TagGroupRoot>
+                  </div>
                 )}
                 <div>
                   <ActionButton
