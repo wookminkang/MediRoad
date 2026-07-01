@@ -309,7 +309,7 @@ export function HospitalDetail({
                           <span className="block truncate text-[15px] font-bold text-neutral">
                             {r.name}
                           </span>
-                          <span className="mt-2 block">
+                          <span className="mt-1 block">
                             <TagGroupRoot size="t3" tone="neutralSubtle">
                               <TagGroupItem>
                                 <TagGroupItemLabel>{r.type}</TagGroupItemLabel>
