@@ -10,6 +10,16 @@ import type {
 import { distanceInMeters } from "@/utils/distance";
 
 /**
+ * 진료과목 필터지만 실제로는 "종별(type)"로 잡아야 하는 값.
+ * 한방·치과는 표시과목명(침구과·구강내과 등)으로 등록돼 있어 과목 조인이 거의 0건 →
+ * 종별(한의원+한방병원 / 치과)로 필터해야 전체가 잡힌다.
+ */
+const DEPT_AS_TYPE: Record<string, readonly string[]> = {
+  한방: ["한의원", "한방병원"],
+  치과: ["치과"],
+};
+
+/**
  * 병원 데이터 접근 (읽기). env 설정 시 Supabase(정규화 테이블 조립), 미설정 시 mock 폴백.
  * 데이터 출처: E-Gen 동기화(`scripts/sync-hospitals.mts`). (ARCHITECTURE §5)
  */
@@ -194,6 +204,10 @@ async function nearbyQuery(
 ): Promise<Paginated<Hospital>> {
   const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
   const sb = getSupabaseServer();
+  // 한방·치과는 과목이 아니라 종별 → RPC엔 종별로(단일 종별만 전달 가능), 다중(한방)은 결과 후처리
+  const deptTypes = department ? DEPT_AS_TYPE[department] : undefined;
+  const rpcType = deptTypes && deptTypes.length === 1 ? deptTypes[0] : (type ?? null);
+  const rpcDept = deptTypes ? null : (department ?? null);
   // RPC(가까운 N개, KNN 조기종료)와 총개수(bbox planned, 가벼움)를 병렬 조회
   const rpcCall = sb.rpc("search_hospitals_nearby", {
     p_lat: center!.lat,
@@ -201,10 +215,10 @@ async function nearbyQuery(
     p_radius_m: radiusKm ? radiusKm * 1000 : null,
     p_sido: sido ?? null,
     p_sigungu: region ?? null,
-    p_type: type ?? null,
+    p_type: rpcType,
     p_q: q ?? null,
-    p_department: department ?? null,
-    p_limit: pageSize,
+    p_department: rpcDept,
+    p_limit: deptTypes && deptTypes.length > 1 ? pageSize * 3 : pageSize,
     p_offset: (page - 1) * pageSize,
   });
   const [{ data, error }, total] = await Promise.all([
@@ -216,6 +230,9 @@ async function nearbyQuery(
   let items = rows
     .map(rowToHospital)
     .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }));
+  // 다중 종별(한방) 후처리 필터
+  if (deptTypes && deptTypes.length > 1)
+    items = items.filter((h) => deptTypes.includes(h.type)).slice(0, pageSize);
   if (openNow) items = items.filter((h) => h.isOpenNow === true);
   return { items, total, page, pageSize };
 }
@@ -230,12 +247,17 @@ async function countNearby(
   let query = sb
     .from("hospitals")
     .select(
-      f.department ? "id, hospital_departments!inner(name)" : "id",
+      f.department && !DEPT_AS_TYPE[f.department]
+        ? "id, hospital_departments!inner(name)"
+        : "id",
       { count: "planned", head: true },
     );
   if (f.type) query = query.eq("type", f.type);
   if (f.sido) query = query.eq("sido", f.sido);
-  if (f.department) query = query.eq("hospital_departments.name", f.department);
+  if (f.department && DEPT_AS_TYPE[f.department])
+    query = query.in("type", DEPT_AS_TYPE[f.department] as string[]);
+  else if (f.department)
+    query = query.eq("hospital_departments.name", f.department);
   if (f.q) {
     const s = f.q.replace(/[,()%]/g, " ").trim();
     if (s) query = query.ilike("name", `%${s}%`);
@@ -271,12 +293,14 @@ export async function getHospitals(
   const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
   const start = (page - 1) * pageSize;
 
+  const deptTypes = department ? DEPT_AS_TYPE[department] : undefined;
+  const useDeptJoin = Boolean(department) && !deptTypes; // 한방·치과는 조인 대신 종별
   const baseSel =
     "*, hospital_hours(day,open,close,closed), hospital_photos(url,alt,category,is_primary,sort_order)";
   let query = getSupabaseServer()
     .from("hospitals")
     .select(
-      department ? `${baseSel}, hospital_departments!inner(name)` : baseSel,
+      useDeptJoin ? `${baseSel}, hospital_departments!inner(name)` : baseSel,
       // exact count는 진료과목 조인 필터에서 매우 느림(수만 건 카운트) → planned 추정치로 15배↑
       { count: "planned" },
     );
@@ -284,7 +308,8 @@ export async function getHospitals(
   if (type) query = query.eq("type", type);
   if (region) query = query.eq("sigungu", region);
   if (sido) query = query.eq("sido", sido);
-  if (department) query = query.eq("hospital_departments.name", department);
+  if (deptTypes) query = query.in("type", deptTypes as string[]);
+  else if (department) query = query.eq("hospital_departments.name", department);
   if (q) {
     const s = q.replace(/[,()%]/g, " ").trim();
     if (s) query = query.ilike("name", `%${s}%`);
