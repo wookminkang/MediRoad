@@ -10,16 +10,18 @@ export function FilterDropdown({
   value,
   options,
   onChange,
-  panelWidth = "w-72",
+  panelWidthPx = 288,
 }: {
   label: string;
   value: string;
   options: Option[];
   onChange: (v: string) => void;
-  panelWidth?: string;
+  panelWidthPx?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -33,11 +35,33 @@ export function FilterDropdown({
   const selected = options.find((o) => o.value === value);
   const active = !!selected;
 
+  const toggle = () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    // 버튼 위치를 측정해 패널 배치 — 모바일은 화면 폭에 맞춰 고정, 데스크톱은 버튼 아래
+    const r = btnRef.current?.getBoundingClientRect();
+    const mobile = typeof window !== "undefined" && window.innerWidth < 768;
+    if (r && mobile) {
+      setPanelStyle({ position: "fixed", top: r.bottom + 8, left: 12, right: 12 });
+    } else {
+      setPanelStyle({
+        position: "absolute",
+        top: "calc(100% + 8px)",
+        left: 0,
+        width: panelWidthPx,
+      });
+    }
+    setOpen(true);
+  };
+
   return (
     <div ref={ref} className="relative">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         className={`flex items-center gap-1 rounded-full border px-4 py-2 text-sm font-medium shadow-md transition-colors ${
           active
             ? "border-transparent bg-[#1E5BD6] text-white"
@@ -64,7 +88,8 @@ export function FilterDropdown({
 
       {open && (
         <div
-          className={`absolute left-0 top-[calc(100%+8px)] z-30 ${panelWidth} max-h-[60vh] overflow-y-auto rounded-2xl border border-line bg-white p-4 shadow-xl`}
+          style={panelStyle}
+          className="z-30 max-h-[60vh] overflow-y-auto rounded-2xl border border-line bg-white p-4 shadow-xl"
         >
           <p className="mb-3 text-base font-bold text-neutral">{label}</p>
           <div className="flex flex-wrap gap-2">

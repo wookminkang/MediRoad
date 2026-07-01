@@ -689,7 +689,7 @@ export function MapExplorer({
               value={filters.department}
               options={MEDICAL_DEPARTMENTS.map((d) => ({ value: d, label: d }))}
               onChange={(v) => updateFilter({ department: v })}
-              panelWidth="w-80"
+              panelWidthPx={320}
             />
             <button
               type="button"
