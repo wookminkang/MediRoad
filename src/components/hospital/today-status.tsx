@@ -45,18 +45,28 @@ export function TodayStatus({ hours }: { hours: OpeningHours[] }) {
     }
   }
 
+  // 내일 진료 시작 (또는 휴진)
+  const tmr = hours.find((h) => h.day === (now.getDay() + 1) % 7);
+  const tomorrowLabel =
+    !tmr || tmr.closed || !tmr.open ? "내일 휴진" : `내일 ${tmr.open} 진료 시작`;
+
   return (
-    <div className="flex items-center gap-2">
-      <span
-        className={`inline-block h-2 w-2 rounded-full ${open ? "bg-positive" : "bg-subtle"}`}
-        aria-hidden
-      />
-      <Text
-        as="span"
-        textStyle="t5Bold"
-        className={open ? "text-positive" : "text-muted"}
-      >
-        {label}
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <span
+          className={`inline-block h-2 w-2 rounded-full ${open ? "bg-positive" : "bg-subtle"}`}
+          aria-hidden
+        />
+        <Text
+          as="span"
+          textStyle="t5Bold"
+          className={open ? "text-positive" : "text-muted"}
+        >
+          {label}
+        </Text>
+      </div>
+      <Text as="span" textStyle="t4Regular" style={{ color: "#9AA0A8" }}>
+        {tomorrowLabel}
       </Text>
     </div>
   );
