@@ -468,7 +468,15 @@ export function NaverMap({
         map.morph(new naver.maps.LatLng(loc.lat, loc.lng), 16);
         onLocate?.(loc); // 상위에 전달 → userLoc 마커 표시
       },
-      () => alert("현재 위치를 가져올 수 없습니다. 위치 권한을 확인해주세요."),
+      (err) => {
+        // 권한 거부(1)는 설정 안내, 그 외(위치 불가·시간초과)는 재시도 안내
+        alert(
+          err.code === err.PERMISSION_DENIED
+            ? "위치 권한이 꺼져 있어요. 브라우저 주소창 왼쪽 자물쇠(ⓘ) → 위치 → ‘허용’으로 바꾼 뒤 다시 눌러 주세요."
+            : "현재 위치를 가져오지 못했어요. 잠시 후 다시 시도해 주세요.",
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
     );
   };
 
