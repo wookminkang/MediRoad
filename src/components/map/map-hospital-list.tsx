@@ -29,6 +29,7 @@ export function MapHospitalList({
   onOpenDetail,
   activeId,
   onHover,
+  onOverscrollDown,
   idPrefix = "d",
   scrollable = true,
 }: {
@@ -50,12 +51,17 @@ export function MapHospitalList({
   /** 현재 상세 패널에 열려 있는 병원 id — 리스트에서 강조 */
   activeId?: string | null;
   onHover: (id: string | null) => void;
+  /** 스크롤 최상단에서 아래로 당길 때 — 바텀시트를 한 단계 내리기(모바일) */
+  onOverscrollDown?: () => void;
   idPrefix?: string;
   /** false면 내부 스크롤 비활성 — 바텀시트가 완전히 펼쳐지기 전엔 위 스와이프가 시트 확장이 되도록 */
   scrollable?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  // 스크롤 최상단에서 아래로 당기면 시트 내리기(한 제스처당 1회)
+  const touchStartY = useRef(0);
+  const overscrollFired = useRef(false);
 
   // 무한스크롤 — 자체 스크롤 컨테이너를 root로
   useEffect(() => {
@@ -75,6 +81,20 @@ export function MapHospitalList({
   return (
     <div
       ref={scrollRef}
+      onTouchStart={(e) => {
+        touchStartY.current = e.touches[0].clientY;
+        overscrollFired.current = false;
+      }}
+      onTouchMove={(e) => {
+        if (!onOverscrollDown || overscrollFired.current) return;
+        const el = scrollRef.current;
+        const dy = e.touches[0].clientY - touchStartY.current;
+        // 스크롤 최상단(≤0)에서 아래로 24px 이상 당김 → 시트 한 단계 내림
+        if (el && el.scrollTop <= 0 && dy > 24) {
+          overscrollFired.current = true;
+          onOverscrollDown();
+        }
+      }}
       className={`min-h-0 flex-1 ${scrollable ? "overflow-y-auto" : "overflow-hidden"}`}
     >
       <div className="sticky top-0 z-10 border-b border-line bg-white px-4 py-3">

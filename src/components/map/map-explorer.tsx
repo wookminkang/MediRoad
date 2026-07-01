@@ -593,6 +593,12 @@ export function MapExplorer({
                 onClose={clearSearch}
                 onFocus={focusHospital}
                 onHover={setHoveredId}
+                // 리스트 최상단에서 아래로 당기면 시트를 한 단계 내림(스크롤 더 올릴 게 없을 때)
+                onOverscrollDown={() => {
+                  const cur = Number(snap);
+                  if (cur >= 0.99) setSnap(0.5);
+                  else if (cur >= 0.5) setSnap(0.12);
+                }}
                 // 시트가 완전히 펼쳐졌을 때만 리스트 스크롤 허용 (그 전엔 위 스와이프=시트 확장)
                 scrollable={Number(snap) >= 0.99}
               />
