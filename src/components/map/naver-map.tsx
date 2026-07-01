@@ -135,6 +135,9 @@ export function NaverMap({
   const ref = useRef<HTMLDivElement>(null);
   const [loadError, setLoadError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // 줌이 바뀌면(설정 완료 시) 마커 그룹핑을 즉시 다시 계산하도록 트리거
+  const [zoomTick, setZoomTick] = useState(0);
+  const lastZoomRef = useRef<number>(-1);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -202,6 +205,12 @@ export function NaverMap({
           const b = map.getBounds();
           const sw = b.getSW ? b.getSW() : b.getMin();
           const ne = b.getNE ? b.getNE() : b.getMax();
+          const z = map.getZoom();
+          // 줌이 바뀌었으면 재조회를 기다리지 말고 즉시 픽셀 그룹핑 재계산(겹침·카운트 불일치 방지)
+          if (z !== lastZoomRef.current) {
+            lastZoomRef.current = z;
+            setZoomTick((t) => t + 1);
+          }
           onViewRef.current(
             {
               minLat: sw.y ?? sw.lat(),
@@ -209,7 +218,7 @@ export function NaverMap({
               maxLat: ne.y ?? ne.lat(),
               maxLng: ne.x ?? ne.lng(),
             },
-            map.getZoom(),
+            z,
           );
         };
         naver.maps.Event.addListener(map, "idle", emit);
@@ -359,7 +368,7 @@ export function NaverMap({
     for (let i = specs.length; i < pool.length; i++) {
       if (pool[i]?.getMap()) pool[i].setMap(null);
     }
-  }, [mode, hospitals, clusters]);
+  }, [mode, hospitals, clusters, zoomTick]);
 
   // 선택된 마커 강조 (이름 라벨 / 건물 버블 하이라이트)
   useEffect(() => {
