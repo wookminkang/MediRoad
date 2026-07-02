@@ -199,20 +199,9 @@ export function MapExplorer({
         const res = await fetch(`/api/hospitals/clusters?${cp}`, { signal: ac.signal });
         const json = await res.json();
         if (isStale()) return;
-        // 지역 중심이 화면 밖이면 라벨을 화면 안(가장자리)으로 클램프 → 항상 보이게
-        const padLat = (b.maxLat - b.minLat) * 0.08;
-        const padLng = (b.maxLng - b.minLng) * 0.08;
-        const clamp = (v: number, lo: number, hi: number) =>
-          Math.max(lo, Math.min(hi, v));
-        setClusters(
-          (json.clusters ?? []).map(
-            (c: { lat: number; lng: number; cnt: number; region: string; sido: string }) => ({
-              ...c,
-              lat: clamp(c.lat, b.minLat + padLat, b.maxLat - padLat),
-              lng: clamp(c.lng, b.minLng + padLng, b.maxLng - padLng),
-            }),
-          ),
-        );
+        // 지역 중심(고정 좌표) 그대로 표시 → 팬해도 마커가 움직이지 않음.
+        // (이전엔 화면 안으로 clamp해서 팬 시 라벨이 슬라이드되는 문제가 있었음)
+        setClusters(json.clusters ?? []);
         setMode("cluster");
       }
     } catch (e) {
@@ -617,7 +606,7 @@ export function MapExplorer({
 
       {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시) */}
       <div className="relative isolate h-full w-full">
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-center gap-2 px-3 py-3">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-wrap items-center gap-2 px-3 py-3">
           {/* 모바일 검색 트리거 — 탭하면 검색 전용 화면 / 검색중이면 쿼리+닫기 표시 */}
           <div className="pointer-events-auto flex w-full items-center gap-2 md:hidden">
             <button

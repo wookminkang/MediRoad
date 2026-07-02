@@ -445,7 +445,7 @@ export async function getHospitalsInBounds(
     p_type: filters.type ?? null,
     p_q: filters.q ?? null,
     p_department: filters.department ?? null,
-    p_limit: 500,
+    p_limit: 1200, // 개별마커/전체셀 조회 — 초밀집 구역(강남 등) 500 초과 잘림 방지
   });
   if (error) throw error;
   return (data as unknown as HospitalRow[])
