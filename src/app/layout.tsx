@@ -16,15 +16,39 @@ const NAVER_VERIFY =
   process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION ??
   "9300c3be7933bbd4a0ef49326fb4f0673be37dd9";
 
+const SITE_DESCRIPTION =
+  "전국 병원·의원·치과·한의원·한방병원을 지도에서. 위치·진료시간·진료과목·야간진료를 한눈에 확인하고 가까운 병원을 빠르게 찾으세요.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "MediRoad — 병원·한의원·한방병원 지도",
-    template: `%s | ${SITE_NAME}`,
+    default: "메디로드 - 내 주변 병원 찾기 | 진료시간·야간진료 지도",
+    template: "%s | 메디로드",
   },
-  description: "병원·한의원·한방병원을 지도로 탐색하는 의료 지도 플랫폼",
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "병원 찾기",
+    "내 주변 병원",
+    "병원 지도",
+    "진료시간",
+    "야간진료",
+    "지금 문 연 병원",
+    "동네 병원",
+    "진료과목별 병원",
+    "치과",
+    "한의원",
+    "한방병원",
+    "메디로드",
+  ],
   applicationName: SITE_NAME,
-  openGraph: { siteName: SITE_NAME, locale: "ko_KR", type: "website" },
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "ko_KR",
+    type: "website",
+    url: SITE_URL,
+    title: "메디로드 - 내 주변 병원 찾기 | 진료시간·야간진료 지도",
+    description: SITE_DESCRIPTION,
+  },
   ...((GOOGLE_VERIFY || NAVER_VERIFY) && {
     verification: {
       ...(GOOGLE_VERIFY && { google: GOOGLE_VERIFY }),
