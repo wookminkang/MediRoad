@@ -165,7 +165,14 @@ export function MapExplorer({
         setMode("marker");
         // marker 모드 드래그 중엔 선택 유지 (초기화하지 않음)
       } else if (zoom >= GRID_MIN_ZOOM) {
-        common.set("step", String(gridStep(zoom)));
+        const step = gridStep(zoom);
+        // 조회 bbox를 셀 경계로 스냅 → 각 셀을 "전체" 집계(뷰포트로 안 잘림).
+        // 팬해도 화면에 남는 셀의 카운트가 변하지 않는다(줌 유지 시 안정).
+        common.set("minLat", String(Math.floor(b.minLat / step) * step));
+        common.set("minLng", String(Math.floor(b.minLng / step) * step));
+        common.set("maxLat", String(Math.ceil(b.maxLat / step) * step));
+        common.set("maxLng", String(Math.ceil(b.maxLng / step) * step));
+        common.set("step", String(step));
         const res = await fetch(`/api/hospitals/grid?${common}`, { signal: ac.signal });
         const json = await res.json();
         if (isStale()) return;
@@ -351,7 +358,7 @@ export function MapExplorer({
         const json = await res.json();
         const items: Hospital[] = json.items ?? [];
         setRegionItems((prev) => (page === 1 ? items : [...prev, ...items]));
-        setRegionTotal(json.total ?? 0);
+        // total은 onSelectRegion에서 클러스터의 정확한 cnt로 설정(planned 추정치로 덮지 않음)
         setRegionPage(page);
       } finally {
         setRegionLoading(false);
@@ -373,7 +380,7 @@ export function MapExplorer({
     setSearchResults(null);
     setSelectedGroup(null);
     setRegionItems([]);
-    setRegionTotal(0);
+    setRegionTotal(c.cnt); // 클러스터의 정확한 개수(region_stats)를 그대로 리스트 total로
     setRegionPage(1);
     setRegionMode(rm);
     loadRegionPage(rm, 1);
@@ -410,16 +417,14 @@ export function MapExplorer({
     const view = viewRef.current;
     const zoom = view?.zoom ?? 15;
     const step = gridStep(zoom);
+    // 그리드 카운트는 이제 "전체 셀" 기준(스냅 집계)이므로 리스트도 전체 셀을 조회 → 일치.
     const cellMinLat = Math.floor(c.lat / step) * step;
     const cellMinLng = Math.floor(c.lng / step) * step;
-    // 마커 카운트는 "셀 ∩ 현재 화면" 기준으로 집계되므로, 리스트도 같은 영역만 조회해야
-    // 개수가 일치한다(셀이 화면 밖으로 걸치면 전체 셀 조회 시 더 많이 잡혀 불일치).
-    const b = view?.b;
     const params = new URLSearchParams({
-      minLat: String(b ? Math.max(cellMinLat, b.minLat) : cellMinLat),
-      minLng: String(b ? Math.max(cellMinLng, b.minLng) : cellMinLng),
-      maxLat: String(b ? Math.min(cellMinLat + step, b.maxLat) : cellMinLat + step),
-      maxLng: String(b ? Math.min(cellMinLng + step, b.maxLng) : cellMinLng + step),
+      minLat: String(cellMinLat),
+      minLng: String(cellMinLng),
+      maxLat: String(cellMinLat + step),
+      maxLng: String(cellMinLng + step),
     });
     if (filters.type) params.set("type", filters.type);
     if (filters.department) params.set("department", filters.department);
