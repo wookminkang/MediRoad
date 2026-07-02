@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import {
   ActionButton,
-  ActionChip,
   Badge,
   TagGroupItem,
   TagGroupItemLabel,
@@ -98,22 +97,7 @@ export function HospitalDetail({
       <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
         {/* 카드 스택 */}
         <div className="flex min-w-0 flex-col gap-10 lg:order-2">
-          {/* 병원 사진 (있을 때만) — 4열 그리드 */}
-          {photos.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-              {photos.map((p, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={p.url}
-                  alt={p.alt ?? `${h.name} 병원 사진 ${i + 1}`}
-                  className="aspect-square w-full rounded-xl object-cover"
-                />
-              ))}
-            </div>
-          )}
-
-          {/* 소개 — 상호명 헤더(카드 밖) + 본문 카드 */}
+          {/* 소개 — 상호명 헤더 → 사진 → 본문 카드 */}
           <section id="intro" className="scroll-mt-24">
             <div className="px-1">
               {h.hours && h.hours.length > 0 && (
@@ -123,9 +107,9 @@ export function HospitalDetail({
               )}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Text as="h1" textStyle="t8Bold">
+                  <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-neutral sm:text-6xl">
                     {h.name}
-                  </Text>
+                  </h1>
                   {isPartnerHospital(h.id) && (
                     <Badge variant="solid" tone="brand">
                       제휴
@@ -166,60 +150,81 @@ export function HospitalDetail({
               )}
             </div>
 
-            <div className="mt-4 rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                {/* 좌: 정보 */}
+            {/* 병원 사진 — 타이틀 아래 (있을 때만) */}
+            {photos.length > 0 && (
+              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {photos.map((p, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={p.url}
+                    alt={p.alt ?? `${h.name} 병원 사진 ${i + 1}`}
+                    className="aspect-square w-full rounded-xl object-cover"
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="mt-5 rounded-2xl bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05] sm:p-8">
+              <div className="flex flex-col gap-8 lg:flex-row lg:justify-between">
+                {/* 좌: 소개 + 위치 + 진료과목 */}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[15px] leading-relaxed text-neutral">
+                  <p className="max-w-2xl text-[15px] leading-[1.85] text-neutral sm:text-base">
                     {introText}
                   </p>
 
-                  {/* 정보 칩: 지하철 / 주소 */}
-                  <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                  {/* 위치·교통 — 아이콘 원형 행 */}
+                  <div className="mt-6 space-y-3">
                     {st && (
-                      <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
-                        <span className="mt-0.5 shrink-0 text-subtle">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
                           <SubwayIcon />
                         </span>
-                        <span className="text-[13px] text-neutral">
+                        <span className="text-sm text-neutral">
                           {st.name}
-                          {st.exit && ` ${st.exit}번 출구`} 도보 약 {stWalk}분 (
+                          {st.exit && ` ${st.exit}번 출구`} · 도보 약 {stWalk}분 (
                           {st.distanceM}m)
                         </span>
                       </div>
                     )}
-                    <div className="flex items-start gap-2 rounded-xl bg-neutral-weak px-3.5 py-3">
-                      <span className="mt-0.5 shrink-0 text-subtle">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
                         <PinMiniIcon />
                       </span>
-                      <span className="text-[13px] text-neutral">{addr}</span>
+                      <span className="text-sm text-neutral">{addr}</span>
                     </div>
                   </div>
 
+                  {/* 진료과목 — 아웃라인 칩 */}
                   {h.departments.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-6 flex flex-wrap gap-1.5">
                       {h.departments.map((d) => (
-                        <ActionChip key={d} asChild size="small">
-                          <Link
-                            href={`/hospitals?department=${encodeURIComponent(d)}`}
-                          >
-                            {d}
-                          </Link>
-                        </ActionChip>
+                        <Link
+                          key={d}
+                          href={`/hospitals?department=${encodeURIComponent(d)}`}
+                          className="rounded-full border border-black/[0.08] px-3 py-1 text-[13px] font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
+                        >
+                          {d}
+                        </Link>
                       ))}
                     </div>
                   )}
                 </div>
 
-                {/* 우: 전화 박스 */}
-                <div className="shrink-0 rounded-2xl border border-line p-5 lg:w-64">
+                {/* 우: 연락 카드 — 구분선 기반(모바일 상단선 / 데스크탑 좌측선) */}
+                <div className="shrink-0 border-t border-black/[0.06] pt-6 lg:w-64 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
                   {h.phone ? (
                     <>
-                      <div className="flex items-center justify-center gap-2 text-neutral">
-                        <PhoneIcon />
-                        <span className="text-lg font-bold">{h.phone}</span>
+                      <p className="text-xs font-medium text-subtle">전화 문의</p>
+                      <div className="mt-1.5 flex items-center gap-2 text-neutral">
+                        <span className="text-brand">
+                          <PhoneIcon />
+                        </span>
+                        <span className="text-[1.35rem] font-bold tracking-tight">
+                          {h.phone}
+                        </span>
                       </div>
-                      <div className="mt-5">
+                      <div className="mt-4 flex flex-col gap-2">
                         <ActionButton
                           asChild
                           variant="brandSolid"
@@ -228,15 +233,47 @@ export function HospitalDetail({
                         >
                           <a href={`tel:${h.phone}`}>전화 문의</a>
                         </ActionButton>
+                        <ActionButton
+                          asChild
+                          variant="neutralWeak"
+                          size="large"
+                          className="w-full"
+                        >
+                          <a
+                            href={naverUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            길찾기
+                          </a>
+                        </ActionButton>
                       </div>
                     </>
                   ) : (
-                    <p className="text-center text-sm text-muted">
-                      전화번호 정보가 없습니다
-                    </p>
+                    <>
+                      <p className="text-sm text-muted">
+                        전화번호 정보가 없습니다
+                      </p>
+                      <div className="mt-3">
+                        <ActionButton
+                          asChild
+                          variant="brandSolid"
+                          size="large"
+                          className="w-full"
+                        >
+                          <a
+                            href={naverUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            길찾기
+                          </a>
+                        </ActionButton>
+                      </div>
+                    </>
                   )}
                   {(h.links?.naverBooking || h.links?.homepage) && (
-                    <div className="mt-3 flex justify-center gap-4 text-sm">
+                    <div className="mt-3 flex gap-4 text-sm">
                       {h.links?.naverBooking && (
                         <a
                           href={h.links.naverBooking}
