@@ -39,6 +39,12 @@ export function Markdown({ children }: { children: string }) {
         components={{
           h2: ({ children }) => <h2 id={slug(textOf(children))}>{children}</h2>,
           h3: ({ children }) => <h3 id={slug(textOf(children))}>{children}</h3>,
+          // 표: 좁은 화면에서 넘칠 때 가로 스크롤(레이아웃 깨짐 방지)
+          table: ({ children }) => (
+            <div className="md-table-wrap">
+              <table>{children}</table>
+            </div>
+          ),
           // 이미지: 가운데 정렬 + alt를 캡션(▲)으로 (뉴스룸 스타일).
           // <p> 안에 들어가도 유효하도록 span 기반(블록 스타일은 CSS).
           img: ({ src, alt }) => (
