@@ -604,8 +604,9 @@ export function MapExplorer({
         />
       </MobileBottomSheet>
 
-      {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시) */}
-      <div className="relative isolate h-full w-full">
+      {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시).
+          isolate 제거: 필터바(z-30)가 리스트/시트 패널(z-20) 위로 오도록(스택 격리 해제) */}
+      <div className="relative h-full w-full">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-wrap items-center gap-2 px-3 py-3">
           {/* 모바일 검색 트리거 — 탭하면 검색 전용 화면 / 검색중이면 쿼리+닫기 표시 */}
           <div className="pointer-events-auto flex w-full items-center gap-2 md:hidden">
