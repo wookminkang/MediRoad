@@ -34,7 +34,7 @@ export function buildColumnArticleLd(c: Column) {
 export function buildColumnBreadcrumbLd(c: Column) {
   const items = [
     { name: "홈", item: SITE_URL },
-    { name: "건강 칼럼", item: `${SITE_URL}/health` },
+    { name: "건강정보", item: `${SITE_URL}/health` },
     {
       name: anyCategoryLabel(c.category),
       item: `${SITE_URL}/health?category=${c.category}`,

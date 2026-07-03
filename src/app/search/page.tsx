@@ -19,6 +19,7 @@ export default async function SearchRedirect({
   const q = toStr(sp.q).trim();
   const scope = toStr(sp.scope);
 
-  const base = scope === "건강 칼럼" ? "/health" : "/hospitals";
+  const base =
+    scope === "건강정보" || scope === "건강 칼럼" ? "/health" : "/hospitals";
   redirect(q ? `${base}?q=${encodeURIComponent(q)}` : base);
 }

@@ -60,7 +60,7 @@ export function Footer() {
             <FooterLink href="/hospitals">병원 찾기</FooterLink>
             <FooterLink href="/area/강남구">지역별 병원</FooterLink>
             <FooterLink href="/hospitals?department=내과">진료과목별 병원</FooterLink>
-            <FooterLink href="/health">건강 칼럼</FooterLink>
+            <FooterLink href="/health">건강정보</FooterLink>
             <FooterLink href="/briefing">메디브리핑</FooterLink>
           </FooterCol>
 

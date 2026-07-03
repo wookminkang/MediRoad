@@ -41,7 +41,6 @@ export async function generateMetadata({
     keywords: c.seo?.keywords ?? [
       anyCategoryLabel(c.category),
       "건강정보",
-      "건강 칼럼",
       ...(c.tags ?? []),
     ],
     authors: [{ name: c.author }, { name: c.reviewedBy.name }],
