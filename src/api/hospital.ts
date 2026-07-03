@@ -1,4 +1,5 @@
 import { MOCK_HOSPITALS } from "@/api/mock/hospitals";
+import { PARTNER_HOSPITAL_IDS } from "@/constants/partners";
 import { normalizeLine, normalizeStationName } from "@/lib/station";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { Paginated } from "@/types";
@@ -545,4 +546,52 @@ export async function getGridClusters(
 export async function getAllHospitalIds(): Promise<string[]> {
   if (!isSupabaseConfigured) return MOCK_HOSPITALS.map((h) => h.id);
   return [];
+}
+
+/**
+ * 사이트맵 "정예" 대상 병원 — 제휴 병원 + 포스트 보유 병원.
+ * 신생 도메인 색인 전략: 품질 확실한 페이지부터 크롤 유도(78k 전량은 후속 확장).
+ */
+export async function getSitemapHospitals(): Promise<
+  { slug: string; updatedAt: string | null }[]
+> {
+  if (!isSupabaseConfigured) return [];
+  const sb = getSupabaseServer();
+  const { data: postRows } = await sb
+    .from("hospital_posts")
+    .select("hospital_id")
+    .eq("status", "published");
+  const postHids = [...new Set((postRows ?? []).map((r) => r.hospital_id))];
+  const ids = [...new Set([...PARTNER_HOSPITAL_IDS, ...postHids])];
+  if (ids.length === 0) return [];
+  const { data } = await sb
+    .from("hospitals")
+    .select("slug, updated_at")
+    .in("id", ids);
+  return ((data ?? []) as { slug: string; updated_at: string | null }[]).map(
+    (h) => ({ slug: h.slug, updatedAt: h.updated_at }),
+  );
+}
+
+/** 사이트맵용 병원 포스트 페이지 목록(published). */
+export async function getSitemapPosts(): Promise<
+  { slug: string; postId: string; updatedAt: string | null }[]
+> {
+  if (!isSupabaseConfigured) return [];
+  const sb = getSupabaseServer();
+  const { data } = await sb
+    .from("hospital_posts")
+    .select("id, updated_at, hospital:hospitals(slug)")
+    .eq("status", "published");
+  return ((data ?? []) as unknown as {
+    id: string;
+    updated_at: string | null;
+    hospital: { slug: string } | null;
+  }[])
+    .filter((r) => r.hospital?.slug)
+    .map((r) => ({
+      slug: r.hospital!.slug,
+      postId: r.id,
+      updatedAt: r.updated_at,
+    }));
 }
