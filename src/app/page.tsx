@@ -262,7 +262,7 @@ export default async function Home() {
                 <li key={p.id}>
                   <Link
                     href={`/hospitals/${p.hospitalSlug}/posts/${p.id}`}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-lg"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
                     {/* 브랜드 틴트 헤더 (썸네일 대체 — 아이콘 + 병원명) */}
                     <div className="relative flex items-center gap-2.5 overflow-hidden bg-brand-weak px-5 py-4">
@@ -328,8 +328,8 @@ export default async function Home() {
                 align="left"
                 id="insights"
               />
-              <ActionButton asChild variant="neutralWeak" size="medium">
-                <Link href="/health">모든 칼럼 보기</Link>
+              <ActionButton asChild variant="neutralOutline" size="medium">
+                <Link href="/health">모든 건강정보 보기</Link>
               </ActionButton>
             </div>
             <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-3">
