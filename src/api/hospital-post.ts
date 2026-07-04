@@ -119,12 +119,13 @@ export async function getLatestHospitalPosts(
   limit = 6,
 ): Promise<LatestHospitalPost[]> {
   if (!isSupabaseConfigured) return [];
+  // 여러 병원이 골고루 노출되도록 넉넉히 가져와 병원당 최신 1개만 남긴다.
   const { data, error } = await getSupabaseServer()
     .from("hospital_posts")
-    .select("id,title,excerpt,thumbnail,published_at,hospital:hospitals(slug,name)")
+    .select("id,title,excerpt,thumbnail,published_at,hospital_id,hospital:hospitals(slug,name)")
     .eq("status", "published")
     .order("published_at", { ascending: false })
-    .limit(limit);
+    .limit(Math.max(60, limit * 8));
   if (error) return [];
   type Row = {
     id: string;
@@ -132,12 +133,16 @@ export async function getLatestHospitalPosts(
     excerpt: string;
     thumbnail: string | null;
     published_at: string | null;
+    hospital_id: string;
     hospital: { slug: string; name: string } | { slug: string; name: string }[] | null;
   };
   const out: LatestHospitalPost[] = [];
+  const seenHospitals = new Set<string>();
   for (const r of (data ?? []) as Row[]) {
     const h = Array.isArray(r.hospital) ? r.hospital[0] : r.hospital;
     if (!h) continue;
+    if (seenHospitals.has(r.hospital_id)) continue; // 병원당 1개
+    seenHospitals.add(r.hospital_id);
     out.push({
       id: r.id,
       title: r.title,
@@ -147,6 +152,7 @@ export async function getLatestHospitalPosts(
       hospitalSlug: h.slug,
       hospitalName: h.name,
     });
+    if (out.length >= limit) break;
   }
   return out;
 }
