@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 // Seed Design 토큰 + 컴포넌트 스타일 (CSS @layer 기반 — Tailwind와 캐스케이드 공존)
 // all.layered = seed-base(토큰) + seed-components(레시피). base만 쓰면 컴포넌트가 미스타일링됨.
 import "@seed-design/css/all.layered.css";
@@ -18,6 +18,14 @@ const NAVER_VERIFY =
 
 const SITE_DESCRIPTION =
   "전국 병원·의원·치과·한의원·한방병원을 지도에서. 위치·진료시간·진료과목·야간진료를 한눈에 확인하고 가까운 병원을 빠르게 찾으세요.";
+
+// 모바일에서 인풋 포커스 시 자동 확대(iOS) 및 핀치 줌 차단
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
