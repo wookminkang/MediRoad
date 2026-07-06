@@ -46,11 +46,13 @@ export async function generateMetadata({
     h.departments.slice(0, 4).join(", ") +
     (h.departments.length > 4 ? " 등" : "");
   const station = h.nearestStation ? ` ${h.nearestStation.name} 인근.` : "";
+  const stationName = h.nearestStation ? `${h.nearestStation.name} ` : "";
 
-  // 제목: "{병원명} 위치·진료시간·진료과목 안내 - {구} {유형}"
+  // 제목: "{병원명} | {구} {역} {유형} | 진료시간·전화번호·위치·진료과목"
+  // (병원명 선두 → 병원명 검색 매칭 강화. layout template "| 메디로드"는 absolute로 우회)
   const title =
     h.seo?.title ??
-    `${h.name} 위치·진료시간·진료과목 안내 - ${sigungu} ${h.type}`;
+    `${h.name} | ${sigungu} ${stationName}${h.type} | 진료시간·전화번호·위치·진료과목`;
 
   // 설명: 병원명·지역·유형·주요 진료과목·역 (지역 중복 제거, ~150자 간결)
   const description =
@@ -61,7 +63,7 @@ export async function generateMetadata({
   const image = h.seo?.ogImage ?? h.photos?.find((p) => p.isPrimary)?.url ?? h.photos?.[0]?.url;
 
   return {
-    title,
+    title: { absolute: title }, // "| 메디로드" 접미 제거(정확한 형식만 출력)
     description,
     keywords,
     authors: [{ name: SITE_NAME, url: SITE_URL }],
