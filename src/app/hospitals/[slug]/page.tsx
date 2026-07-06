@@ -48,11 +48,11 @@ export async function generateMetadata({
   const station = h.nearestStation ? ` ${h.nearestStation.name} 인근.` : "";
   const stationName = h.nearestStation ? `${h.nearestStation.name} ` : "";
 
-  // 제목: "{병원명} | {구} {역} {유형} | 진료시간·전화번호·위치·진료과목"
-  // (병원명 선두 → 병원명 검색 매칭 강화. layout template "| 메디로드"는 absolute로 우회)
+  // 제목: "{병원명} | {구} {역} {유형}"  (예: 바른마음한의원 | 강서구 발산역 한의원)
+  // 병원명 선두 → 병원명 검색 매칭 강화, 구·역세권·유형 키워드 포함, 스터핑 없이 간결.
+  // layout template "| 메디로드"는 title.absolute로 우회.
   const title =
-    h.seo?.title ??
-    `${h.name} | ${sigungu} ${stationName}${h.type} | 진료시간·전화번호·위치·진료과목`;
+    h.seo?.title ?? `${h.name} | ${sigungu} ${stationName}${h.type}`;
 
   // 설명: 병원명·지역·유형·주요 진료과목·역 (지역 중복 제거, ~150자 간결)
   const description =
