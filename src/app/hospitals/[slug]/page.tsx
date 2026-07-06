@@ -5,7 +5,6 @@ import {
   getAllHospitalIds,
   getHospitalBySlug,
   getRelatedHospitals,
-  getSitemapHospitals,
 } from "@/api/hospital";
 import { getHospitalPosts } from "@/api/hospital-post";
 import { HospitalDetail } from "@/components/hospital/hospital-detail";
@@ -26,11 +25,7 @@ export const dynamicParams = true;
 export const revalidate = 86400;
 
 export async function generateStaticParams() {
-  // 정예(제휴+포스트 보유) 병원은 빌드 시 정적 생성 → CDN 즉시 서빙(온디맨드 렌더 제거).
-  // 나머지는 dynamicParams=true로 첫 요청 시 ISR 생성. (Supabase 미설정 시 mock 목록)
-  const featured = await getSitemapHospitals();
-  if (featured.length > 0) return featured.map(({ slug }) => ({ slug }));
-  const ids = await getAllHospitalIds();
+  const ids = await getAllHospitalIds(); // Supabase면 [] (mock일 때만 목록 = slug)
   return ids.map((slug) => ({ slug }));
 }
 
