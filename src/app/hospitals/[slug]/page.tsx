@@ -42,8 +42,9 @@ export async function generateMetadata({
   const url = `${SITE_URL}/hospitals/${h.slug}`;
   const sido = h.region.sido;
   const sigungu = h.region.sigungu;
-  const addr = h.roadAddress ?? h.address;
-  const deptStr = h.departments.join(", ");
+  const deptTop =
+    h.departments.slice(0, 4).join(", ") +
+    (h.departments.length > 4 ? " 등" : "");
   const station = h.nearestStation ? ` ${h.nearestStation.name} 인근.` : "";
 
   // 제목: "{병원명} 위치·진료시간·진료과목 안내 - {구} {유형}"
@@ -51,10 +52,10 @@ export async function generateMetadata({
     h.seo?.title ??
     `${h.name} 위치·진료시간·진료과목 안내 - ${sigungu} ${h.type}`;
 
-  // 설명: 사이트·주소·병원명·진료과목 + 지하철 (지역 검색 노출 강화)
+  // 설명: 병원명·지역·유형·주요 진료과목·역 (지역 중복 제거, ~150자 간결)
   const description =
     h.seo?.description ??
-    `메디로드에서 ${sido} ${sigungu} ${addr} ${h.name}의 ${deptStr} 진료 정보를 확인하세요.${station} 위치·진료시간·연락처·길찾기 안내.`;
+    `${h.name} - ${sigungu} ${h.type}.${deptTop ? ` ${deptTop} 진료.` : ""}${station} 위치·진료시간·연락처·길찾기를 메디로드에서 확인하세요.`;
 
   const keywords = h.seo?.keywords ?? hospitalKeywords(h);
   const image = h.seo?.ogImage ?? h.photos?.find((p) => p.isPrimary)?.url ?? h.photos?.[0]?.url;
