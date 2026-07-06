@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import Image from "next/image";
@@ -8,7 +9,13 @@ import { ActionButton, Text } from "@seed-design/react";
 import { getColumns } from "@/api/column";
 import { getLatestHospitalPosts } from "@/api/hospital-post";
 import { ColumnCard } from "@/components/column/column-card";
+import { SITE_URL } from "@/constants/site";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
+
+// 홈 self-canonical (사이트맵 홈 URL과 동일 — 슬래시 없는 SITE_URL)
+export const metadata: Metadata = {
+  alternates: { canonical: SITE_URL },
+};
 
 // ISR — 정적 프리렌더 + 10분마다 백그라운드 재생성(매 요청 DB 대기 제거 → 즉시 서빙)
 export const revalidate = 600;
