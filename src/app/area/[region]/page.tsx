@@ -5,7 +5,7 @@ import { getHospitals } from "@/api/hospital";
 import { AreaLanding } from "@/components/hospital/area-landing";
 import { PageContainer } from "@/components/ui/page-container";
 import { FEATURED_REGIONS } from "@/constants/region";
-import { SITE_NAME, SITE_URL } from "@/constants/site";
+import { SITE_URL } from "@/constants/site";
 import { buildAreaFaqs, buildAreaIntro, departmentsOf } from "@/lib/area";
 import {
   buildAreaBreadcrumbLd,
@@ -29,7 +29,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   const region = decodeURIComponent((await params).region);
-  const title = `${region} 병원 | ${SITE_NAME}`;
+  const title = `${region} 병원`; // template가 "| 메디로드" 자동 부착
   return {
     title,
     description: `${region} 병원·의원을 진료과목별로 찾아보세요. 위치·진료시간·연락처 안내.`,
