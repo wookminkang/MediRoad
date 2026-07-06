@@ -66,9 +66,9 @@ export async function generateMetadata({
       [
         h.name,
         `${sigungu} ${h.type}`,
-        station ? `${sigungu} ${station} ${h.type}` : null,
+        ...(station ? [`${sigungu} ${station} ${h.type}`] : []),
         "메디로드",
-      ].filter(Boolean),
+      ],
     alternates: { canonical: url },
     robots: { index: !h.seo?.noindex, follow: true },
     openGraph: {
