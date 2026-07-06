@@ -15,6 +15,10 @@ const esc = (s: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
+// <loc>은 canonical과 동일하게 비ASCII 경로를 퍼센트 인코딩한 뒤 XML 이스케이프.
+// (sitemap URL ≠ canonical 불일치로 인한 네이버 등 색인 누락 방지)
+const encLoc = (s: string) => esc(encodeURI(s));
+
 const iso = (d?: Date | string): string | undefined =>
   d == null ? undefined : typeof d === "string" ? d : d.toISOString();
 
@@ -23,7 +27,7 @@ export function urlsetXml(urls: SitemapUrl[]): string {
     .map((u) => {
       const lm = iso(u.lastmod);
       return (
-        `<url><loc>${esc(u.url)}</loc>` +
+        `<url><loc>${encLoc(u.url)}</loc>` +
         (lm ? `<lastmod>${lm}</lastmod>` : "") +
         (u.changefreq ? `<changefreq>${u.changefreq}</changefreq>` : "") +
         (u.priority != null ? `<priority>${u.priority}</priority>` : "") +
@@ -40,7 +44,7 @@ export function sitemapIndexXml(
   const body = items
     .map((s) => {
       const lm = iso(s.lastmod);
-      return `<sitemap><loc>${esc(s.loc)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ""}</sitemap>`;
+      return `<sitemap><loc>${encLoc(s.loc)}</loc>${lm ? `<lastmod>${lm}</lastmod>` : ""}</sitemap>`;
     })
     .join("");
   return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}</sitemapindex>`;
