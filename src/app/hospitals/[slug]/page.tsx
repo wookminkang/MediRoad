@@ -11,7 +11,7 @@ import { HospitalDetail } from "@/components/hospital/hospital-detail";
 import { HospitalPostList } from "@/components/hospital/hospital-post-list";
 import { PageContainer } from "@/components/ui/page-container";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
-import { hospitalKeywords } from "@/lib/hospital";
+import { eunNeun } from "@/lib/hospital";
 import {
   buildBreadcrumbLd,
   buildFaqLd,
@@ -40,35 +40,27 @@ export async function generateMetadata({
   }
 
   const url = `${SITE_URL}/hospitals/${h.slug}`;
-  const sido = h.region.sido;
   const sigungu = h.region.sigungu;
-  const deptTop =
-    h.departments.slice(0, 4).join(", ") +
-    (h.departments.length > 4 ? " 등" : "");
-  const station = h.nearestStation ? ` ${h.nearestStation.name} 인근.` : "";
-  const stationName = h.nearestStation ? `${h.nearestStation.name} ` : "";
+  const st = h.nearestStation?.name?.trim();
+  const station = st ? (st.endsWith("역") ? st : `${st}역`) : ""; // "발산역"
 
-  // 제목: "{병원명} | {구} {역} {유형}"  (예: 바른마음한의원 | 강서구 발산역 한의원)
-  // 병원명 선두 → 병원명 검색 매칭 강화, 구·역세권·유형 키워드 포함, 스터핑 없이 간결.
-  // layout template "| 메디로드"는 title.absolute로 우회.
+  // 제목: "{병원명} | {구} {역} {유형}"  (병원명 선두 → 병원명 검색 매칭)
   const title =
-    h.seo?.title ?? `${h.name} | ${sigungu} ${stationName}${h.type}`;
+    h.seo?.title ?? `${h.name} | ${[sigungu, station, h.type].filter(Boolean).join(" ")}`;
 
-  // 설명: 병원명·지역·유형·주요 진료과목·역 (지역 중복 제거, ~150자 간결)
+  // 설명: "{병원명}은/는 {구} {역}에 위치한 {유형}입니다. 진료시간은 …입니다. 지역은 {시도} {구}입니다."
+  const weekday = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
+  const hoursStr = weekday ? ` 진료시간은 ${weekday.open} ~ ${weekday.close}입니다.` : "";
+  const place = station ? `${sigungu} ${station}` : sigungu;
   const description =
     h.seo?.description ??
-    `${h.name} - ${sigungu} ${h.type}.${deptTop ? ` ${deptTop} 진료.` : ""}${station} 위치·진료시간·연락처·길찾기를 메디로드에서 확인하세요.`;
+    `${h.name}${eunNeun(h.name)} ${place}에 위치한 ${h.type}입니다.${hoursStr}`;
 
-  const keywords = h.seo?.keywords ?? hospitalKeywords(h);
   const image = h.seo?.ogImage ?? h.photos?.find((p) => p.isPrimary)?.url ?? h.photos?.[0]?.url;
 
   return {
-    title: { absolute: title }, // "| 메디로드" 접미 제거(정확한 형식만 출력)
+    title: { absolute: title }, // "| 메디로드" 접미 없이 정확한 형식만
     description,
-    keywords,
-    authors: [{ name: SITE_NAME, url: SITE_URL }],
-    creator: SITE_NAME,
-    publisher: SITE_NAME,
     alternates: { canonical: url },
     robots: { index: !h.seo?.noindex, follow: true },
     openGraph: {
@@ -78,18 +70,7 @@ export async function generateMetadata({
       description,
       siteName: SITE_NAME,
       locale: "ko_KR",
-      ...(image && {
-        images: [{ url: image, alt: `${h.name} ${h.type} 사진` }],
-      }),
-    },
-    other: {
-      "geo.region": "KR",
-      "geo.placename": `${sido} ${sigungu}`,
-      "geo.position": `${h.location.lat};${h.location.lng}`,
-      ICBM: `${h.location.lat}, ${h.location.lng}`,
-      coverage: `${sido} ${sigungu}`,
-      copyright: SITE_NAME,
-      "article:section": "병원 상세",
+      ...(image && { images: [{ url: image, alt: `${h.name} ${h.type}` }] }),
     },
   };
 }

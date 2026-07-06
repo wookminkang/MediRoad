@@ -30,7 +30,7 @@ function hasJongseong(word: string): boolean {
   if (c < 0xac00 || c > 0xd7a3) return false; // 한글 음절이 아니면 받침 없음 취급
   return (c - 0xac00) % 28 !== 0;
 }
-const eunNeun = (w: string) => (hasJongseong(w) ? "은" : "는");
+export const eunNeun = (w: string) => (hasJongseong(w) ? "은" : "는");
 
 /**
  * 자동 소개 문단 — 공공데이터(지역·유형·진료과목·지하철·진료시간)로 사실 기반 생성.
