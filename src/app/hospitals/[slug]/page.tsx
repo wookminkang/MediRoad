@@ -61,6 +61,7 @@ export async function generateMetadata({
   return {
     title: { absolute: title }, // "| 메디로드" 접미 없이 정확한 형식만
     description,
+    keywords: h.seo?.keywords ?? [h.name, `${sigungu} ${h.type}`, "메디로드"],
     alternates: { canonical: url },
     robots: { index: !h.seo?.noindex, follow: true },
     openGraph: {
