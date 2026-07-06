@@ -105,7 +105,7 @@ export default async function Home() {
       <section aria-labelledby="hero" className="relative h-[420px] overflow-hidden sm:h-[540px]">
         <Image
           src="/main_hero_banner_1.jpg"
-          alt=""
+          alt="메디로드 - 내 주변 병원·한의원을 지도로 찾는 서비스"
           fill
           priority
           sizes="100vw"
@@ -155,7 +155,7 @@ export default async function Home() {
                 >
                   <Image
                     src={icon}
-                    alt=""
+                    alt={`${dept} 진료과목`}
                     width={80}
                     height={80}
                     unoptimized
