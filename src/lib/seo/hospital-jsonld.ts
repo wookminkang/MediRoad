@@ -83,20 +83,11 @@ export function buildMedicalClinicLd(h: Hospital) {
   };
 }
 
-/** BreadcrumbList — 홈 › 지역 › 과목 › 병원 */
+/** BreadcrumbList — 홈 › 지역 › 병원 (화면 breadcrumb과 일치, 진료과목 제외) */
 export function buildBreadcrumbLd(h: Hospital) {
-  const dept = h.departments[0];
   const items = [
     { name: "홈", item: SITE_URL },
     { name: h.region.sigungu, item: `${SITE_URL}/area/${h.region.sigungu}` },
-    ...(dept
-      ? [
-          {
-            name: dept,
-            item: `${SITE_URL}/area/${h.region.sigungu}/${dept}`,
-          },
-        ]
-      : []),
     { name: h.name },
   ];
   return {

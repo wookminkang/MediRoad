@@ -53,7 +53,6 @@ export function HospitalDetail({
   hospital: Hospital;
   related?: Hospital[];
 }) {
-  const dept = h.departments[0];
   const addr = h.roadAddress ?? h.address;
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
   const st = h.nearestStation;
@@ -77,18 +76,12 @@ export function HospitalDetail({
 
   return (
     <article>
-      {/* breadcrumb */}
+      {/* breadcrumb — 홈 › 지역 › 상호명 (진료과목 제외) */}
       <nav aria-label="경로 안내" className="mb-4">
         <Text as="span" textStyle="t3Regular" className="text-subtle">
           <Link href="/">홈</Link>
           {" › "}
           <Link href={`/area/${h.region.sigungu}`}>{h.region.sigungu}</Link>
-          {dept && (
-            <>
-              {" › "}
-              <Link href={`/area/${h.region.sigungu}/${dept}`}>{dept}</Link>
-            </>
-          )}
           {" › "}
           {h.name}
         </Text>

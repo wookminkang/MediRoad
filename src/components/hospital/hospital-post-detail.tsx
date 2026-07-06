@@ -56,7 +56,11 @@ export function HospitalPostDetail({
           </span>
         </nav>
 
-        <div className="relative mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center">
+        <div
+          className={`relative mt-5 grid gap-8 lg:items-center ${
+            post.thumbnail ? "lg:grid-cols-[minmax(0,1fr)_20rem]" : ""
+          }`}
+        >
           {/* 텍스트 */}
           <div className="min-w-0">
             <p className="text-sm font-bold text-[#7FA9F5]">
@@ -100,18 +104,14 @@ export function HospitalPostDetail({
             </p>
           </div>
 
-          {/* 대표 이미지 — 없으면 빈 박스 */}
-          {post.thumbnail ? (
+          {/* 대표 이미지 — 없으면 렌더하지 않음(영역 미확보) */}
+          {post.thumbnail && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={post.thumbnail}
               alt={post.title}
               className="aspect-[4/3] w-full rounded-2xl object-cover shadow-[0_10px_30px_rgba(0,0,0,0.4)] ring-1 ring-white/10"
             />
-          ) : (
-            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.03] text-white/20">
-              <ImageIcon />
-            </div>
           )}
         </div>
       </header>
@@ -341,15 +341,6 @@ function ChevronRightIcon() {
   return (
     <svg {...iconProps} width={18} height={18} strokeWidth={2.2}>
       <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-function ImageIcon() {
-  return (
-    <svg {...iconProps} width={44} height={44} strokeWidth={1.4}>
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <circle cx="9" cy="9" r="2" />
-      <path d="m21 15-3.5-3.5a2 2 0 0 0-3 0L5 21" />
     </svg>
   );
 }
