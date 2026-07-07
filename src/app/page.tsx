@@ -22,14 +22,14 @@ export const revalidate = 600;
 
 /** 진료과목 (원형 카드) */
 const CONCERNS: { dept: string; hint: string; icon: string }[] = [
-  { dept: "내과", hint: "감기·소화기·만성질환", icon: "/내과.svg" },
-  { dept: "소아청소년과", hint: "우리 아이 진료", icon: "/소아청소년과.svg" },
-  { dept: "치과", hint: "충치·교정·임플란트", icon: "/치과.svg" },
-  { dept: "피부과", hint: "피부 질환·트러블", icon: "/피부과.svg" },
-  { dept: "이비인후과", hint: "코·목·귀", icon: "/이비인후과.svg" },
-  { dept: "안과", hint: "시력·눈 질환", icon: "/안과.svg" },
-  { dept: "정신건강의학과", hint: "마음·수면·스트레스", icon: "/정신건강의학과.svg" },
-  { dept: "한방", hint: "한의원·한방병원", icon: "/한의과.svg" },
+  { dept: "내과", hint: "감기·소화기·만성질환", icon: "/dept3d/내과.webp" },
+  { dept: "소아청소년과", hint: "우리 아이 진료", icon: "/dept3d/소아청소년과.webp" },
+  { dept: "치과", hint: "충치·교정·임플란트", icon: "/dept3d/치과.webp" },
+  { dept: "피부과", hint: "피부 질환·트러블", icon: "/dept3d/피부과.webp" },
+  { dept: "이비인후과", hint: "코·목·귀", icon: "/dept3d/이비인후과.webp" },
+  { dept: "안과", hint: "시력·눈 질환", icon: "/dept3d/안과.webp" },
+  { dept: "정신건강의학과", hint: "마음·수면·스트레스", icon: "/dept3d/정신건강의학과.webp" },
+  { dept: "한방", hint: "한의원·한방병원", icon: "/dept3d/한방.webp" },
 ];
 
 /** 메디로드 가치 (아이콘 블록) */
