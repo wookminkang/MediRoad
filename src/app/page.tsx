@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -30,25 +29,6 @@ const CONCERNS: { dept: string; hint: string; icon: string }[] = [
   { dept: "안과", hint: "시력·눈 질환", icon: "/dept3d/안과.webp" },
   { dept: "정신건강의학과", hint: "마음·수면·스트레스", icon: "/dept3d/정신건강의학과.webp" },
   { dept: "한방", hint: "한의원·한방병원", icon: "/dept3d/한방.webp" },
-];
-
-/** 메디로드 가치 (아이콘 블록) */
-const VALUES: { icon: ReactNode; title: string; desc: string }[] = [
-  {
-    icon: <PinIcon />,
-    title: "가까운 순서로 보여드려요",
-    desc: "현재 위치를 기준으로 가장 가까운 병원부터 정확한 거리와 함께 정렬합니다.",
-  },
-  {
-    icon: <ClockIcon />,
-    title: "지금 문 연 병원을 한눈에",
-    desc: "실시간 진료시간을 반영해 '영업중'인 병원만 골라볼 수 있어요.",
-  },
-  {
-    icon: <ShieldIcon />,
-    title: "공공데이터 기반의 신뢰",
-    desc: "전국 병·의원 공식 정보를 바탕으로 위치·진료과목·연락처를 믿고 확인하세요.",
-  },
 ];
 
 /** 인기 지역 (사진 카드) */
@@ -167,52 +147,6 @@ export default async function Home() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* 가치 — 병원 상태에 따라 (좌측 제목 + 우측 문단 + 3블록) */}
-      <section aria-labelledby="values" className="bg-neutral-weak">
-        <div className="mx-auto max-w-6xl px-4 py-20">
-          <div className="grid items-start gap-x-10 gap-y-12 md:grid-cols-2">
-            {/* 좌: 제목 + 가치 블록 */}
-            <div>
-              <h2
-                id="values"
-                className="whitespace-pre-line text-2xl font-bold leading-snug text-neutral sm:text-3xl"
-              >
-                {"무작정 찾기보다,\n기준이 있는 병원 찾기"}
-              </h2>
-              <div className="mt-10 flex flex-col gap-8">
-                {VALUES.map((v) => (
-                  <div key={v.title} className="flex items-start gap-5">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-brand">
-                      {v.icon}
-                    </span>
-                    <div>
-                      <h3 className="text-lg font-bold text-neutral">{v.title}</h3>
-                      <p className="mt-1 text-muted">{v.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 우: 설명 문단 + 지도 이미지 */}
-            <div>
-              <p className="text-muted">
-                메디로드는 병원 정보를 단순히 모아두는 데 그치지 않습니다. 내 위치와 지금
-                시간, 진료과목까지 고려해 정말 필요한 병원을 빠르게 찾도록 돕는 것을
-                목표로 합니다.
-              </p>
-              <Image
-                src="/main_map.png"
-                alt="메디로드 지도 화면 미리보기"
-                width={1200}
-                height={800}
-                className="mt-6 w-full rounded-2xl border border-line shadow-sm"
-              />
-            </div>
-          </div>
         </div>
       </section>
 
@@ -410,30 +344,6 @@ function PostMarkIcon() {
       <path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
       <rect x="8" y="2" width="8" height="4" rx="1" />
       <path d="M8 12h2l1.5 3 2-6L15 12h1" />
-    </svg>
-  );
-}
-function PinIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-function ClockIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3 2" />
-    </svg>
-  );
-}
-function ShieldIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 3 5 6v6c0 4 3 7 7 9 4-2 7-5 7-9V6z" />
-      <path d="m9 12 2 2 4-4" />
     </svg>
   );
 }
