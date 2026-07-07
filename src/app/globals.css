@@ -1,5 +1,13 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css");
 @import "tailwindcss";
+
+/* Pretendard self-host (variable) — 외부 CDN @import 제거, 렌더차단 없이 swap */
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   color-scheme: light; /* light-only 고정 */
@@ -23,7 +31,7 @@
   --color-brand-solid: var(--seed-color-bg-brand-solid);
   --color-brand-weak: var(--seed-color-bg-brand-weak);
   --color-line: var(--seed-color-stroke-neutral-weak);
-  /* 기본 폰트 = Pretendard */
+  /* 기본 폰트 = Pretendard (self-host @font-face) */
   --font-sans:
     Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
     "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
