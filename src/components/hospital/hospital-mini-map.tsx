@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
 
@@ -36,9 +36,27 @@ export function HospitalMiniMap({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  // 뷰포트 근접 시에만 지도 로드 — 초기 요청(네이버 SDK+타일 ~13개) 절감
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!CLIENT_ID) return;
+    if (!inView || !CLIENT_ID) return;
     let cancelled = false;
     loadNaver()
       .then(() => {
@@ -64,7 +82,7 @@ export function HospitalMiniMap({
     return () => {
       cancelled = true;
     };
-  }, [lat, lng]);
+  }, [inView, lat, lng]);
 
   return <div ref={ref} className={`bg-neutral-weak ${className}`} />;
 }
