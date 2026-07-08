@@ -88,13 +88,14 @@ export default async function Home() {
           alt="메디로드 - 내 주변 병원·한의원을 지도로 찾는 서비스"
           fill
           priority
+          quality={90}
           sizes="100vw"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
         <div
           className="absolute inset-0 mx-auto flex max-w-6xl flex-col justify-end px-4 pb-24 sm:pb-28"
-          style={{ textShadow: "0 2px 14px rgba(0,0,0,0.45)" }}
+          style={{ textShadow: "0 1px 6px rgba(0,0,0,0.25)" }}
         >
           <p className="text-base font-semibold text-white sm:text-xl">
             우리 동네 병원을 가장 쉽게 찾는 방법
