@@ -84,6 +84,9 @@ export function HospitalDetail({
     { id: "intro", label: "소개", icon: <DocDuoIcon /> },
     ...(hasHours ? [{ id: "hours", label: "진료시간", icon: <ClockDuoIcon /> }] : []),
     { id: "location", label: "위치", icon: <PinDuoIcon /> },
+    ...(posts.length > 0
+      ? [{ id: "posts", label: "포스팅", icon: <PostDuoIcon /> }]
+      : []),
     ...(related.length > 0
       ? [{ id: "nearby", label: "주변 병원", icon: <HospitalDuoIcon /> }]
       : []),
@@ -494,6 +497,17 @@ function HospitalDuoIcon() {
       />
       <rect x="3.2" y="19.5" width="17.6" height="2" rx="1" fill={DUO_TINT2} />
       <path d="M11 8.4h2v2.4h2.4v2H13v2.4h-2V12.8H8.6v-2H11Z" fill="#F0466E" />
+    </svg>
+  );
+}
+function PostDuoIcon() {
+  return (
+    <svg {...duoProps} aria-hidden>
+      <rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.4" fill={DUO_TINT} />
+      <rect x="6" y="7.4" width="5.2" height="5.2" rx="1.2" fill={DUO_BRAND} />
+      <rect x="12.6" y="8" width="4.8" height="1.8" rx="0.9" fill={DUO_TINT2} />
+      <rect x="12.6" y="11" width="3.4" height="1.8" rx="0.9" fill={DUO_TINT2} />
+      <rect x="6" y="15" width="11.4" height="1.8" rx="0.9" fill={DUO_BRAND} />
     </svg>
   );
 }

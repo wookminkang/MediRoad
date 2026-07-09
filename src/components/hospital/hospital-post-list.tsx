@@ -16,7 +16,7 @@ export function HospitalPostList({
   if (!posts.length) return null;
   const rows = Math.ceil(posts.length / 2);
   return (
-    <section aria-labelledby="hospital-posts" className="mt-12">
+    <section id="posts" aria-labelledby="hospital-posts" className="mt-12 scroll-mt-24">
       <h2 id="hospital-posts" className="text-lg font-bold text-neutral">
         포스팅
       </h2>
