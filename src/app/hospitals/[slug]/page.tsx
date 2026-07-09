@@ -8,7 +8,6 @@ import {
 } from "@/api/hospital";
 import { getHospitalPosts } from "@/api/hospital-post";
 import { HospitalDetail } from "@/components/hospital/hospital-detail";
-import { HospitalPostList } from "@/components/hospital/hospital-post-list";
 import { PageContainer } from "@/components/ui/page-container";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
 import { eunNeun } from "@/lib/hospital";
@@ -106,8 +105,7 @@ export default async function HospitalDetailPage({
 
   return (
     <PageContainer maxWidth="max-w-7xl">
-      <HospitalDetail hospital={h} related={related} />
-      <HospitalPostList hospital={h} posts={posts} />
+      <HospitalDetail hospital={h} related={related} posts={posts} />
       {jsonLd.map((ld, i) => (
         <script
           key={i}

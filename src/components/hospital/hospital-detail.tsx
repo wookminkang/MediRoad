@@ -1,20 +1,17 @@
-import type { ReactNode } from "react";
-
 import Link from "next/link";
 
 import {
   ActionButton,
-  Badge,
   TagGroupItem,
   TagGroupItemLabel,
   TagGroupRoot,
-  Text,
 } from "@seed-design/react";
 
 import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 
 import { HospitalMiniMap } from "./hospital-mini-map";
+import { HospitalPostList } from "./hospital-post-list";
 import { SectionNav } from "./section-nav";
 import { TodayStatus } from "./today-status";
 import { PostActions } from "@/components/hospital/post-actions";
@@ -22,10 +19,9 @@ import { isPartnerHospital } from "@/constants/partners";
 import { buildAutoDescription, buildHospitalSummaryBullets } from "@/lib/hospital";
 import { lineColor } from "@/lib/station";
 import type { Hospital } from "@/types/hospital";
+import type { HospitalPost } from "@/types/hospital-post";
 
 import { OpeningHoursTable } from "./opening-hours-table";
-
-const TIME_AMENITIES = new Set(["야간진료", "일요일진료", "공휴일진료"]);
 
 /** 두 좌표 간 거리(m) — Haversine */
 function distM(
@@ -45,13 +41,15 @@ function distM(
 const fmtDist = (m: number) =>
   m < 1000 ? `${Math.round(m)}m` : `${(m / 1000).toFixed(1)}km`;
 
-/** 병원 상세 — 좌측 섹션 내비 + 우측 카드 스택 레이아웃 */
+/** 병원 상세 — 좌측 섹션 내비 + 우측 단일 컬럼(상태·이름·사진·통계·CTA·진료시간·위치·주변) */
 export function HospitalDetail({
   hospital: h,
   related = [],
+  posts = [],
 }: {
   hospital: Hospital;
   related?: Hospital[];
+  posts?: HospitalPost[];
 }) {
   const addr = h.roadAddress ?? h.address;
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
@@ -59,15 +57,32 @@ export function HospitalDetail({
   const stWalk = st ? Math.max(1, Math.round(st.distanceM / 80)) : 0;
   const introText = h.description ?? buildAutoDescription(h);
   const summaryBullets = buildHospitalSummaryBullets(h);
+  const hasHours = !!(h.hours && h.hours.length > 0);
 
-  // 사진(최대 5, 대표 먼저) — 관리자 업로드분
+  // 야간진료 여부 + 평일 마감 시각
+  const weekday = (h.hours ?? []).find(
+    (d) => d.day === 1 && !d.closed && d.close,
+  );
+  const weekdayClose = weekday?.close;
+  const nightCare =
+    !!h.amenities?.includes("야간진료") ||
+    (h.hours ?? []).some(
+      (d) =>
+        d.day >= 1 &&
+        d.day <= 5 &&
+        !d.closed &&
+        d.close &&
+        parseInt(d.close, 10) >= 20,
+    );
+
+  // 사진(최대 5, 대표 먼저)
   const photos = [...(h.photos ?? [])]
     .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
     .slice(0, 5);
 
   const navItems = [
     { id: "intro", label: "소개", icon: <DocDuoIcon /> },
-    { id: "hours", label: "진료시간", icon: <ClockDuoIcon /> },
+    ...(hasHours ? [{ id: "hours", label: "진료시간", icon: <ClockDuoIcon /> }] : []),
     { id: "location", label: "위치", icon: <PinDuoIcon /> },
     ...(related.length > 0
       ? [{ id: "nearby", label: "주변 병원", icon: <HospitalDuoIcon /> }]
@@ -76,245 +91,182 @@ export function HospitalDetail({
 
   return (
     <article>
-      {/* breadcrumb — 홈 › 지역 › 상호명 (진료과목 제외) */}
-      <nav aria-label="경로 안내" className="mb-4">
-        <Text as="span" textStyle="t3Regular" className="text-subtle">
-          <Link href="/">홈</Link>
-          {" › "}
-          <Link href={`/area/${h.region.sigungu}`}>{h.region.sigungu}</Link>
-          {" › "}
-          {h.name}
-        </Text>
-      </nav>
-
       <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
-        {/* 카드 스택 */}
-        <div className="flex min-w-0 flex-col gap-10 lg:order-2">
-          {/* 소개 — 상호명 헤더 → 사진 → 본문 카드 */}
+        <div className="flex min-w-0 flex-col lg:order-2">
+          {/* 소개 — 상태·이름·사진·소개·통계·주소·CTA */}
           <section id="intro" className="scroll-mt-24">
-            <div className="px-1">
-              {h.hours && h.hours.length > 0 && (
-                <div className="mb-3">
-                  <TodayStatus hours={h.hours} />
-                </div>
-              )}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-neutral sm:text-6xl">
+            {/* 상태 */}
+            {hasHours && (
+              <div className="mb-2">
+                <TodayStatus hours={h.hours!} />
+              </div>
+            )}
+
+            {/* 이름 + 제휴 배지 / AI요약·공유 */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-neutral sm:text-5xl">
                     {h.name}
                   </h1>
                   {isPartnerHospital(h.id) && (
-                    <Badge variant="solid" tone="brand">
-                      제휴
-                    </Badge>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand-weak px-2.5 py-1 text-xs font-bold text-brand">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                      제휴병원
+                    </span>
                   )}
                 </div>
-                {/* AI 요약 · 공유 — 상호명 행 우측(별도 영역 차지 X) */}
-                <div className="shrink-0">
-                  <PostActions
-                    title={h.name}
-                    summary={summaryBullets}
-                    bodyText={introText}
-                    showSpeak={false}
-                    showPrint={false}
-                    statusSlot={
-                      h.hours && h.hours.length > 0 ? (
-                        <TodayStatus hours={h.hours} prominent />
-                      ) : undefined
-                    }
-                  />
-                </div>
+                <p className="mt-2 text-sm text-muted">
+                  {h.type} · {h.region.sigungu}
+                </p>
               </div>
-              <p className="mt-1.5 text-sm text-muted">
-                {h.type} · {h.region.sigungu}
-              </p>
-              {h.amenities && h.amenities.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {h.amenities.map((a) => (
-                    <Badge
-                      key={a}
-                      variant="weak"
-                      tone={TIME_AMENITIES.has(a) ? "positive" : "neutral"}
-                    >
-                      {a}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <div className="shrink-0">
+                <PostActions
+                  title={h.name}
+                  summary={summaryBullets}
+                  bodyText={introText}
+                  showSpeak={false}
+                  showPrint={false}
+                  statusSlot={
+                    hasHours ? (
+                      <TodayStatus hours={h.hours!} prominent />
+                    ) : undefined
+                  }
+                />
+              </div>
             </div>
 
-            {/* 병원 사진 — 타이틀 아래 (있을 때만) */}
-            {photos.length > 0 && (
-              <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {photos.map((p, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={p.url}
-                    alt={p.alt ?? `${h.name} 병원 사진 ${i + 1}`}
-                    className="aspect-square w-full rounded-xl object-cover"
-                  />
+            {/* 병원 사진 5칸 (없으면 플레이스홀더) */}
+            <div className="mt-6 grid grid-cols-3 gap-2.5 sm:grid-cols-5">
+              {photos.length > 0
+                ? photos.map((p, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={p.url}
+                      alt={p.alt ?? `${h.name} 병원 사진 ${i + 1}`}
+                      className="aspect-square w-full rounded-2xl object-cover"
+                    />
+                  ))
+                : Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="aspect-square rounded-2xl bg-neutral-weak"
+                    />
+                  ))}
+            </div>
+
+            {/* 소개 문장 */}
+            <p className="mt-6 text-[15px] leading-relaxed text-neutral sm:text-base">
+              {introText}
+            </p>
+
+            <hr className="my-6 border-t border-black/[0.07]" />
+
+            {/* 3분할 통계 */}
+            <div className="grid grid-cols-3 divide-x divide-black/[0.07] text-center">
+              <Stat
+                main={st ? `도보 ${stWalk}분` : "위치"}
+                sub={
+                  st
+                    ? `${st.name} ${st.distanceM}m`
+                    : `${h.region.sido} ${h.region.sigungu}`
+                }
+              />
+              <Stat main={`${h.departments.length}개 과`} sub="진료과목" />
+              <Stat
+                main={nightCare ? "야간진료" : "평일진료"}
+                sub={weekdayClose ? `평일 ${weekdayClose}까지` : "진료시간 확인"}
+                brand={nightCare}
+              />
+            </div>
+
+            <hr className="my-6 border-t border-black/[0.07]" />
+
+            {/* 주소 + 진료과목 칩 */}
+            <div className="flex items-start gap-2">
+              <span className="mt-0.5 shrink-0 text-subtle">
+                <PinSmallIcon />
+              </span>
+              <span className="text-[15px] text-neutral">{addr}</span>
+            </div>
+            {h.departments.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {h.departments.map((d) => (
+                  <Link
+                    key={d}
+                    href={`/hospitals?department=${encodeURIComponent(d)}`}
+                    className="rounded-full border border-black/[0.08] px-3 py-1 text-[13px] font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
+                  >
+                    {d}
+                  </Link>
                 ))}
               </div>
             )}
 
-            <div className="mt-5 rounded-2xl bg-white p-6 shadow-[0_2px_16px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05] sm:p-8">
-              <div className="flex flex-col gap-8 lg:flex-row lg:justify-between">
-                {/* 좌: 소개 + 위치 + 진료과목 */}
-                <div className="min-w-0 flex-1">
-                  <p className="max-w-2xl text-[15px] leading-[1.85] text-neutral sm:text-base">
-                    {introText}
-                  </p>
-
-                  {/* 위치·교통 — 아이콘 원형 행 */}
-                  <div className="mt-6 space-y-3">
-                    {st && (
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak text-brand">
-                          <SubwayIcon />
-                        </span>
-                        <span className="text-sm text-neutral">
-                          {st.name}
-                          {st.exit && ` ${st.exit}번 출구`} · 도보 약 {stWalk}분 (
-                          {st.distanceM}m)
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-weak">
-                        <PinDuoIcon />
-                      </span>
-                      <span className="text-sm text-neutral">{addr}</span>
-                    </div>
-                  </div>
-
-                  {/* 진료과목 — 아웃라인 칩 */}
-                  {h.departments.length > 0 && (
-                    <div className="mt-6 flex flex-wrap gap-1.5">
-                      {h.departments.map((d) => (
-                        <Link
-                          key={d}
-                          href={`/hospitals?department=${encodeURIComponent(d)}`}
-                          className="rounded-full border border-black/[0.08] px-3 py-1 text-[13px] font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
-                        >
-                          {d}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* 우: 연락 카드 — 구분선 기반(모바일 상단선 / 데스크탑 좌측선) */}
-                <div className="shrink-0 border-t border-black/[0.06] pt-6 lg:w-64 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                  {h.phone ? (
-                    <>
-                      <p className="text-xs font-medium text-subtle">전화 문의</p>
-                      <div className="mt-1.5 flex items-center gap-2 text-neutral">
-                        <span className="text-brand">
-                          <PhoneIcon />
-                        </span>
-                        <span className="text-[1.35rem] font-bold tracking-tight">
-                          {h.phone}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex flex-col gap-2">
-                        <ActionButton
-                          asChild
-                          variant="brandSolid"
-                          size="large"
-                          className="w-full"
-                        >
-                          <a href={`tel:${h.phone}`}>전화 문의</a>
-                        </ActionButton>
-                        <ActionButton
-                          asChild
-                          variant="neutralWeak"
-                          size="large"
-                          className="w-full"
-                        >
-                          <a
-                            href={naverUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            길찾기
-                          </a>
-                        </ActionButton>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-muted">
-                        전화번호 정보가 없습니다
-                      </p>
-                      <div className="mt-3">
-                        <ActionButton
-                          asChild
-                          variant="brandSolid"
-                          size="large"
-                          className="w-full"
-                        >
-                          <a
-                            href={naverUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            길찾기
-                          </a>
-                        </ActionButton>
-                      </div>
-                    </>
-                  )}
-                  {(h.links?.naverBooking || h.links?.homepage) && (
-                    <div className="mt-3 flex gap-4 text-sm">
-                      {h.links?.naverBooking && (
-                        <a
-                          href={h.links.naverBooking}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-brand"
-                        >
-                          예약
-                        </a>
-                      )}
-                      {h.links?.homepage && (
-                        <a
-                          href={h.links.homepage}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-brand"
-                        >
-                          홈페이지
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* CTA — 전화 문의 / 길찾기 */}
+            <div className="mt-6 grid grid-cols-2 gap-2.5">
+              {h.phone ? (
+                <ActionButton
+                  asChild
+                  variant="brandSolid"
+                  size="large"
+                  className="w-full"
+                >
+                  <a
+                    href={`tel:${h.phone}`}
+                    className="flex items-center justify-center gap-2"
+                  >
+                    <PhoneIcon />
+                    전화 문의
+                  </a>
+                </ActionButton>
+              ) : (
+                <ActionButton
+                  variant="brandSolid"
+                  size="large"
+                  className="w-full"
+                  disabled
+                >
+                  전화번호 없음
+                </ActionButton>
+              )}
+              <ActionButton
+                asChild
+                variant="neutralWeak"
+                size="large"
+                className="w-full"
+              >
+                <a href={naverUrl} target="_blank" rel="noopener noreferrer">
+                  길찾기
+                </a>
+              </ActionButton>
             </div>
           </section>
 
-          {/* 진료시간 카드 */}
-          {h.hours && h.hours.length > 0 && (
-            <Card
-              id="hours"
-              title="진료시간"
-              subtitle="요일별 진료시간이에요. 명절·임시 휴진은 다를 수 있어요."
-            >
-              <OpeningHoursTable
-                hours={h.hours}
-                holidayClosed={h.holidayClosed}
-              />
-            </Card>
+          {/* 진료시간 */}
+          {hasHours && (
+            <section id="hours" className="mt-12 scroll-mt-24">
+              <h2 className="text-lg font-bold text-neutral">진료시간</h2>
+              <p className="mt-1 text-sm text-muted">
+                요일별 진료시간이에요. 명절·임시 휴진은 다를 수 있어요.
+              </p>
+              <div className="mt-4">
+                <OpeningHoursTable
+                  hours={h.hours!}
+                  holidayClosed={h.holidayClosed}
+                />
+              </div>
+            </section>
           )}
 
-          {/* 위치 카드 — 지도 좌측 배치 */}
-          <Card
-            id="location"
-            title="위치"
-            subtitle="지도에서 위치를 확인하고 길찾기로 바로 안내받으세요."
-          >
-            <div className="grid gap-5 lg:grid-cols-2">
+          {/* 위치 */}
+          <section id="location" className="mt-12 scroll-mt-24">
+            <h2 className="text-lg font-bold text-neutral">위치</h2>
+            <p className="mt-1 text-sm text-muted">
+              지도에서 위치를 확인하고 길찾기로 바로 안내받으세요.
+            </p>
+            <div className="mt-4 grid gap-5 lg:grid-cols-2">
               {h.location?.lat && h.location?.lng ? (
                 <HospitalMiniMap
                   lat={h.location.lat}
@@ -355,41 +307,43 @@ export function HospitalDetail({
                     size="medium"
                     className="w-full sm:w-auto"
                   >
-                    <a
-                      href={naverUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={naverUrl} target="_blank" rel="noopener noreferrer">
                       길찾기
                     </a>
                   </ActionButton>
                 </div>
               </div>
             </div>
-          </Card>
+          </section>
 
-          {/* 자주 묻는 질문 (데이터 있을 때만) */}
+          {/* 포스팅 — 위치 아래 */}
+          <HospitalPostList hospital={h} posts={posts} />
+
+          {/* 자주 묻는 질문 */}
           {h.faqs && h.faqs.length > 0 && (
-            <Card title="자주 묻는 질문">
-              <FaqAccordion faqs={h.faqs} />
-            </Card>
+            <section className="mt-12">
+              <h2 className="text-lg font-bold text-neutral">자주 묻는 질문</h2>
+              <div className="mt-4">
+                <FaqAccordion faqs={h.faqs} />
+              </div>
+            </section>
           )}
 
-          {/* 주변 병원 카드 */}
+          {/* 주변 병원 */}
           {related.length > 0 && (
-            <Card
-              id="nearby"
-              title="이 근처 추천 병원"
-              subtitle="같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요."
-            >
-              <ul className="grid gap-[1.225rem] sm:grid-cols-2">
+            <section id="nearby" className="mt-12 scroll-mt-24">
+              <h2 className="text-lg font-bold text-neutral">이 근처 추천 병원</h2>
+              <p className="mt-1 text-sm text-muted">
+                같은 종별·진료과목의 가까운 병원을 거리순으로 모았어요.
+              </p>
+              <ul className="mt-4 grid gap-4 sm:grid-cols-2">
                 {related.map((r) => {
                   const d = distM(h.location, r.location);
                   return (
                     <li key={r.id}>
                       <Link
                         href={`/hospitals/${r.slug}`}
-                        className="group flex items-center gap-3"
+                        className="group flex items-center gap-3 rounded-xl border border-line p-3 transition-colors hover:bg-neutral-weak"
                       >
                         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-weak">
                           <HospitalDuoIcon />
@@ -408,13 +362,6 @@ export function HospitalDetail({
                                   {r.region.sigungu}
                                 </TagGroupItemLabel>
                               </TagGroupItem>
-                              {r.region.emdong && (
-                                <TagGroupItem>
-                                  <TagGroupItemLabel>
-                                    {r.region.emdong}
-                                  </TagGroupItemLabel>
-                                </TagGroupItem>
-                              )}
                               {d != null && (
                                 <TagGroupItem tone="brand">
                                   <TagGroupItemLabel
@@ -437,15 +384,15 @@ export function HospitalDetail({
                   );
                 })}
               </ul>
-            </Card>
+            </section>
           )}
 
-          {/* 출처 푸터 */}
-          <footer className="px-1 pt-1">
-            <Text as="p" textStyle="t3Regular" className="text-subtle">
+          {/* 출처 */}
+          <footer className="mt-12 border-t border-black/[0.06] pt-5">
+            <p className="text-xs text-subtle">
               {h.updatedAt ? `정보 업데이트: ${h.updatedAt} · ` : ""}출처
               건강보험심사평가원(HIRA)
-            </Text>
+            </p>
           </footer>
         </div>
 
@@ -458,41 +405,27 @@ export function HospitalDetail({
   );
 }
 
-function Card({
-  id,
-  title,
-  subtitle,
-  icon,
-  children,
+/** 3분할 통계 셀 */
+function Stat({
+  main,
+  sub,
+  brand = false,
 }: {
-  id?: string;
-  title: string;
-  subtitle?: string;
-  icon?: ReactNode;
-  children: ReactNode;
+  main: string;
+  sub: string;
+  brand?: boolean;
 }) {
   return (
-    <section id={id} className="scroll-mt-24">
-      {/* 제목은 카드 밖 */}
-      <div className="mb-3 px-1">
-        <div className="flex items-center gap-2">
-          {icon && <span className="text-brand">{icon}</span>}
-          <Text as="h2" textStyle="t8Bold">
-            {title}
-          </Text>
-        </div>
-        {subtitle && (
-          <div className="mt-1.5">
-            <Text as="p" textStyle="t4Regular" style={{ color: "#6B7280" }}>
-              {subtitle}
-            </Text>
-          </div>
-        )}
-      </div>
-      <div className="rounded-2xl bg-white p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] sm:p-7">
-        {children}
-      </div>
-    </section>
+    <div className="px-2">
+      <p
+        className={`text-lg font-extrabold leading-tight sm:text-xl ${
+          brand ? "text-brand" : "text-neutral"
+        }`}
+      >
+        {main}
+      </p>
+      <p className="mt-1 text-xs text-muted sm:text-[13px]">{sub}</p>
+    </div>
   );
 }
 
@@ -508,22 +441,11 @@ function LineBadge({ line }: { line: string }) {
   );
 }
 
-const iconProps = {
-  width: 18,
-  height: 18,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.8,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-
-/* ── 사이드바(SectionNav) 전용 듀오톤 아이콘 (토스풍: 연한 채움 + 브랜드블루 포인트) ── */
+/* ── 아이콘 ── */
 const duoProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" } as const;
-const DUO_TINT = "#D6E4FF"; // 연한 블루 채움
-const DUO_TINT2 = "#AEC8FA"; // 조금 진한 틴트(접힘·바닥)
-const DUO_BRAND = "#1E5BD6"; // 브랜드블루 포인트
+const DUO_TINT = "#D6E4FF";
+const DUO_TINT2 = "#AEC8FA";
+const DUO_BRAND = "#1E5BD6";
 
 function DocDuoIcon() {
   return (
@@ -571,10 +493,32 @@ function HospitalDuoIcon() {
         fill={DUO_TINT}
       />
       <rect x="3.2" y="19.5" width="17.6" height="2" rx="1" fill={DUO_TINT2} />
-      <path
-        d="M11 8.4h2v2.4h2.4v2H13v2.4h-2V12.8H8.6v-2H11Z"
-        fill="#F0466E"
-      />
+      <path d="M11 8.4h2v2.4h2.4v2H13v2.4h-2V12.8H8.6v-2H11Z" fill="#F0466E" />
+    </svg>
+  );
+}
+function PinSmallIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+function PhoneIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M6.6 2.6a2 2 0 0 0-2 1.9C4.1 12 12 19.9 19.5 19.4a2 2 0 0 0 1.9-2v-2.4a1.6 1.6 0 0 0-1.4-1.6l-2.5-.34a1.6 1.6 0 0 0-1.45.53l-.95 1a13 13 0 0 1-5.5-5.5l1-.95a1.6 1.6 0 0 0 .53-1.45L10.2 4a1.6 1.6 0 0 0-1.6-1.4Z" />
     </svg>
   );
 }
@@ -592,29 +536,6 @@ function ChevronRightIcon() {
       aria-hidden
     >
       <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-function PhoneIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill={DUO_BRAND} aria-hidden>
-      <path d="M6.6 2.6a2 2 0 0 0-2 1.9C4.1 12 12 19.9 19.5 19.4a2 2 0 0 0 1.9-2v-2.4a1.6 1.6 0 0 0-1.4-1.6l-2.5-.34a1.6 1.6 0 0 0-1.45.53l-.95 1a13 13 0 0 1-5.5-5.5l1-.95a1.6 1.6 0 0 0 .53-1.45L10.2 4a1.6 1.6 0 0 0-1.6-1.4Z" />
-    </svg>
-  );
-}
-function SubwayIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <rect x="5" y="3" width="14" height="14" rx="4.5" fill={DUO_TINT} />
-      <rect x="7.6" y="6" width="8.8" height="4" rx="1.3" fill={DUO_BRAND} />
-      <circle cx="8.8" cy="12.7" r="1.15" fill={DUO_BRAND} />
-      <circle cx="15.2" cy="12.7" r="1.15" fill={DUO_BRAND} />
-      <path
-        d="M9 17 7.2 20.3M15 17 16.8 20.3"
-        stroke={DUO_TINT2}
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
     </svg>
   );
 }
