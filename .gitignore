@@ -44,6 +44,8 @@ next-env.d.ts
 # 일일 발행 아티팩트
 scripts/daily-publish.log
 content/columns/_ingested/
+# 썸네일 베이스 원본(AI 생성) — 최종본은 Supabase Storage에 있음
+content/columns/images/
 
 # enrich 재개 커서(런타임)
 scripts/.enrich-cursor

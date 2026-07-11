@@ -151,8 +151,12 @@ async function composeThumbnail(imageBuf: Buffer, title: string): Promise<Buffer
       `<rect width="${S}" height="${S}" fill="url(#g)"/></svg>`,
   );
 
-  const len = title.replace(/\s/g, "").length;
-  const dpi = len <= 14 ? 560 : len <= 22 ? 460 : 380;
+  // 크기는 "가장 긴 줄" 기준. 전체 길이로 정하면 큰 글씨가 폭을 넘겨
+  // 파고가 아무 데서나 줄을 끊는다("…아프다 / 면?"). 줄바꿈은 title의 \n으로 지정.
+  const longest = Math.max(
+    ...title.split("\n").map((line) => line.replace(/\s/g, "").length),
+  );
+  const dpi = longest <= 8 ? 560 : longest <= 11 ? 470 : 400;
   const renderText = (color: string) =>
     sharp({
       text: {
