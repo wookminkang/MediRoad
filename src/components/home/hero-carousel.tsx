@@ -91,9 +91,18 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             // 카드 폭을 100%보다 좁게 잡아야 옆 카드가 살짝 보인다(= 더 있다는 신호)
             className="w-[86%] shrink-0 snap-center sm:w-[420px]"
           >
+            {/*
+             * 활성 카드만 원래 크기, 옆 카드는 살짝 줄인다 — 지금 보는 게 어느 카드인지
+             * 크기로 말해준다. (올리브영 홈 캐러셀) 스케일은 안쪽 Link에만 걸어야
+             * li의 폭이 그대로 남아 스냅 위치가 흔들리지 않는다.
+             */}
             <Link
               href={s.href}
-              className="relative block aspect-[3/4] overflow-hidden rounded-3xl sm:aspect-[4/5]"
+              // 비율은 배너 원본(1024x1536 = 2:3)과 맞춘다. 안 맞으면 object-cover가
+              // 위아래를 잘라 캐릭터 얼굴이 확대되고 카피가 얼굴 위에 얹힌다.
+              className={`relative block aspect-[2/3] overflow-hidden rounded-3xl transition-transform duration-300 ease-out ${
+                i === current ? "scale-100" : "scale-[0.92]"
+              }`}
             >
               <Image
                 src={s.image}
@@ -105,10 +114,11 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 className="object-cover"
               />
               {/*
-               * 카피 가독성용 그라데이션. 배너 아트가 밝은 하늘색이라 얕게 깔면 흰 글씨가 뭉갠다.
-               * 카피가 놓이는 하단 절반을 확실히 눌러 대비를 확보한다.
+               * 카피 스크림. 검정으로 깔면 크림색 일러스트 위에서 탁하게 뜬다(때 낀 것처럼 보인다).
+               * 브랜드 네이비로 깔아야 "디자인된 배너"로 읽힌다. 하단만 짧고 진하게 눌러
+               * 캐릭터 몸통까지 잡아먹지 않게 한다.
                */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 via-45% to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B2A6B]/90 via-[#0B2A6B]/40 via-38% to-transparent" />
 
               <div className="absolute inset-x-0 bottom-0 p-6 text-center">
                 <p className="text-[13px] font-semibold text-white/85">

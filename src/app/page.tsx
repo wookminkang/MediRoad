@@ -13,6 +13,7 @@ import {
   PromoCarousel,
   type PromoSlide,
 } from "@/components/home/promo-carousel";
+import { ScrollRow } from "@/components/home/scroll-row";
 import { SITE_URL } from "@/constants/site";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
@@ -31,7 +32,7 @@ export const revalidate = 600;
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    image: "/home/hero-1-map.webp",
+    image: "/home/hero-v4-1-map.webp",
     eyebrow: "우리 동네 병원 찾기",
     title: "내 주변 병원,\n지도로 빠르게",
     sub: "위치·진료시간·진료과목을 한눈에",
@@ -39,7 +40,7 @@ const HERO_SLIDES: HeroSlide[] = [
     cta: "지도에서 찾기",
   },
   {
-    image: "/home/hero-2-night.webp",
+    image: "/home/hero-v4-2-night.webp",
     eyebrow: "지금 문 연 병원",
     title: "지금 진료 중인\n병원만 모아보기",
     sub: "영업 중인 병원을 바로 확인하세요",
@@ -47,7 +48,7 @@ const HERO_SLIDES: HeroSlide[] = [
     cta: "진료 중인 병원 보기",
   },
   {
-    image: "/home/hero-3-time.webp",
+    image: "/home/hero-v4-3-time.webp",
     eyebrow: "진료시간 확인",
     title: "헛걸음 없이,\n진료시간부터 확인",
     sub: "요일별 진료시간과 휴진일을 미리 확인하세요",
@@ -139,8 +140,8 @@ const areaMapHref = (r: { lat: number; lng: number }) =>
 
 export default async function Home() {
   const [{ items: columns }, posts] = await Promise.all([
-    getColumns({ pageSize: 3 }),
-    getLatestHospitalPosts(3),
+    getColumns({ pageSize: 4 }), // 건강 이야기 — 최대 4개
+    getLatestHospitalPosts(6), // 1열 목록 — 최대 6개
   ]);
 
   return (
@@ -156,13 +157,19 @@ export default async function Home() {
       <HeroCarousel slides={HERO_SLIDES} />
 
       {/*
-       * 진료과목 + 바로가기 타일.
-       * 모바일 4열(3줄) → sm 이상 6열(2줄). 가로 스크롤 대신 그리드로 둔다 —
-       * 12칸이면 스크롤로 감추는 것보다 다 보여주는 편이 탐색이 빠르다. (올리브영 카테고리 그리드)
+       * 진료과목 + 바로가기 타일 — 2줄 고정, 넘치면 좌우 스크롤. (올리브영 카테고리 그리드)
+       *
+       * grid-flow-col + grid-rows-2 로 세로 2칸을 채운 뒤 다음 열로 넘어간다.
+       * 한 열 폭을 화면의 1/4로 잡아 4열이 보이고 나머지는 스크롤로 이어진다
+       * (딱 떨어지면 더 있다는 게 안 보이므로 4.3열이 걸치게 둔다).
+       * 좌우 거터는 음수 마진으로 뚫어 스크롤이 화면 끝까지 이어진다.
        */}
       <section aria-labelledby="concerns" className="bg-white">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-6 sm:pb-20 sm:pt-10">
-          <ul className="grid grid-cols-4 gap-x-2 gap-y-5 sm:gap-x-4">
+          <ScrollRow
+            ariaLabel="진료과목·바로가기"
+            className="no-scrollbar -mx-4 grid auto-cols-[23%] grid-flow-col grid-rows-2 gap-x-2 gap-y-5 overflow-x-auto px-4 sm:auto-cols-[16%] sm:gap-x-4"
+          >
             {CONCERNS.map(({ dept, icon }) => (
               <li key={dept}>
                 <TileLink
@@ -178,7 +185,7 @@ export default async function Home() {
                 <TileLink href={href} icon={icon} alt={label} label={label} />
               </li>
             ))}
-          </ul>
+          </ScrollRow>
 
           <h2 id="concerns" className="sr-only">
             진료과목·바로가기
@@ -236,8 +243,9 @@ export default async function Home() {
               align="left"
               id="hospital-posts"
             />
-            <ul className="mt-10 grid grid-cols-2 gap-6">
-              {posts.map((p) => (
+            {/* 1열 목록 — 카드 폭이 넓어져 제목·발췌가 잘리지 않는다. 최대 6개 */}
+            <ul className="mt-10 flex flex-col gap-4">
+              {posts.slice(0, 6).map((p) => (
                 <li key={p.id}>
                   <Link
                     href={`/hospitals/${p.hospitalSlug}/posts/${p.id}`}
@@ -312,7 +320,7 @@ export default async function Home() {
               </ActionButton>
             </div>
             <ul className="mt-10 grid grid-cols-2 gap-6">
-              {columns.map((c) => (
+              {columns.slice(0, 4).map((c) => (
                 <li key={c.id}>
                   <ColumnCard column={c} />
                 </li>
