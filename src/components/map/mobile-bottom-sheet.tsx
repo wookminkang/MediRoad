@@ -71,7 +71,7 @@ export function MobileBottomSheet({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)] md:hidden"
+      className="shell-fixed bottom-0 z-20 flex flex-col rounded-t-2xl bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
       style={{
         height: vh ? height : "50vh",
         transition:

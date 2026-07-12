@@ -11,9 +11,9 @@ import { ActionButton, Text } from "@seed-design/react";
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-line bg-neutral-weak">
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 md:px-6">
+      <div className="mx-auto w-full px-4 py-10">
         {/* 고객센터 + 소셜 */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-6">
           <div>
             <Text as="p" textStyle="t6Bold">
               고객센터 010-7665-4418

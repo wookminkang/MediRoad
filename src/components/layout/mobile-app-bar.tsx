@@ -26,7 +26,7 @@ export function MobileAppBar() {
 
   if (!section) {
     return (
-      <div className="flex w-full items-center justify-between md:hidden">
+      <div className="flex w-full items-center justify-between">
         <Logo />
         <HeaderSearch {...search} />
       </div>
@@ -34,7 +34,7 @@ export function MobileAppBar() {
   }
 
   return (
-    <div className="grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center md:hidden">
+    <div className="grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center">
       <BackButton />
       <h2 className="truncate text-center text-[17px] font-bold text-neutral">
         {section.label}

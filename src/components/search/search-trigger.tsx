@@ -96,7 +96,7 @@ export function SearchTrigger({
   };
 
   const panel = open ? (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    <div className="shell-fixed inset-y-0 z-50 flex flex-col bg-white">
       {/* 상단 바 — 뒤로가기 + 검색 입력 */}
       <div className="flex items-center gap-2 border-b border-black/[0.06] px-3 py-2.5">
         <button

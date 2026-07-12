@@ -1,65 +1,23 @@
-import Image from "next/image";
-import Link from "next/link";
-
-import { ActionButton } from "@seed-design/react";
-
 import { MobileAppBar } from "./mobile-app-bar";
-import { NavLink } from "./nav-link";
 
 /**
- * 전역 헤더 (banner) — sticky. (WIREFRAME §3)
+ * 전역 헤더 (banner) — 앱바 한 줄(뒤로가기·페이지명·검색).
  *
- * 데스크톱: 로고 + 주요 내비.
- * 모바일  : 앱바(뒤로가기·페이지명·검색). 햄버거는 없앴고 내비는 하단 탭바(BottomNav)가 맡는다.
+ * 앱 쉘(640px)이라 데스크톱에서도 같은 앱바를 쓴다. 가로 내비게이션은 없앴다 —
+ * 640 칸에 가로 메뉴를 밀어넣으면 찌그러지고, 내비는 하단 탭바(BottomNav)가 맡는다.
  *
- * Server Component. 색·radius=Seed 토큰, 레이아웃=Tailwind.
+ * 고정하지 않는다 — 스크롤하면 흘러가고, 목록 화면에서는 그 아래 탭 바가 top-0에 붙는다.
  */
 export function Header() {
   return (
     <header
-      // 모바일: 고정하지 않는다 — 스크롤하면 흘러가고, 대신 아래 탭 바가 top-0에 붙는다.
-      // 데스크톱: 종전대로 sticky.
-      className="relative z-40 md:sticky md:top-0"
+      className="relative z-40"
       style={{
         backgroundColor: "var(--seed-color-bg-layer-default)",
         borderBottom: "1px solid var(--seed-color-stroke-neutral-weak)",
       }}
     >
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link
-          href="/"
-          aria-label="메디로드 홈"
-          className="hidden items-center md:flex"
-        >
-          <Image
-            src="/mediroad_logo.svg"
-            alt="MediRoad"
-            width={86}
-            height={43}
-            priority
-          />
-        </Link>
-
-        {/* 데스크톱 내비 */}
-        <nav
-          aria-label="주요 메뉴"
-          className="hidden items-center gap-2 md:flex"
-        >
-          {/* 병원 카테고리 보류 — 다시 노출하려면 주석 해제
-          <NavLink href="/hospitals">병원</NavLink>
-          */}
-          <NavLink href="/map">내 주변 병원</NavLink>
-          {/* 증상·질환 보류 — 다시 노출하려면 주석 해제
-          <NavLink href="/conditions">증상·질환</NavLink>
-          */}
-          <NavLink href="/health">건강정보</NavLink>
-          <NavLink href="/briefing">메디브리핑</NavLink>
-          <NavLink href="/faq">FAQ</NavLink>
-          <ActionButton asChild variant="brandSolid" size="small">
-            <Link href="/hospitals">병원 찾기</Link>
-          </ActionButton>
-        </nav>
-
+      <div className="flex h-14 w-full items-center px-4">
         <MobileAppBar />
       </div>
     </header>

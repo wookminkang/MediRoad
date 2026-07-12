@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ActionButton, Text } from "@seed-design/react";
+import { ActionButton } from "@seed-design/react";
 
 import { getColumns } from "@/api/column";
 import { getLatestHospitalPosts } from "@/api/hospital-post";
@@ -162,7 +162,7 @@ export default async function Home() {
        */}
       <section aria-labelledby="concerns" className="bg-white">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-6 sm:pb-20 sm:pt-10">
-          <ul className="grid grid-cols-4 gap-x-2 gap-y-5 sm:grid-cols-6 sm:gap-x-4">
+          <ul className="grid grid-cols-4 gap-x-2 gap-y-5 sm:gap-x-4">
             {CONCERNS.map(({ dept, icon }) => (
               <li key={dept}>
                 <TileLink
@@ -190,7 +190,7 @@ export default async function Home() {
 
       {/* 어디에서나 — 인기 지역 (사진 카드) */}
       <section aria-labelledby="regions" className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-6xl px-4 py-12">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <SectionHeading
               title={"어디에서나,\n같은 기준의 병원 찾기"}
@@ -201,7 +201,7 @@ export default async function Home() {
               <Link href="/map">지도에서 찾기</Link>
             </ActionButton>
           </div>
-          <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
+          <ul className="mt-10 grid grid-cols-2 gap-6">
             {REGIONS.map((r) => (
               <li key={r.name}>
                 <Link href={areaMapHref(r)} className="block">
@@ -229,14 +229,14 @@ export default async function Home() {
       {/* 병원이 전하는 건강정보 — 병원별 포스트 (실데이터) */}
       {posts.length > 0 && (
         <section aria-labelledby="hospital-posts" className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-20">
+          <div className="mx-auto max-w-6xl px-4 py-12">
             <SectionHeading
               title={"병원이 직접 전하는,\n건강정보"}
               sub="병원이 작성한 진료 이야기와 건강 정보를 만나보세요."
               align="left"
               id="hospital-posts"
             />
-            <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-3">
+            <ul className="mt-10 grid grid-cols-2 gap-6">
               {posts.map((p) => (
                 <li key={p.id}>
                   <Link
@@ -300,7 +300,7 @@ export default async function Home() {
       {/* 건강 이야기 — 최신 칼럼 (실데이터) */}
       {columns.length > 0 && (
         <section aria-labelledby="insights" className="bg-neutral-weak">
-          <div className="mx-auto max-w-6xl px-4 py-20">
+          <div className="mx-auto max-w-6xl px-4 py-12">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <SectionHeading
                 title={"메디로드가 전하는,\n건강 이야기"}
@@ -311,7 +311,7 @@ export default async function Home() {
                 <Link href="/health">모든 건강정보 보기</Link>
               </ActionButton>
             </div>
-            <ul className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-3">
+            <ul className="mt-10 grid grid-cols-2 gap-6">
               {columns.map((c) => (
                 <li key={c.id}>
                   <ColumnCard column={c} />

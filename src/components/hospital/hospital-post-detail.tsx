@@ -58,7 +58,7 @@ export function HospitalPostDetail({
 
         <div
           className={`relative mt-5 grid gap-8 lg:items-center ${
-            post.thumbnail ? "lg:grid-cols-[minmax(0,1fr)_20rem]" : ""
+            ""
           }`}
         >
           {/* 텍스트 */}

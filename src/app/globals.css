@@ -77,6 +77,23 @@ figcaption {
   display: none;
 }
 
+/*
+ * 앱 쉘 — 데스크톱에서도 모바일 UI를 640px 칸에 그대로 보여준다. (강남언니 패턴)
+ *
+ * position:fixed는 뷰포트 기준이라 쉘을 벗어난다. 하단 탭바·전체화면 패널처럼
+ * 고정되는 요소는 이 클래스로 쉘 폭 안에 가둬야 한다.
+ *
+ * transform(translateX)을 쓴다 — Tailwind v4의 translate-y-* 는 CSS `translate` 속성이라
+ * 서로 다른 속성이므로 겹쳐도 덮어쓰지 않는다(탭바 숨김 애니메이션과 공존).
+ */
+.shell-fixed {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  max-width: var(--app-shell-max, 640px);
+  transform: translateX(-50%);
+}
+
 /* 인터랙티브 요소 커서 — Tailwind v4는 button 기본 커서가 default라 포인터로 복원 */
 button:not(:disabled),
 select:not(:disabled),

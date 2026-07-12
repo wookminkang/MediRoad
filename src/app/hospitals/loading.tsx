@@ -27,10 +27,10 @@ export default function Loading() {
       </div>
 
       {/* 사이드바 + 결과 그리드 (페이지와 동일: lg 240px 좌측) */}
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-8">
         {/* 모바일 필터 버튼 / 데스크톱 사이드바 */}
         <div>
-          <div className="h-12 w-full animate-pulse rounded-xl lg:hidden" style={block} />
+          <div className="h-12 w-full animate-pulse rounded-xl" style={block} />
           <div className="hidden flex-col gap-3 lg:flex">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-9 w-full animate-pulse" style={block} />
@@ -41,7 +41,7 @@ export default function Loading() {
         {/* 결과: 개수 줄 + 카드 그리드 */}
         <div className="min-h-[60vh]">
           <div className="mb-4 h-5 w-20 animate-pulse" style={block} />
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}

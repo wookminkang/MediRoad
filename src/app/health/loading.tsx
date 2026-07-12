@@ -31,7 +31,7 @@ export default function Loading() {
       <div className="mt-8 h-6 w-28 animate-pulse" style={block} />
 
       {/* 카드 그리드 */}
-      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-6 lg:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-6">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex flex-col gap-2">
             <div className="aspect-square w-full animate-pulse rounded-2xl" style={block} />

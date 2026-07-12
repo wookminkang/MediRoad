@@ -107,18 +107,26 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_LD) }}
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      {/*
+       * 앱 쉘 — 데스크톱에서도 모바일 UI를 640px 칸에 그대로. (강남언니 패턴)
+       * 바깥은 배경색, 안쪽 640 칸이 앱 화면. 쉘 폭이 640을 넘지 않으므로
+       * ≥768(md/lg/xl)을 가정한 레이아웃은 이 코드베이스에서 쓰지 않는다.
+       */}
+      {/* 쉘 바깥 배경 — Seed가 body 배경을 흰색으로 잡아 Tailwind 클래스가 밀린다. 인라인으로 확정 */}
+      <body className="min-h-full" style={{ backgroundColor: "#EDF0F4" }}>
         <AppProviders>
           <SkipLink />
-          <Header />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <ChromeOnMap>
-            <Footer />
-          </ChromeOnMap>
-          {/* 모바일 하단 탭바 — 지도 페이지에서는 스스로 렌더하지 않는다 */}
-          <BottomNav />
+          <div className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col bg-white">
+            <Header />
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+            <ChromeOnMap>
+              <Footer />
+            </ChromeOnMap>
+            {/* 하단 탭바 — fixed지만 .shell-fixed로 쉘 폭에 갇힌다. 지도에서는 스스로 렌더 안 함 */}
+            <BottomNav />
+          </div>
         </AppProviders>
       </body>
     </html>

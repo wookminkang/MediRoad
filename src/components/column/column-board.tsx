@@ -1,6 +1,5 @@
 import { Text } from "@seed-design/react";
 
-import { SearchTrigger } from "@/components/search/search-trigger";
 import { TabRow } from "@/components/search/tab-row";
 import {
   categoryLabel,
@@ -19,35 +18,19 @@ type Props = {
 };
 
 /** 칼럼 게시판 (목록·카테고리 공용) — 헤더 + 검색 + 탭 + 목록. (WIREFRAME 4-6) */
-export function ColumnBoard({ active, columns, total, q }: Props) {
+export function ColumnBoard({ active, columns, total }: Props) {
   return (
     <>
-      {/* 제목 + 검색 아이콘 + 카테고리 탭 — 헤더(h-14) 아래 스티키 */}
-      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:top-14 md:-mx-6 md:px-6">
-        {/*
-         * 제목 + 검색 아이콘 줄 — 모바일에서는 통째로 감춘다.
-         * 헤더 앱바가 이미 "건강정보" 제목과 검색 아이콘을 들고 있어 그대로 두면 두 번 나온다.
-         * h1은 DOM에 남으므로(display:none) SEO에는 영향이 없다.
-         */}
-        <div className="hidden items-center justify-between gap-2 md:flex">
-          <div className="min-w-0">
-            <Text as="h1" textStyle="t8Bold">
-              건강정보
-            </Text>
-            <p className="mt-0.5 text-sm text-muted">
-              의료진이 감수한 믿을 수 있는 건강 정보, 증상·질환·관리법을 쉽게
-              풀어드려요.
-            </p>
-          </div>
-          <div>
-            <SearchTrigger
-              action="/health"
-              placeholder="궁금한 증상·질환을 검색해보세요"
-              q={q}
-              suggestions={COLUMN_CATEGORIES.map((c) => c.label)}
-            />
-          </div>
-        </div>
+      {/*
+       * 제목·검색은 헤더 앱바("건강정보" + 검색 아이콘)가 들고 있으므로 화면에 다시 그리지 않는다.
+       * H1은 문서에 있어야 하므로(SEO) 화면에서만 감춘다.
+       */}
+      <Text as="h1" textStyle="t8Bold" className="sr-only">
+        건강정보 — 증상·질환·관리법
+      </Text>
+
+      {/* 카테고리 탭 — 헤더 아래 스티키 */}
+      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1">
 
         <nav aria-label="카테고리" className="mt-1">
           <TabRow

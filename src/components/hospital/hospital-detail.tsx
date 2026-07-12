@@ -12,7 +12,6 @@ import { FaqAccordion } from "@/components/ui/faq-accordion";
 
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { HospitalPostList } from "./hospital-post-list";
-import { SectionNav } from "./section-nav";
 import { TodayStatus } from "./today-status";
 import { PostActions } from "@/components/hospital/post-actions";
 import { isPartnerHospital } from "@/constants/partners";
@@ -86,23 +85,11 @@ export function HospitalDetail({
     .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
     .slice(0, 5);
 
-  const navItems = [
-    { id: "intro", label: "소개", icon: <DocDuoIcon /> },
-    ...(hasHours ? [{ id: "hours", label: "진료시간", icon: <ClockDuoIcon /> }] : []),
-    { id: "location", label: "위치", icon: <PinDuoIcon /> },
-    ...(posts.length > 0
-      ? [{ id: "posts", label: "포스팅", icon: <PostDuoIcon /> }]
-      : []),
-    ...(hasFaqs ? [{ id: "faq", label: "자주 묻는 질문", icon: <FaqDuoIcon /> }] : []),
-    ...(related.length > 0
-      ? [{ id: "nearby", label: "주변 병원", icon: <HospitalDuoIcon /> }]
-      : []),
-  ];
 
   return (
     <article>
-      <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col lg:order-2">
+      <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           {/* 빵부스러기 — BreadcrumbList JSON-LD와 동일 경로 */}
           <nav aria-label="현재 위치" className="mb-4">
             <ol className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
@@ -304,7 +291,7 @@ export function HospitalDetail({
             <p className="mt-1 text-sm text-muted">
               지도에서 위치를 확인하고 길찾기로 바로 안내받으세요.
             </p>
-            <div className="mt-4 grid gap-5 lg:grid-cols-2">
+            <div className="mt-4 grid gap-5">
               {h.location?.lat && h.location?.lng ? (
                 <HospitalMiniMap
                   lat={h.location.lat}
@@ -459,10 +446,6 @@ export function HospitalDetail({
           </footer>
         </div>
 
-        {/* 좌측 섹션 내비 (lg 이상) */}
-        <aside className="hidden lg:order-1 lg:block">
-          <SectionNav items={navItems} />
-        </aside>
       </div>
     </article>
   );
@@ -508,83 +491,7 @@ function LineBadge({ line }: { line: string }) {
 const duoProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none" } as const;
 const DUO_TINT = "#D6E4FF";
 const DUO_TINT2 = "#AEC8FA";
-const DUO_BRAND = "#1E5BD6";
 
-function DocDuoIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <path
-        d="M6.2 2.6h6L18 8.2v11.1a2.1 2.1 0 0 1-2.1 2.1H6.2A2.1 2.1 0 0 1 4 19.3V4.7A2.1 2.1 0 0 1 6.2 2.6Z"
-        fill={DUO_TINT}
-      />
-      <path d="M12 2.7v3.8A1.7 1.7 0 0 0 13.7 8.2H18Z" fill={DUO_TINT2} />
-      <rect x="7.2" y="12" width="8" height="1.8" rx="0.9" fill={DUO_BRAND} />
-      <rect x="7.2" y="15.5" width="5.4" height="1.8" rx="0.9" fill={DUO_BRAND} />
-    </svg>
-  );
-}
-function ClockDuoIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <circle cx="12" cy="12" r="9" fill={DUO_TINT} />
-      <path
-        d="M12 7.2v5l3.1 1.9"
-        stroke={DUO_BRAND}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-function PinDuoIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <path
-        d="M12 2.2c-3.9 0-7 3-7 6.9 0 4.9 5.5 10.6 6.4 11.6a.8.8 0 0 0 1.2 0c.9-1 6.4-6.7 6.4-11.6 0-3.9-3.1-6.9-7-6.9Z"
-        fill={DUO_BRAND}
-      />
-      <circle cx="12" cy="9.1" r="2.6" fill="#fff" />
-    </svg>
-  );
-}
-function HospitalDuoIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <path
-        d="M5 20.4V6.3A2.1 2.1 0 0 1 7.1 4.2H16.9A2.1 2.1 0 0 1 19 6.3V20.4Z"
-        fill={DUO_TINT}
-      />
-      <rect x="3.2" y="19.5" width="17.6" height="2" rx="1" fill={DUO_TINT2} />
-      <path d="M11 8.4h2v2.4h2.4v2H13v2.4h-2V12.8H8.6v-2H11Z" fill="#F0466E" />
-    </svg>
-  );
-}
-function PostDuoIcon() {
-  return (
-    <svg {...duoProps} aria-hidden>
-      <rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.4" fill={DUO_TINT} />
-      <rect x="6" y="7.4" width="5.2" height="5.2" rx="1.2" fill={DUO_BRAND} />
-      <rect x="12.6" y="8" width="4.8" height="1.8" rx="0.9" fill={DUO_TINT2} />
-      <rect x="12.6" y="11" width="3.4" height="1.8" rx="0.9" fill={DUO_TINT2} />
-      <rect x="6" y="15" width="11.4" height="1.8" rx="0.9" fill={DUO_BRAND} />
-    </svg>
-  );
-}
-function FaqDuoIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="9" fill="var(--seed-color-bg-brand-weak)" />
-      <path
-        d="M9.4 9.4a2.6 2.6 0 1 1 3.5 2.45c-.55.2-.9.72-.9 1.3v.35"
-        stroke="var(--seed-color-fg-brand)"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <circle cx="12" cy="16.4" r="1" fill="var(--seed-color-fg-brand)" />
-    </svg>
-  );
-}
 
 function PinSmallIcon() {
   return (
@@ -625,6 +532,19 @@ function ChevronRightIcon() {
       aria-hidden
     >
       <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+function HospitalDuoIcon() {
+  return (
+    <svg {...duoProps} aria-hidden>
+      <path
+        d="M5 20.4V6.3A2.1 2.1 0 0 1 7.1 4.2H16.9A2.1 2.1 0 0 1 19 6.3V20.4Z"
+        fill={DUO_TINT}
+      />
+      <rect x="3.2" y="19.5" width="17.6" height="2" rx="1" fill={DUO_TINT2} />
+      <path d="M11 8.4h2v2.4h2.4v2H13v2.4h-2V12.8H8.6v-2H11Z" fill="#F0466E" />
     </svg>
   );
 }

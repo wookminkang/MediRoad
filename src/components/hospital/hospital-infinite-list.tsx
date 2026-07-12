@@ -83,7 +83,7 @@ export function HospitalInfiniteList({
       </p>
 
       {/* 모바일 1열 로우(주소가 잘리지 않도록) → sm부터 그리드 카드 */}
-      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5 md:grid-cols-3 xl:grid-cols-4">
+      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
         {items.map((h) => (
           <li key={h.id}>
             <HospitalGridCard hospital={h} />

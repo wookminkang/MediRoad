@@ -8,11 +8,12 @@ import { usePathname } from "next/navigation";
 import { SECTIONS, matchSection } from "@/constants/nav";
 
 /**
- * 모바일 하단 탭바 (md 미만에서만 노출).
+ * 하단 탭바 — 앱 쉘(640px)이라 데스크톱에서도 그대로 쓴다.
  *
- * 항목은 constants/nav의 SECTIONS(헤더 타이틀과 공유)에서 가져온다 — 아이콘만 여기서 붙인다.
+ * 항목은 constants/nav의 SECTIONS(앱바 타이틀과 공유)에서 가져온다 — 아이콘만 여기서 붙인다.
  * 지도(/map)에서는 숨긴다 — 풀스크린 지도 + 하단 시트(mobile-bottom-sheet)와 자리가 겹친다.
- * 탭바가 fixed라 문서 끝 콘텐츠를 가리므로, 같은 높이의 스페이서를 흐름에 함께 넣는다.
+ * fixed라 문서 최하단을 가리므로, 같은 높이의 스페이서를 흐름에 함께 넣는다.
+ * fixed는 뷰포트 기준이라 .shell-fixed로 쉘 폭 안에 가둔다.
  */
 
 const ICONS: Record<string, (active: boolean) => React.ReactNode> = {
@@ -47,7 +48,6 @@ export function BottomNav() {
       {/* fixed 탭바가 문서 최하단을 덮지 않도록 같은 높이만큼 흐름에 자리를 만든다 */}
       <div
         aria-hidden
-        className="md:hidden"
         style={{ height: `calc(${BAR_H} + env(safe-area-inset-bottom))` }}
       />
 
@@ -59,7 +59,7 @@ export function BottomNav() {
        */}
       <nav
         aria-label="하단 메뉴"
-        className={`fixed inset-x-0 bottom-0 z-20 border-t border-black/[0.06] bg-white transition-transform duration-300 md:hidden ${
+        className={`shell-fixed bottom-0 z-20 border-t border-black/[0.06] bg-white transition-transform duration-300 ${
           hidden ? "translate-y-full" : "translate-y-0"
         }`}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}

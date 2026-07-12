@@ -23,7 +23,7 @@ export function ColumnList({
   }
 
   return (
-    <ol className="grid grid-cols-2 gap-x-4 gap-y-6 lg:grid-cols-4">
+    <ol className="grid grid-cols-2 gap-x-4 gap-y-6">
       {columns.map((c) => (
         <li key={c.id}>
           <ColumnCard column={c} basePath={basePath} />

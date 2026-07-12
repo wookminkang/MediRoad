@@ -540,12 +540,28 @@ export function MapExplorer({
   };
 
   return (
-    <div className="relative h-[calc(100dvh-3.5rem)] md:h-[calc(100vh-3.5rem)]">
-      {/* 데스크톱 좌측 리스트 — 지도 위에 떠 있는 플로팅 패널(지도 레이아웃 안 밀림) */}
-      {hasPanel && (
-        <aside className="absolute bottom-3 left-3 top-[4.25rem] z-20 hidden w-80 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
+    <div className="relative h-[calc(100dvh-3.5rem)]">
+      {/*
+       * 바텀시트 — 핸들바 드래그로 높이 제어(커스텀). 앱 쉘이라 전 화면에서 이걸 쓴다.
+       * 상세는 예전엔 PC 전용 플로팅 패널에만 있었다. 그 패널을 걷어내면서 시트 안으로 옮겨,
+       * 목록 ↔ 상세를 같은 시트에서 전환한다(모바일에도 상세가 생긴다).
+       */}
+      <MobileBottomSheet
+        open={hasPanel || Boolean(detailHospital)}
+        snap={typeof snap === "number" ? snap : 0.5}
+        onSnapChange={setSnap}
+        onClose={clearSearch}
+      >
+        {detailHospital ? (
+          <MapHospitalDetail
+            hospital={detailHospital}
+            loading={detailLoading}
+            onBack={closeDetail}
+            onClose={closeDetail}
+          />
+        ) : (
           <MapHospitalList
-            idPrefix="d"
+            idPrefix="m"
             items={listItems}
             hasPanel={hasPanel}
             regionActive={regionActive}
@@ -560,48 +576,9 @@ export function MapExplorer({
             onClose={clearSearch}
             onFocus={focusHospital}
             onOpenDetail={openDetail}
-            activeId={detailHospital?.id ?? null}
             onHover={setHoveredId}
           />
-        </aside>
-      )}
-
-      {/* 데스크톱 상세 패널 — 리스트 오른쪽에 별도 패널로 표시 */}
-      {detailHospital && (
-        <aside className="absolute bottom-3 left-[21.25rem] top-[4.25rem] z-30 hidden w-96 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-xl md:flex">
-          <MapHospitalDetail
-            hospital={detailHospital}
-            loading={detailLoading}
-            onBack={closeDetail}
-            onClose={closeDetail}
-          />
-        </aside>
-      )}
-
-      {/* 모바일 바텀시트 — 핸들바 드래그로 높이 제어(커스텀), md 미만에서만 */}
-      <MobileBottomSheet
-        open={hasPanel}
-        snap={typeof snap === "number" ? snap : 0.5}
-        onSnapChange={setSnap}
-        onClose={clearSearch}
-      >
-        <MapHospitalList
-          idPrefix="m"
-          items={listItems}
-          hasPanel={hasPanel}
-          regionActive={regionActive}
-          searchActive={searchActive}
-          mode={mode}
-          regionLabel={regionMode?.label}
-          regionLoading={regionLoading}
-          regionTotal={regionTotal}
-          regionShown={regionItems.length}
-          canLoadMore={canLoadMore}
-          onLoadMore={loadMore}
-          onClose={clearSearch}
-          onFocus={focusHospital}
-          onHover={setHoveredId}
-        />
+        )}
       </MobileBottomSheet>
 
       {/* 지도 + 상단 필터바 — 항상 풀폭(리스트는 위에 떠서 표시).
@@ -609,7 +586,7 @@ export function MapExplorer({
       <div className="relative h-full w-full">
         <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-wrap items-center gap-2 px-3 py-3">
           {/* 모바일 검색 트리거 — 탭하면 검색 전용 화면 / 검색중이면 쿼리+닫기 표시 */}
-          <div className="pointer-events-auto flex w-full items-center gap-2 md:hidden">
+          <div className="pointer-events-auto flex w-full items-center gap-2">
             <button
               type="button"
               onClick={() => setSearchPageOpen(true)}
@@ -645,7 +622,7 @@ export function MapExplorer({
               e.preventDefault();
               runSearch(qInput);
             }}
-            className="pointer-events-auto hidden items-center gap-1.5 md:flex"
+            className="pointer-events-auto hidden items-center gap-1.5"
           >
             <div className="relative">
               <svg
@@ -679,7 +656,7 @@ export function MapExplorer({
           </form>
           <div
             className={`pointer-events-auto items-center gap-2 ${
-              searchActive ? "hidden md:flex" : "flex"
+              searchActive ? "hidden" : "flex"
             }`}
           >
             <FilterDropdown
@@ -746,7 +723,7 @@ export function MapExplorer({
 
         {/* 마커 500개 캡 안내 — 너무 많으면 일부만 표시되므로 확대 유도 */}
         {!searchActive && mode === "marker" && mapHospitals.length >= 500 && (
-          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center px-4 md:top-16">
+          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center px-4">
             <span className="pointer-events-auto rounded-full bg-[#26282c]/90 px-3.5 py-1.5 text-xs font-medium text-white shadow-lg">
               병원이 많아 일부만 표시돼요. 확대하면 더 정확해요
             </span>
@@ -828,7 +805,7 @@ export function MapExplorer({
 
         {/* 모바일: 검색 결과 상태에서 "이 지역 검색하기" — 현재 화면 영역의 병원 보기 */}
         {searchActive && (
-          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center md:hidden">
+          <div className="pointer-events-none absolute inset-x-0 top-[4.25rem] z-20 flex justify-center">
             <button
               type="button"
               onClick={clearSearch}

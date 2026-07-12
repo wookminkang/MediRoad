@@ -164,7 +164,7 @@ export function MobileSearch({
   const showResults = term.length >= 2;
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col bg-white md:hidden">
+    <div className="shell-fixed inset-y-0 z-[60] flex flex-col bg-white">
       {/* 헤더 */}
       <div className="flex items-center gap-2 border-b border-line px-2 py-2.5">
         <button

@@ -15,7 +15,7 @@ type Props = {
 
 /**
  * 페이지 공통 컨테이너 — 좌우 거터 + 최대폭 + 상하 패딩(페이지 수직 리듬). (DESIGN_SYSTEM §4-3)
- * 거터 px-4 md:px-6, 상단 pt-6, 하단 pb-14. 최대폭 기본 1024px(max-w-5xl).
+ * 거터 px-4, 상단 pt-6, 하단 pb-14. 최대폭 기본 1024px(max-w-5xl).
  * 지도 등 풀폭 화면은 이 컨테이너를 쓰지 않고 자체 레이아웃 사용.
  */
 export function PageContainer({
@@ -26,8 +26,8 @@ export function PageContainer({
 }: Props) {
   return (
     <div
-      className={`mx-auto w-full ${maxWidth} px-4 md:px-6 ${
-        flushTop ? "pb-16 pt-0 md:pt-12" : ""
+      className={`mx-auto w-full ${maxWidth} px-4 ${
+        flushTop ? "pb-16 pt-0" : ""
       } ${className}`}
       // 헤더 ↔ 콘텐츠 상하 여백 (전 페이지 공통). inline = Tailwind 클래스 생성과 무관하게 보장.
       // flushTop은 미디어쿼리가 필요해 클래스로 처리하므로 인라인을 비운다.

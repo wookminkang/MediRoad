@@ -9,7 +9,6 @@ import { HospitalInfiniteList } from "@/components/hospital/hospital-infinite-li
 import { ActiveFilterChips } from "@/components/search/active-filter-chips";
 import { FilterSheet } from "@/components/search/filter-sheet";
 import { FilterSidebar } from "@/components/search/filter-sidebar";
-import { SearchTrigger } from "@/components/search/search-trigger";
 import { TabRow } from "@/components/search/tab-row";
 import { PageContainer } from "@/components/ui/page-container";
 import { MEDICAL_DEPARTMENTS, type MedicalDepartment } from "@/constants/hospital";
@@ -123,66 +122,31 @@ export default async function HospitalsPage({
   return (
     <PageContainer maxWidth="max-w-7xl" flushTop>
       {/*
-       * 스티키 바 — 제목 + 검색 아이콘 / 필터 + 진료과목 탭.
-       * 인라인 검색바(≈56px)를 걷어내고 아이콘으로 바꿔 그 자리를 리스트에 돌려준다.
-       * 컨테이너 좌우 거터는 음수 마진으로 뚫어 화면 끝까지 배경을 깐다.
+       * 제목은 헤더 앱바("병원찾기")가 들고 있으므로 화면에 다시 그리지 않는다.
+       * 다만 검색어 맥락이 담긴 H1은 문서에 있어야 한다(SEO). 화면에서만 감춘다.
+       * 검색어는 아래 ActiveFilterChips가 칩으로 계속 보여준다.
        */}
-      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:top-14 md:-mx-6 md:px-6">
-        {/*
-         * 제목 + 검색 아이콘 줄 — 모바일에서는 통째로 감춘다.
-         * 헤더 앱바가 이미 "병원찾기" 제목과 검색 아이콘을 들고 있어 그대로 두면 두 번 나온다.
-         * h1은 DOM에 남으므로(display:none) SEO에는 영향이 없고,
-         * 검색어 맥락은 아래 ActiveFilterChips가 칩으로 계속 보여준다.
-         */}
-        <div className="hidden items-center justify-between gap-2 md:flex">
-          <Text as="h1" textStyle="t8Bold">
-            {label ? `“${label}” 검색 결과` : "전체 병원"}
-          </Text>
-          <div>
-            <SearchTrigger
-              action="/hospitals"
-              placeholder="병원 이름·지역으로 검색"
-              q={q}
-              suggestions={[
-                "내과",
-                "치과",
-                "정형외과",
-                "피부과",
-                "한방",
-                "소아청소년과",
-                "이비인후과",
-                "산부인과",
-              ]}
-            />
-          </div>
-        </div>
+      <Text as="h1" textStyle="t8Bold" className="sr-only">
+        {label ? `“${label}” 검색 결과` : "전체 병원"}
+      </Text>
 
-        <div className="mt-1">
-          <TabRow
-            items={tabs}
-            activeId={department ?? ""}
-            leading={
-              <div className="lg:hidden">
-                <FilterSheet activeCount={activeCount}>{sidebar}</FilterSheet>
-              </div>
-            }
-          />
-        </div>
+      {/* 스티키 바 — 필터 + 진료과목 탭. 좌우 거터는 음수 마진으로 뚫어 끝까지 배경을 깐다 */}
+      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1">
+        <TabRow
+          items={tabs}
+          activeId={department ?? ""}
+          leading={<FilterSheet activeCount={activeCount}>{sidebar}</FilterSheet>}
+        />
 
         <ActiveFilterChips />
       </div>
 
-      {/* 필터 사이드바(데스크톱) + 무한스크롤 그리드 */}
-      <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
-        <aside className="hidden lg:block">{sidebar}</aside>
-
-        {/* min-height로 결과 적을 때 레이아웃 붕괴 방지 */}
-        <section aria-label="검색 결과" className="min-h-[60vh]">
-          <HydrationBoundary state={dehydrate(queryClient)}>
-            <HospitalInfiniteList filters={filters} />
-          </HydrationBoundary>
-        </section>
-      </div>
+      {/* min-height로 결과 적을 때 레이아웃 붕괴 방지 */}
+      <section aria-label="검색 결과" className="mt-4 min-h-[60vh]">
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <HospitalInfiniteList filters={filters} />
+        </HydrationBoundary>
+      </section>
     </PageContainer>
   );
 }

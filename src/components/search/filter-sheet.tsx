@@ -53,7 +53,7 @@ export function FilterSheet({
   // 그래서 스티키 바에서 backdrop-blur를 뺐다. (포털은 next/link를 깨뜨려 쓸 수 없다)
   const sheet = open ? (
     <div
-      className="fixed inset-0 z-50 lg:hidden"
+      className="shell-fixed inset-y-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-label="상세 필터"
