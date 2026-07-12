@@ -8,6 +8,11 @@ import { ActionButton, Text } from "@seed-design/react";
 import { getColumns } from "@/api/column";
 import { getLatestHospitalPosts } from "@/api/hospital-post";
 import { ColumnCard } from "@/components/column/column-card";
+import { HeroCarousel, type HeroSlide } from "@/components/home/hero-carousel";
+import {
+  PromoCarousel,
+  type PromoSlide,
+} from "@/components/home/promo-carousel";
 import { SITE_URL } from "@/constants/site";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
@@ -18,6 +23,65 @@ export const metadata: Metadata = {
 
 // ISR — 정적 프리렌더 + 10분마다 백그라운드 재생성(매 요청 DB 대기 제거 → 즉시 서빙)
 export const revalidate = 600;
+
+/**
+ * 히어로 캐러셀 슬라이드.
+ * 카피는 의료광고 안전선(§5-4)을 따른다 — 효과·최고·완치를 암시하지 않고,
+ * "찾기·확인" 같은 정보 서비스의 사실만 말한다.
+ */
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    image: "/home/hero-1-map.webp",
+    eyebrow: "우리 동네 병원 찾기",
+    title: "내 주변 병원,\n지도로 빠르게",
+    sub: "위치·진료시간·진료과목을 한눈에",
+    href: "/map",
+    cta: "지도에서 찾기",
+  },
+  {
+    image: "/home/hero-2-night.webp",
+    eyebrow: "지금 문 연 병원",
+    title: "지금 진료 중인\n병원만 모아보기",
+    sub: "영업 중인 병원을 바로 확인하세요",
+    href: "/hospitals?open=1",
+    cta: "진료 중인 병원 보기",
+  },
+  {
+    image: "/home/hero-3-time.webp",
+    eyebrow: "진료시간 확인",
+    title: "헛걸음 없이,\n진료시간부터 확인",
+    sub: "요일별 진료시간과 휴진일을 미리 확인하세요",
+    href: "/hospitals",
+    cta: "병원 찾아보기",
+  },
+];
+
+/** 프로모 배너 — 콘텐츠(건강정보·메디브리핑) 진입 */
+const PROMO_SLIDES: PromoSlide[] = [
+  {
+    image: "/home/promo-1-briefing.webp",
+    title: "메디브리핑",
+    sub: "의료 정책·건강 이슈를 한눈에",
+    href: "/briefing",
+  },
+  {
+    image: "/home/promo-2-health.webp",
+    title: "건강정보",
+    sub: "증상·질환·관리법을 쉽게 풀어드려요",
+    href: "/health",
+  },
+];
+
+/**
+ * 바로가기 타일 — 진료과목과 같은 줄에 놓이므로 아이콘 규격도 동일하다.
+ * 실제로 있는 라우트·필터로만 연결한다(없는 필터로 링크하면 빈 결과가 나온다).
+ */
+const SHORTCUTS: { label: string; href: string; icon: string }[] = [
+  { label: "지금 진료중", href: "/hospitals?open=1", icon: "/home/icon-open-now.webp" },
+  { label: "지도로 찾기", href: "/map", icon: "/home/icon-map.webp" },
+  { label: "지역별", href: "/area/강남구", icon: "/home/icon-area.webp" },
+  { label: "지하철역", href: "/near", icon: "/home/icon-station.webp" },
+];
 
 /** 진료과목 (원형 카드) */
 const CONCERNS: { dept: string; hint: string; icon: string }[] = [
@@ -81,83 +145,48 @@ export default async function Home() {
 
   return (
     <>
-      {/* Hero — 배경 이미지 + 카피 오버레이 */}
-      <section aria-labelledby="hero" className="relative h-[420px] overflow-hidden sm:h-[540px]">
-        <Image
-          src="/main_hero_banner_1.jpg"
-          alt="메디로드 - 내 주변 병원·한의원을 지도로 찾는 서비스"
-          fill
-          priority
-          quality={90}
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
-        <div
-          className="absolute inset-0 mx-auto flex max-w-6xl flex-col justify-end px-4 pb-24 sm:pb-28"
-          style={{ textShadow: "0 1px 6px rgba(0,0,0,0.25)" }}
-        >
-          <p className="text-base font-semibold text-white sm:text-xl">
-            우리 동네 병원을 가장 쉽게 찾는 방법
-          </p>
-          <h1
-            id="hero"
-            className="mt-3 text-4xl font-bold leading-[1.15] text-white sm:text-6xl"
-          >
-            내 주변 병원,
-            <br />
-            지도로 빠르게 찾으세요
-          </h1>
-          <p className="mt-4 max-w-lg text-base text-white/90 sm:text-lg">
-            위치·진료시간·진료과목까지, 우리 동네 병원·한의원을 한눈에.
-          </p>
-          <div className="mt-7">
-            <ActionButton asChild variant="brandSolid" size="large">
-              <Link href="/map">지도에서 병원 찾기</Link>
-            </ActionButton>
-          </div>
-        </div>
-      </section>
+      {/*
+       * 홈의 H1 — 캐러셀이 히어로를 대신하면서 화면에는 큰 제목이 없다.
+       * 문서에 H1이 하나도 없으면 SEO상 손해라 스크린리더·크롤러용으로 남긴다. (SEO §6-1)
+       */}
+      <h1 className="sr-only">
+        내 주변 병원 찾기 — 위치·진료시간·진료과목을 지도에서 한눈에
+      </h1>
 
-      {/* 진료과목 — 어디서부터 찾을지 모를 때 */}
+      <HeroCarousel slides={HERO_SLIDES} />
+
+      {/*
+       * 진료과목 + 바로가기 타일.
+       * 모바일 4열(3줄) → sm 이상 6열(2줄). 가로 스크롤 대신 그리드로 둔다 —
+       * 12칸이면 스크롤로 감추는 것보다 다 보여주는 편이 탐색이 빠르다. (올리브영 카테고리 그리드)
+       */}
       <section aria-labelledby="concerns" className="bg-white">
-        {/* 3줄 그리드 → 한 줄로 줄어든 만큼 모바일 상하 여백도 줄인다(섹션이 텅 비어 보인다) */}
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:py-20">
-          <SectionHeading
-            title={"어떤 병원을 찾아야 할지,\n어디서부터 시작할지 모를 때"}
-            sub="증상·진료과목별로 가까운 병원을 바로 찾아보세요."
-            id="concerns"
-          />
-          {/*
-           * 한 줄 가로 스크롤 — 아이콘 타일 + 과목명. (올리브영 카테고리 행 패턴)
-           * 컨테이너 거터는 음수 마진으로 뚫어 스크롤이 화면 끝까지 이어지게 한다
-           * (끝에서 잘리면 더 있는지 안 보인다). 다 들어가는 넓은 화면에서는 가운데 정렬.
-           * hint는 뺐다 — 한 줄에 세 줄짜리 텍스트를 넣으면 타일보다 글이 커진다.
-           */}
-          <ul className="no-scrollbar -mx-4 mt-10 flex gap-4 overflow-x-auto px-4 sm:gap-6 lg:justify-center">
+        <div className="mx-auto max-w-6xl px-4 pb-12 pt-6 sm:pb-20 sm:pt-10">
+          <ul className="grid grid-cols-4 gap-x-2 gap-y-5 sm:grid-cols-6 sm:gap-x-4">
             {CONCERNS.map(({ dept, icon }) => (
-              <li key={dept} className="shrink-0">
-                <Link
+              <li key={dept}>
+                <TileLink
                   href={`/hospitals?department=${encodeURIComponent(dept)}`}
-                  className="group flex w-[72px] flex-col items-center gap-2.5 text-center sm:w-[88px]"
-                >
-                  <Image
-                    src={icon}
-                    alt={`${dept} 진료과목`}
-                    width={88}
-                    height={88}
-                    unoptimized
-                    className="h-[72px] w-[72px] rounded-2xl transition-transform group-hover:scale-105 sm:h-[88px] sm:w-[88px]"
-                  />
-                  <span className="text-[13px] font-bold leading-tight text-neutral sm:text-sm">
-                    {dept}
-                  </span>
-                </Link>
+                  icon={icon}
+                  alt={`${dept} 진료과목`}
+                  label={dept}
+                />
+              </li>
+            ))}
+            {SHORTCUTS.map(({ label, href, icon }) => (
+              <li key={label}>
+                <TileLink href={href} icon={icon} alt={label} label={label} />
               </li>
             ))}
           </ul>
+
+          <h2 id="concerns" className="sr-only">
+            진료과목·바로가기
+          </h2>
         </div>
       </section>
+
+      <PromoCarousel slides={PROMO_SLIDES} />
 
       {/* 어디에서나 — 인기 지역 (사진 카드) */}
       <section aria-labelledby="regions" className="bg-white">
@@ -343,6 +372,38 @@ function SectionHeading({
       </h2>
       {sub && <p className="mt-3 text-muted">{sub}</p>}
     </div>
+  );
+}
+
+/** 아이콘 타일 + 라벨 — 진료과목·바로가기가 같은 규격을 쓴다 */
+function TileLink({
+  href,
+  icon,
+  alt,
+  label,
+}: {
+  href: string;
+  icon: string;
+  alt: string;
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col items-center gap-2 text-center"
+    >
+      <Image
+        src={icon}
+        alt={alt}
+        width={88}
+        height={88}
+        unoptimized
+        className="h-[64px] w-[64px] rounded-2xl transition-transform group-hover:scale-105 sm:h-[76px] sm:w-[76px]"
+      />
+      <span className="text-[12px] font-bold leading-tight text-neutral sm:text-[13px]">
+        {label}
+      </span>
+    </Link>
   );
 }
 
