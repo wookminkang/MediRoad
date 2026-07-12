@@ -121,13 +121,13 @@ export default async function HospitalsPage({
   ];
 
   return (
-    <PageContainer maxWidth="max-w-7xl">
+    <PageContainer maxWidth="max-w-7xl" flushTop>
       {/*
        * 스티키 바 — 제목 + 검색 아이콘 / 필터 + 진료과목 탭.
        * 인라인 검색바(≈56px)를 걷어내고 아이콘으로 바꿔 그 자리를 리스트에 돌려준다.
        * 컨테이너 좌우 거터는 음수 마진으로 뚫어 화면 끝까지 배경을 깐다.
        */}
-      <div className="sticky top-14 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:top-14 md:-mx-6 md:px-6">
         {/*
          * 제목 + 검색 아이콘 줄 — 모바일에서는 통째로 감춘다.
          * 헤더 앱바가 이미 "병원찾기" 제목과 검색 아이콘을 들고 있어 그대로 두면 두 번 나온다.

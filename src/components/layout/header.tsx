@@ -17,7 +17,9 @@ import { NavLink } from "./nav-link";
 export function Header() {
   return (
     <header
-      className="sticky top-0 z-40"
+      // 모바일: 고정하지 않는다 — 스크롤하면 흘러가고, 대신 아래 탭 바가 top-0에 붙는다.
+      // 데스크톱: 종전대로 sticky.
+      className="relative z-40 md:sticky md:top-0"
       style={{
         backgroundColor: "var(--seed-color-bg-layer-default)",
         borderBottom: "1px solid var(--seed-color-stroke-neutral-weak)",

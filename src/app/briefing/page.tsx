@@ -58,7 +58,7 @@ export default async function BriefingPage({
   });
 
   return (
-    <PageContainer maxWidth="max-w-7xl">
+    <PageContainer maxWidth="max-w-7xl" flushTop>
       <BriefingBoard active={category} items={items} total={total} q={q} />
     </PageContainer>
   );

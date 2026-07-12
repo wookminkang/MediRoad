@@ -6,6 +6,11 @@ type Props = {
   className?: string;
   /** 최대폭 Tailwind 클래스 (기본 max-w-5xl=1024px). 예) "max-w-[900px]" */
   maxWidth?: string;
+  /**
+   * 모바일에서 상단 패딩을 없앤다 — 맨 위가 스티키 탭 바인 목록 페이지용.
+   * (헤더 앱바 바로 아래 탭이 붙어야 하는데 48px이 뜨면 탭이 떠 보인다)
+   */
+  flushTop?: boolean;
 };
 
 /**
@@ -17,12 +22,20 @@ export function PageContainer({
   children,
   className = "",
   maxWidth = "max-w-5xl",
+  flushTop = false,
 }: Props) {
   return (
     <div
-      className={`mx-auto w-full ${maxWidth} px-4 md:px-6 ${className}`}
-      // 헤더 ↔ 콘텐츠 상하 여백 (전 페이지 공통). inline = Tailwind 클래스 생성과 무관하게 보장
-      style={{ paddingTop: "48px", paddingBottom: "64px" }}
+      className={`mx-auto w-full ${maxWidth} px-4 md:px-6 ${
+        flushTop ? "pb-16 pt-0 md:pt-12" : ""
+      } ${className}`}
+      // 헤더 ↔ 콘텐츠 상하 여백 (전 페이지 공통). inline = Tailwind 클래스 생성과 무관하게 보장.
+      // flushTop은 미디어쿼리가 필요해 클래스로 처리하므로 인라인을 비운다.
+      style={
+        flushTop
+          ? undefined
+          : { paddingTop: "48px", paddingBottom: "64px" }
+      }
     >
       {children}
     </div>

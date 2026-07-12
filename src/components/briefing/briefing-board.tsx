@@ -22,7 +22,7 @@ export function BriefingBoard({ active, items, total, q }: Props) {
   return (
     <>
       {/* 제목 + 검색 아이콘 + 카테고리 탭 — 스티키 (health와 동일 규칙) */}
-      <div className="sticky top-14 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:top-14 md:-mx-6 md:px-6">
         {/* 제목 + 검색 아이콘 줄 — 모바일에서는 헤더 앱바가 대신하므로 감춘다 (health와 동일 규칙) */}
         <div className="hidden items-center justify-between gap-2 md:flex">
           <div className="min-w-0">
@@ -55,6 +55,7 @@ export function BriefingBoard({ active, items, total, q }: Props) {
               })),
             ]}
             activeId={active ?? ""}
+            variant="underline"
           />
         </nav>
       </div>

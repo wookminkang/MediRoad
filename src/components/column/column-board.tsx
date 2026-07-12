@@ -23,7 +23,7 @@ export function ColumnBoard({ active, columns, total, q }: Props) {
   return (
     <>
       {/* 제목 + 검색 아이콘 + 카테고리 탭 — 헤더(h-14) 아래 스티키 */}
-      <div className="sticky top-14 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:-mx-6 md:px-6">
+      <div className="sticky top-0 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:top-14 md:-mx-6 md:px-6">
         {/*
          * 제목 + 검색 아이콘 줄 — 모바일에서는 통째로 감춘다.
          * 헤더 앱바가 이미 "건강정보" 제목과 검색 아이콘을 들고 있어 그대로 두면 두 번 나온다.
@@ -60,6 +60,7 @@ export function ColumnBoard({ active, columns, total, q }: Props) {
               })),
             ]}
             activeId={active ?? ""}
+            variant="underline"
           />
         </nav>
       </div>

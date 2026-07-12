@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -33,6 +35,7 @@ const BAR_H = "3.5rem"; // 56px
 
 export function BottomNav() {
   const pathname = usePathname();
+  const hidden = useHideOnScrollDown();
 
   // 지도는 풀스크린 UX — 탭바·스페이서 모두 렌더하지 않는다.
   if (pathname === "/map" || pathname.startsWith("/map/")) return null;
@@ -56,7 +59,9 @@ export function BottomNav() {
        */}
       <nav
         aria-label="하단 메뉴"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-black/[0.06] bg-white md:hidden"
+        className={`fixed inset-x-0 bottom-0 z-20 border-t border-black/[0.06] bg-white transition-transform duration-300 md:hidden ${
+          hidden ? "translate-y-full" : "translate-y-0"
+        }`}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <ul className="mx-auto flex max-w-md items-stretch">
@@ -88,6 +93,41 @@ export function BottomNav() {
       </nav>
     </>
   );
+}
+
+/**
+ * 아래로 스크롤하면 감추고, 위로 올리면 다시 올라온다 (모바일 앱 하단바 패턴).
+ *
+ * - 임계값(6px)을 둬서 iOS 바운스·손떨림으로 깜빡이지 않게 한다.
+ * - 최상단 근처(80px 이내)에서는 항상 보인다 — 화면 진입 직후 사라지면 안 된다.
+ * - rAF로 묶어 스크롤 이벤트마다 setState 하지 않는다.
+ */
+function useHideOnScrollDown() {
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    let last = window.scrollY;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const dy = y - last;
+        if (Math.abs(dy) > 6) {
+          setHidden(dy > 0 && y > 80);
+          last = y;
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return hidden;
 }
 
 /* ── 아이콘 ── 활성: 면(currentColor) 채움 + 흰색 디테일 / 비활성: 선만 ── */

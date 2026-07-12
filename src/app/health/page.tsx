@@ -50,7 +50,7 @@ export default async function HealthPage({
   const { items, total } = await getColumnsCached({ q, category, pageSize: 50 });
 
   return (
-    <PageContainer maxWidth="max-w-7xl">
+    <PageContainer maxWidth="max-w-7xl" flushTop>
       <ColumnBoard active={category} columns={items} total={total} q={q} />
     </PageContainer>
   );
