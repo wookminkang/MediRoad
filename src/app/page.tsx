@@ -121,29 +121,37 @@ export default async function Home() {
 
       {/* 진료과목 — 어디서부터 찾을지 모를 때 */}
       <section aria-labelledby="concerns" className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-20">
+        {/* 3줄 그리드 → 한 줄로 줄어든 만큼 모바일 상하 여백도 줄인다(섹션이 텅 비어 보인다) */}
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:py-20">
           <SectionHeading
             title={"어떤 병원을 찾아야 할지,\n어디서부터 시작할지 모를 때"}
             sub="증상·진료과목별로 가까운 병원을 바로 찾아보세요."
             id="concerns"
           />
-          <ul className="mt-12 grid grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-4 lg:grid-cols-4">
-            {CONCERNS.map(({ dept, hint, icon }) => (
-              <li key={dept}>
+          {/*
+           * 한 줄 가로 스크롤 — 아이콘 타일 + 과목명. (올리브영 카테고리 행 패턴)
+           * 컨테이너 거터는 음수 마진으로 뚫어 스크롤이 화면 끝까지 이어지게 한다
+           * (끝에서 잘리면 더 있는지 안 보인다). 다 들어가는 넓은 화면에서는 가운데 정렬.
+           * hint는 뺐다 — 한 줄에 세 줄짜리 텍스트를 넣으면 타일보다 글이 커진다.
+           */}
+          <ul className="no-scrollbar -mx-4 mt-10 flex gap-4 overflow-x-auto px-4 sm:gap-6 lg:justify-center">
+            {CONCERNS.map(({ dept, icon }) => (
+              <li key={dept} className="shrink-0">
                 <Link
                   href={`/hospitals?department=${encodeURIComponent(dept)}`}
-                  className="flex flex-col items-center gap-3 text-center"
+                  className="group flex w-[72px] flex-col items-center gap-2.5 text-center sm:w-[88px]"
                 >
                   <Image
                     src={icon}
                     alt={`${dept} 진료과목`}
-                    width={80}
-                    height={80}
+                    width={88}
+                    height={88}
                     unoptimized
-                    className="h-16 w-16 rounded-2xl transition-transform hover:scale-105 sm:h-20 sm:w-20"
+                    className="h-[72px] w-[72px] rounded-2xl transition-transform group-hover:scale-105 sm:h-[88px] sm:w-[88px]"
                   />
-                  <span className="font-bold text-neutral">{dept}</span>
-                  <span className="text-xs text-muted">{hint}</span>
+                  <span className="text-[13px] font-bold leading-tight text-neutral sm:text-sm">
+                    {dept}
+                  </span>
                 </Link>
               </li>
             ))}
