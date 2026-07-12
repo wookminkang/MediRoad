@@ -1,5 +1,6 @@
 import { getNeighborDistricts } from "@/constants/region-neighbors";
 import { SITE_URL } from "@/constants/site";
+import { walkMinutes } from "@/lib/hospital";
 import type { Hospital } from "@/types/hospital";
 
 /**
@@ -57,7 +58,7 @@ export function buildMedicalClinicLd(h: Hospital) {
     ...(h.nearestStation && {
       publicTransport: `${h.nearestStation.name}${
         h.nearestStation.distanceM
-          ? ` 도보 ${Math.max(1, Math.round(h.nearestStation.distanceM / 67))}분`
+          ? ` 도보 ${walkMinutes(h.nearestStation.distanceM)}분`
           : ""
       }`,
     }),

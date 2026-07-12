@@ -6,13 +6,12 @@ import type { Hospital } from "@/types/hospital";
 
 export function buildAreaIntro(
   region: string,
-  department: string | undefined,
-  count: number,
+  department?: string,
 ): string {
   if (department) {
-    return `${region}에서 ${department} 진료가 가능한 병원 ${count}곳을 모았습니다. 위치·진료시간·연락처를 비교하고 가까운 ${department} 병원을 찾아보세요.`;
+    return `${region}에서 ${department} 진료가 가능한 병원을 모았습니다. 위치·진료시간·연락처를 비교하고 가까운 ${department} 병원을 찾아보세요.`;
   }
-  return `${region}의 병원·의원 ${count}곳을 진료과목별로 찾아보세요. 위치·진료시간·연락처를 한눈에 확인할 수 있습니다.`;
+  return `${region}의 병원·의원을 진료과목별로 찾아보세요. 위치·진료시간·연락처를 한눈에 확인할 수 있습니다.`;
 }
 
 export function buildAreaFaqs(

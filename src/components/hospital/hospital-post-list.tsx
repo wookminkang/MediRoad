@@ -47,12 +47,14 @@ export function HospitalPostList({
                     <div className="h-22 w-22 shrink-0 rounded-xl bg-neutral-weak" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-[15px] font-bold leading-snug text-neutral">
+                    <h3 className="line-clamp-2 text-[15px] font-bold leading-snug text-neutral">
                       {p.title}
-                    </p>
+                    </h3>
                     {p.publishedAt && (
                       <p className="mt-1.5 text-xs text-subtle">
-                        {fmtDate(p.publishedAt)}
+                        <time dateTime={p.publishedAt}>
+                          {fmtDate(p.publishedAt)}
+                        </time>
                       </p>
                     )}
                   </div>

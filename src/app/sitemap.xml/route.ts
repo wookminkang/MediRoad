@@ -6,7 +6,7 @@ export const revalidate = 3600;
 
 export function GET() {
   const now = new Date();
-  const names = ["static", "hospitals", "posts", "content"];
+  const names = ["static", "hospitals", "stations", "posts", "content"];
   return xmlResponse(
     sitemapIndexXml(
       names.map((n) => ({ loc: `${SITE_URL}/sitemaps/${n}.xml`, lastmod: now })),

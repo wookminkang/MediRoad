@@ -1,5 +1,5 @@
 import { getNeighborDistricts } from "@/constants/region-neighbors";
-import type { Hospital } from "@/types/hospital";
+import type { Hospital, OpeningHours } from "@/types/hospital";
 
 /**
  * 병원 도메인 로직 (데이터 접근 아님 — 파생/가공). (ARCHITECTURE §1 lib/)
@@ -33,6 +33,14 @@ function hasJongseong(word: string): boolean {
 export const eunNeun = (w: string) => (hasJongseong(w) ? "은" : "는");
 
 /**
+ * 도보 시간(분) — 성인 보행 약 67m/분 기준.
+ * 소개문·FAQ·통계·JSON-LD가 모두 이 함수를 써야 한 페이지 안에서 값이 어긋나지 않는다.
+ * (SEO §GEO: 병원 데이터와 본문 내용이 서로 모순되지 않게 한다)
+ */
+export const walkMinutes = (distanceM: number) =>
+  Math.max(1, Math.round(distanceM / 67));
+
+/**
  * 자동 소개 문단 — 공공데이터(지역·유형·진료과목·지하철·진료시간)로 사실 기반 생성.
  * 관리자 입력(description)이 없을 때 상세페이지를 채우는 폴백. 과장 표현 없이 사실만.
  */
@@ -42,22 +50,55 @@ export function buildAutoDescription(h: Hospital): string {
     `${h.name}${eunNeun(h.name)} ${loc}에 위치한 ${h.type}입니다.`,
   ];
 
-  if (h.nearestStation?.name) {
-    const m = h.nearestStation.distanceM ?? 0;
-    const min = Math.max(1, Math.round(m / 67)); // 도보 약 67m/분
-    const raw = h.nearestStation.name.trim();
-    const st = raw.endsWith("역") ? raw : `${raw}역`;
-    parts.push(`${st}에서 도보 약 ${min}분 거리입니다.`);
+  const st = h.nearestStation;
+  if (st?.name) {
+    const min = walkMinutes(st.distanceM ?? 0);
+    const raw = st.name.trim();
+    const station = raw.endsWith("역") ? raw : `${raw}역`;
+    const line = st.line ? `${st.line} ` : "";
+    const exit = st.exit ? ` ${st.exit}번 출구에서` : "에서";
+    parts.push(
+      `${line}${station}${exit} 도보 약 ${min}분(약 ${st.distanceM}m) 거리로, 대중교통으로 찾아가기 좋습니다.`,
+    );
+  } else {
+    parts.push(`주소는 ${h.roadAddress ?? h.address}입니다.`);
   }
 
   if (h.departments.length > 0) {
-    parts.push(`${h.departments.slice(0, 6).join(", ")} 진료를 봅니다.`);
+    parts.push(`진료과목은 ${h.departments.join(", ")}입니다.`);
   }
 
-  const weekday = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
+  const open = (d?: OpeningHours) => !!d && !d.closed && !!d.open && !!d.close;
+  const hours = h.hours ?? [];
+  const weekday = hours.find((d) => d.day === 1 && open(d));
   if (weekday) {
     parts.push(`평일 진료시간은 ${weekday.open}~${weekday.close}입니다.`);
+
+    // 야간진료(평일 20시 이후 마감) — 검색 수요가 큰 정보라 문장으로 명시
+    const close = Number(
+      (weekday.close ?? "").replace(/[^0-9]/g, "").slice(0, 4).padEnd(4, "0"),
+    );
+    if (close >= 2000) {
+      parts.push(
+        `평일 ${weekday.close}까지 진료해 퇴근 후 방문이 가능한 야간진료 병원입니다.`,
+      );
+    }
   }
+
+  // 주말 진료 — 토·일 데이터가 있을 때만
+  const sat = hours.find((d) => d.day === 6);
+  const sun = hours.find((d) => d.day === 7);
+  const weekend: string[] = [];
+  if (open(sat)) weekend.push(`토요일 ${sat!.open}~${sat!.close}`);
+  else if (sat?.closed) weekend.push("토요일 휴진");
+  if (open(sun)) weekend.push(`일요일 ${sun!.open}~${sun!.close}`);
+  else if (sun?.closed) weekend.push("일요일 휴진");
+  if (weekend.length) parts.push(`주말은 ${weekend.join(", ")}입니다.`);
+
+  if (h.amenities?.includes("주차가능")) parts.push("주차가 가능합니다.");
+
+  const lunch = hours.find((d) => d.lunch)?.lunch;
+  if (lunch) parts.push(`점심시간은 ${lunch}입니다.`);
 
   parts.push(
     "정확한 진료시간·휴진 여부는 방문 전 전화로 확인하시는 것을 권장합니다.",

@@ -11,6 +11,7 @@ import { HospitalDetail } from "@/components/hospital/hospital-detail";
 import { PageContainer } from "@/components/ui/page-container";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
 import { eunNeun } from "@/lib/hospital";
+import { buildHospitalFaqs } from "@/lib/hospital-faq";
 import {
   buildBreadcrumbLd,
   buildFaqLd,
@@ -97,15 +98,18 @@ export default async function HospitalDetailPage({
   const related = await getRelatedHospitals(h);
   const posts = await getHospitalPosts(h.id);
 
+  // 관리자 입력 FAQ가 없으면 공공데이터에서 자동 생성 — 화면·FAQPage JSON-LD 공용
+  const hospital = h.faqs?.length ? h : { ...h, faqs: buildHospitalFaqs(h) };
+
   const jsonLd = [
-    buildMedicalClinicLd(h),
-    buildBreadcrumbLd(h),
-    buildFaqLd(h),
+    buildMedicalClinicLd(hospital),
+    buildBreadcrumbLd(hospital),
+    buildFaqLd(hospital),
   ].filter(Boolean);
 
   return (
     <PageContainer maxWidth="max-w-7xl">
-      <HospitalDetail hospital={h} related={related} posts={posts} />
+      <HospitalDetail hospital={hospital} related={related} posts={posts} />
       {jsonLd.map((ld, i) => (
         <script
           key={i}

@@ -129,6 +129,8 @@ export type HospitalSearchFilters = {
   type?: HospitalType;
   /** 지역 (시군구명 — /area 랜딩) */
   region?: string;
+  /** 최근접 지하철역명 (괄호 부기 제외한 clean 이름 — /near 랜딩). 예: "서울대입구" */
+  station?: string;
   /** 시도(광역) — 병원 리스트 지역 필터 */
   sido?: string;
   /** 영업중만 보기 */

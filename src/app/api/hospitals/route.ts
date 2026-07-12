@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
         : undefined,
     sido: sp.get("sido") ?? undefined,
     region: sp.get("region") ?? undefined,
+    station: sp.get("station") ?? undefined,
     openNow: sp.get("open") === "1" || undefined,
     center: lat && lng ? { lat: Number(lat), lng: Number(lng) } : undefined,
     radiusKm: radius ? Number(radius) : undefined,

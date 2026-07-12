@@ -18,6 +18,7 @@ function toParams(f: HospitalSearchFilters, page: number): string {
   if (f.department) p.set("department", f.department);
   if (f.sido) p.set("sido", f.sido);
   if (f.region) p.set("region", f.region);
+  if (f.station) p.set("station", f.station);
   if (f.openNow) p.set("open", "1");
   if (f.center) {
     p.set("lat", String(f.center.lat));
@@ -49,7 +50,6 @@ export function HospitalInfiniteList({
     });
 
   const items = data.pages.flatMap((p) => p.items);
-  const total = data.pages[0]?.total ?? items.length;
 
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -75,7 +75,12 @@ export function HospitalInfiniteList({
   return (
     <>
       <p className="mb-4 text-sm text-muted">
-        총 <span className="font-bold text-neutral">{total.toLocaleString()}</span>곳
+        총{" "}
+        <span className="font-bold text-neutral">
+          {items.length.toLocaleString()}
+          {hasNextPage ? "+" : ""}
+        </span>
+        곳
       </p>
 
       <ul className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-4">

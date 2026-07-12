@@ -16,8 +16,13 @@ import { SectionNav } from "./section-nav";
 import { TodayStatus } from "./today-status";
 import { PostActions } from "@/components/hospital/post-actions";
 import { isPartnerHospital } from "@/constants/partners";
-import { buildAutoDescription, buildHospitalSummaryBullets } from "@/lib/hospital";
+import {
+  buildAutoDescription,
+  buildHospitalSummaryBullets,
+  walkMinutes,
+} from "@/lib/hospital";
 import { lineColor } from "@/lib/station";
+import { cleanStationName, stationSegment } from "@/lib/station-landing";
 import type { Hospital } from "@/types/hospital";
 import type { HospitalPost } from "@/types/hospital-post";
 
@@ -54,10 +59,11 @@ export function HospitalDetail({
   const addr = h.roadAddress ?? h.address;
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
   const st = h.nearestStation;
-  const stWalk = st ? Math.max(1, Math.round(st.distanceM / 80)) : 0;
+  const stWalk = st ? walkMinutes(st.distanceM) : 0;
   const introText = h.description ?? buildAutoDescription(h);
   const summaryBullets = buildHospitalSummaryBullets(h);
   const hasHours = !!(h.hours && h.hours.length > 0);
+  const hasFaqs = !!(h.faqs && h.faqs.length > 0);
 
   // 야간진료 여부 + 평일 마감 시각
   const weekday = (h.hours ?? []).find(
@@ -87,6 +93,7 @@ export function HospitalDetail({
     ...(posts.length > 0
       ? [{ id: "posts", label: "포스팅", icon: <PostDuoIcon /> }]
       : []),
+    ...(hasFaqs ? [{ id: "faq", label: "자주 묻는 질문", icon: <FaqDuoIcon /> }] : []),
     ...(related.length > 0
       ? [{ id: "nearby", label: "주변 병원", icon: <HospitalDuoIcon /> }]
       : []),
@@ -96,6 +103,34 @@ export function HospitalDetail({
     <article>
       <div className="grid gap-8 lg:grid-cols-[180px_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col lg:order-2">
+          {/* 빵부스러기 — BreadcrumbList JSON-LD와 동일 경로 */}
+          <nav aria-label="현재 위치" className="mb-4">
+            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
+              <li>
+                <Link href="/" className="hover:text-brand hover:underline">
+                  홈
+                </Link>
+              </li>
+              <li aria-hidden className="text-subtle/50">
+                ›
+              </li>
+              <li>
+                <Link
+                  href={`/area/${encodeURIComponent(h.region.sigungu)}`}
+                  className="hover:text-brand hover:underline"
+                >
+                  {h.region.sigungu}
+                </Link>
+              </li>
+              <li aria-hidden className="text-subtle/50">
+                ›
+              </li>
+              <li aria-current="page" className="font-semibold text-neutral">
+                {h.name}
+              </li>
+            </ol>
+          </nav>
+
           {/* 소개 — 상태·이름·사진·소개·통계·주소·CTA */}
           <section id="intro" className="scroll-mt-24">
             {/* 상태 */}
@@ -187,12 +222,12 @@ export function HospitalDetail({
             <hr className="my-6 border-t border-black/[0.07]" />
 
             {/* 주소 + 진료과목 칩 */}
-            <div className="flex items-start gap-2">
+            <address className="flex items-start gap-2 not-italic">
               <span className="mt-0.5 shrink-0 text-subtle">
                 <PinSmallIcon />
               </span>
               <span className="text-[15px] text-neutral">{addr}</span>
-            </div>
+            </address>
             {h.departments.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {h.departments.map((d) => (
@@ -280,27 +315,38 @@ export function HospitalDetail({
                 <MapPlaceholder className="min-h-[13rem] rounded-xl" />
               )}
               <div className="flex flex-col gap-3">
-                <p className="text-[15px] text-neutral">{addr}</p>
+                <address className="text-[15px] not-italic text-neutral">
+                  {addr}
+                </address>
                 {st && (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {st.line && <LineBadge line={st.line} />}
-                    <TagGroupRoot size="t3" tone="neutralSubtle">
-                      <TagGroupItem>
-                        <TagGroupItemLabel>{st.name}</TagGroupItemLabel>
-                      </TagGroupItem>
-                      <TagGroupItem>
-                        <TagGroupItemLabel>
-                          {st.exit ? `${st.exit}번 출구 ` : ""}도보 약 {stWalk}분
-                        </TagGroupItemLabel>
-                      </TagGroupItem>
-                      <TagGroupItem tone="brand">
-                        <TagGroupItemLabel
-                          style={{ color: "var(--seed-color-fg-brand)" }}
-                        >
-                          {st.distanceM}m
-                        </TagGroupItemLabel>
-                      </TagGroupItem>
-                    </TagGroupRoot>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {st.line && <LineBadge line={st.line} />}
+                      <TagGroupRoot size="t3" tone="neutralSubtle">
+                        <TagGroupItem>
+                          <TagGroupItemLabel>{st.name}</TagGroupItemLabel>
+                        </TagGroupItem>
+                        <TagGroupItem>
+                          <TagGroupItemLabel>
+                            {st.exit ? `${st.exit}번 출구 ` : ""}도보 약 {stWalk}분
+                          </TagGroupItemLabel>
+                        </TagGroupItem>
+                        <TagGroupItem tone="brand">
+                          <TagGroupItemLabel
+                            style={{ color: "var(--seed-color-fg-brand)" }}
+                          >
+                            {st.distanceM}m
+                          </TagGroupItemLabel>
+                        </TagGroupItem>
+                      </TagGroupRoot>
+                    </div>
+                    <Link
+                      href={`/near/${stationSegment(cleanStationName(st.name))}`}
+                      className="inline-flex w-fit items-center gap-1 text-sm font-semibold text-brand hover:underline"
+                    >
+                      {stationSegment(cleanStationName(st.name))} 주변 병원 보기
+                      <ChevronRightIcon />
+                    </Link>
                   </div>
                 )}
                 <div>
@@ -323,11 +369,20 @@ export function HospitalDetail({
           <HospitalPostList hospital={h} posts={posts} />
 
           {/* 자주 묻는 질문 */}
-          {h.faqs && h.faqs.length > 0 && (
-            <section className="mt-12">
-              <h2 className="text-lg font-bold text-neutral">자주 묻는 질문</h2>
+          {hasFaqs && (
+            <section
+              id="faq"
+              aria-labelledby="hospital-faq"
+              className="mt-12 scroll-mt-24"
+            >
+              <h2 id="hospital-faq" className="text-lg font-bold text-neutral">
+                자주 묻는 질문
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                진료시간·위치·진료과목 등 방문 전 자주 확인하는 내용이에요.
+              </p>
               <div className="mt-4">
-                <FaqAccordion faqs={h.faqs} />
+                <FaqAccordion faqs={h.faqs!} />
               </div>
             </section>
           )}
@@ -393,8 +448,13 @@ export function HospitalDetail({
           {/* 출처 */}
           <footer className="mt-12 border-t border-black/[0.06] pt-5">
             <p className="text-xs text-subtle">
-              {h.updatedAt ? `정보 업데이트: ${h.updatedAt} · ` : ""}출처
-              건강보험심사평가원(HIRA)
+              {h.updatedAt && (
+                <>
+                  정보 업데이트:{" "}
+                  <time dateTime={h.updatedAt}>{h.updatedAt}</time> ·{" "}
+                </>
+              )}
+              출처 건강보험심사평가원(HIRA)
             </p>
           </footer>
         </div>
@@ -511,6 +571,21 @@ function PostDuoIcon() {
     </svg>
   );
 }
+function FaqDuoIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" fill="var(--seed-color-bg-brand-weak)" />
+      <path
+        d="M9.4 9.4a2.6 2.6 0 1 1 3.5 2.45c-.55.2-.9.72-.9 1.3v.35"
+        stroke="var(--seed-color-fg-brand)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="16.4" r="1" fill="var(--seed-color-fg-brand)" />
+    </svg>
+  );
+}
+
 function PinSmallIcon() {
   return (
     <svg

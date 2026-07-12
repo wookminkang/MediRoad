@@ -43,52 +43,70 @@ export function OpeningHoursTable({
   }, []);
 
   return (
-    <div className="flex flex-col">
-      {DISPLAY_ORDER.map((day) => {
-        const h = byDay.get(day);
-        const closed = !h || h.closed || !h.open;
-        const night = !closed && isNight(h?.close);
-        const isToday = day === today;
-        return (
-          <div
-            key={day}
-            className={`flex items-center gap-2.5 border-b border-line py-1.5 last:border-b-0 ${
-              isToday ? "rounded-lg bg-brand-weak/50 px-2" : ""
-            }`}
-          >
-            <DayChip today={isToday}>{DAY_LABELS[day]}</DayChip>
-            {isToday && (
-              <span className="rounded bg-[#1E5BD6] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                오늘
-              </span>
-            )}
-            {closed ? (
-              <ClosedBadge />
-            ) : (
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`text-sm font-bold tracking-tight ${
-                    isToday ? "text-[#1E5BD6]" : "text-neutral"
-                  }`}
-                >
-                  {h.open}–{h.close}
-                </span>
-                {h.lunch && (
-                  <span className="text-xs text-muted">점심 {h.lunch}</span>
+    // 요일→시간 관계를 검색엔진이 그대로 읽도록 실제 <table>로 표현한다(시각은 동일).
+    <table className="w-full border-collapse">
+      <caption className="sr-only">요일별 진료시간</caption>
+      <thead className="sr-only">
+        <tr>
+          <th scope="col">요일</th>
+          <th scope="col">진료시간</th>
+        </tr>
+      </thead>
+      <tbody className="flex flex-col">
+        {DISPLAY_ORDER.map((day) => {
+          const h = byDay.get(day);
+          const closed = !h || h.closed || !h.open;
+          const night = !closed && isNight(h?.close);
+          const isToday = day === today;
+          return (
+            <tr
+              key={day}
+              className={`flex items-center gap-2.5 border-b border-line py-1.5 last:border-b-0 ${
+                isToday ? "rounded-lg bg-brand-weak/50 px-2" : ""
+              }`}
+            >
+              <th scope="row" className="flex items-center gap-2.5 font-normal">
+                <DayChip today={isToday}>{DAY_LABELS[day]}</DayChip>
+                {isToday && (
+                  <span className="rounded bg-[#1E5BD6] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    오늘
+                  </span>
                 )}
-                {night && <NightBadge />}
-              </div>
-            )}
-          </div>
-        );
-      })}
-      {holidayClosed && (
-        <div className="flex items-center gap-3 py-2.5">
-          <DayChip>공휴일</DayChip>
-          <ClosedBadge />
-        </div>
-      )}
-    </div>
+              </th>
+              <td>
+                {closed ? (
+                  <ClosedBadge />
+                ) : (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`text-sm font-bold tracking-tight ${
+                        isToday ? "text-[#1E5BD6]" : "text-neutral"
+                      }`}
+                    >
+                      <time>{h.open}</time>–<time>{h.close}</time>
+                    </span>
+                    {h.lunch && (
+                      <span className="text-xs text-muted">점심 {h.lunch}</span>
+                    )}
+                    {night && <NightBadge />}
+                  </div>
+                )}
+              </td>
+            </tr>
+          );
+        })}
+        {holidayClosed && (
+          <tr className="flex items-center gap-3 py-2.5">
+            <th scope="row" className="font-normal">
+              <DayChip>공휴일</DayChip>
+            </th>
+            <td>
+              <ClosedBadge />
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   );
 }
 

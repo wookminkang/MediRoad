@@ -181,12 +181,13 @@ function mockMatches(h: Hospital, q: string): boolean {
   );
 }
 function mockGetHospitals(f: HospitalSearchFilters): Paginated<Hospital> {
-  const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = f;
+  const { q, department, type, region, station, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = f;
   let results = MOCK_HOSPITALS.filter((h) => {
     if (q && !mockMatches(h, q)) return false;
     if (department && !h.departments.includes(department)) return false;
     if (type && h.type !== type) return false;
     if (region && h.region.sigungu !== region) return false;
+    if (station && !(h.nearestStation?.name ?? "").startsWith(station)) return false;
     if (sido && h.region.sido !== sido) return false;
     if (openNow && !h.isOpenNow) return false;
     if (center && radiusKm && distanceInMeters(center, h.location) > radiusKm * 1000) return false;
@@ -291,7 +292,7 @@ export async function getHospitals(
     }
   }
 
-  const { q, department, type, region, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
+  const { q, department, type, region, station, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
   const start = (page - 1) * pageSize;
 
   const deptTypes = department ? DEPT_AS_TYPE[department] : undefined;
@@ -308,6 +309,9 @@ export async function getHospitals(
 
   if (type) query = query.eq("type", type);
   if (region) query = query.eq("sigungu", region);
+  // 역세권: station_name은 "역" 접미 없이 저장되고 일부는 괄호 부기명(예: "서울대입구(관악구청)")
+  // → clean 이름 접두 매칭. (/near 랜딩)
+  if (station) query = query.ilike("station_name", `${station}%`);
   if (sido) query = query.eq("sido", sido);
   if (deptTypes) query = query.in("type", deptTypes as string[]);
   else if (department) query = query.eq("hospital_departments.name", department);

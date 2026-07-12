@@ -2,37 +2,35 @@ import Link from "next/link";
 
 import { ActionChip, Text } from "@seed-design/react";
 
-import { FEATURED_REGIONS } from "@/constants/region";
-import { stationSegment } from "@/lib/station-landing";
 import type { HospitalSearchFilters } from "@/types/hospital";
 
 import { HospitalInfiniteList } from "./hospital-infinite-list";
 
 type Props = {
-  region: string;
+  /** 표시·URL용 역명(예: "서울대입구역") */
+  station: string;
   department?: string;
-  /** 무한스크롤 목록 필터 (region[, department]) */
+  /** 무한스크롤 목록 필터 (station[, department]) */
   filters: HospitalSearchFilters;
-  /** 지역 내 진료과목 (허브·인접 탐색) */
-  regionDepartments: string[];
-  /** 이 지역 주요 지하철역(clean 역명 — 역세권 랜딩 교차 링크) */
-  stations?: string[];
+  /** 이 역 주변에서 등장하는 진료과목 (허브·인접 탐색) */
+  stationDepartments: string[];
+  /** 역이 속한 시군구 (지역 랜딩 교차 링크) */
+  sigungu?: string;
   intro: string;
   faqs: { q: string; a: string }[];
 };
 
-export function AreaLanding({
-  region,
+export function StationLanding({
+  station,
   department,
   filters,
-  regionDepartments,
-  stations = [],
+  stationDepartments,
+  sigungu,
   intro,
   faqs,
 }: Props) {
-  const title = department ? `${region} ${department}` : `${region} 병원`;
-  const otherRegions = FEATURED_REGIONS.filter((r) => r !== region);
-  const otherDepartments = regionDepartments.filter((d) => d !== department);
+  const title = department ? `${station} ${department}` : `${station} 병원`;
+  const otherDepartments = stationDepartments.filter((d) => d !== department);
 
   return (
     <article>
@@ -45,11 +43,7 @@ export function AreaLanding({
         >
           <Link href="/">홈</Link>
           {" › "}
-          {department ? (
-            <Link href={`/area/${region}`}>{region}</Link>
-          ) : (
-            region
-          )}
+          {department ? <Link href={`/near/${station}`}>{station}</Link> : station}
           {department && (
             <>
               {" › "}
@@ -69,11 +63,11 @@ export function AreaLanding({
         </Text>
       </header>
 
-      {/* region-only: 진료과목 허브 */}
-      {!department && regionDepartments.length > 0 && (
+      {/* 역 허브: 진료과목 칩 */}
+      {!department && stationDepartments.length > 0 && (
         <nav aria-label="진료과목" className="mt-6 flex flex-wrap gap-2">
-          {regionDepartments.map((d) => (
-            <ChipLink key={d} href={`/area/${region}/${d}`}>
+          {stationDepartments.map((d) => (
+            <ChipLink key={d} href={`/near/${station}/${d}`}>
               {d}
             </ChipLink>
           ))}
@@ -83,14 +77,14 @@ export function AreaLanding({
       {/* 병원 목록 — SSR 첫 페이지 + 무한스크롤 */}
       <section aria-labelledby="list" className="mt-8">
         <Text as="h2" id="list" textStyle="t7Bold">
-          {title} 병원
+          {station} {department ?? ""} 병원
         </Text>
         <div className="mt-3">
           <HospitalInfiniteList filters={filters} />
         </div>
       </section>
 
-      {/* 지역 특화 FAQ */}
+      {/* 역세권 FAQ */}
       <section aria-labelledby="faq" className="mt-8">
         <Text as="h2" id="faq" textStyle="t7Bold">
           {title} 자주 묻는 질문
@@ -115,48 +109,6 @@ export function AreaLanding({
 
       {/* 인접 탐색 (내부링크) */}
       <nav aria-label="인접 탐색" className="mt-8 flex flex-col gap-3">
-        {stations.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Text
-              as="span"
-              textStyle="t4Medium"
-              style={{ color: "var(--seed-color-fg-neutral-muted)" }}
-            >
-              역세권으로 찾기
-            </Text>
-            {stations.map((s) => (
-              <ChipLink
-                key={s}
-                href={
-                  department
-                    ? `/near/${stationSegment(s)}/${department}`
-                    : `/near/${stationSegment(s)}`
-                }
-              >
-                {stationSegment(s)} {department ?? ""}
-              </ChipLink>
-            ))}
-          </div>
-        )}
-        {otherRegions.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Text
-              as="span"
-              textStyle="t4Medium"
-              style={{ color: "var(--seed-color-fg-neutral-muted)" }}
-            >
-              인접 지역
-            </Text>
-            {otherRegions.map((r) => (
-              <ChipLink
-                key={r}
-                href={department ? `/area/${r}/${department}` : `/area/${r}`}
-              >
-                {r} {department ?? "병원"}
-              </ChipLink>
-            ))}
-          </div>
-        )}
         {department && otherDepartments.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <Text
@@ -164,13 +116,27 @@ export function AreaLanding({
               textStyle="t4Medium"
               style={{ color: "var(--seed-color-fg-neutral-muted)" }}
             >
-              {region} 다른 과목
+              {station} 다른 과목
             </Text>
             {otherDepartments.map((d) => (
-              <ChipLink key={d} href={`/area/${region}/${d}`}>
+              <ChipLink key={d} href={`/near/${station}/${d}`}>
                 {d}
               </ChipLink>
             ))}
+          </div>
+        )}
+        {sigungu && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Text
+              as="span"
+              textStyle="t4Medium"
+              style={{ color: "var(--seed-color-fg-neutral-muted)" }}
+            >
+              지역으로 보기
+            </Text>
+            <ChipLink href={department ? `/area/${sigungu}/${department}` : `/area/${sigungu}`}>
+              {sigungu} {department ?? "병원"}
+            </ChipLink>
           </div>
         )}
       </nav>
