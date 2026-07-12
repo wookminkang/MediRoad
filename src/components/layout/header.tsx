@@ -3,11 +3,15 @@ import Link from "next/link";
 
 import { ActionButton } from "@seed-design/react";
 
-import { MobileMenu } from "./mobile-menu";
+import { MobileAppBar } from "./mobile-app-bar";
 import { NavLink } from "./nav-link";
 
 /**
- * 전역 헤더 (banner) — 로고 + 주요 내비. sticky. (WIREFRAME §3)
+ * 전역 헤더 (banner) — sticky. (WIREFRAME §3)
+ *
+ * 데스크톱: 로고 + 주요 내비.
+ * 모바일  : 앱바(뒤로가기·페이지명·검색). 햄버거는 없앴고 내비는 하단 탭바(BottomNav)가 맡는다.
+ *
  * Server Component. 색·radius=Seed 토큰, 레이아웃=Tailwind.
  */
 export function Header() {
@@ -20,7 +24,11 @@ export function Header() {
       }}
     >
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link href="/" aria-label="메디로드 홈" className="flex items-center">
+        <Link
+          href="/"
+          aria-label="메디로드 홈"
+          className="hidden items-center md:flex"
+        >
           <Image
             src="/mediroad_logo.svg"
             alt="MediRoad"
@@ -50,8 +58,7 @@ export function Header() {
           </ActionButton>
         </nav>
 
-        {/* 모바일 햄버거 메뉴 */}
-        <MobileMenu />
+        <MobileAppBar />
       </div>
     </header>
   );

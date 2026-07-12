@@ -68,6 +68,15 @@ figcaption {
   text-wrap: pretty;
 }
 
+/* 가로 스크롤 필터 칩 — 스크롤바를 숨겨 한 줄 높이를 유지 */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* 인터랙티브 요소 커서 — Tailwind v4는 button 기본 커서가 default라 포인터로 복원 */
 button:not(:disabled),
 select:not(:disabled),

@@ -3,68 +3,84 @@ import Link from "next/link";
 import { Badge } from "@seed-design/react";
 
 import { isPartnerHospital } from "@/constants/partners";
+import { walkMinutes } from "@/lib/hospital";
 import type { Hospital } from "@/types/hospital";
 
-/** 검색결과 그리드 카드 — 썸네일 없는 정보형 카드(아이콘 타일 + 핵심 정보). */
+/**
+ * 검색결과 카드 — 썸네일이 없는 정보형이라 모바일은 1열 가로 로우, sm 이상은 그리드 카드.
+ *
+ * 2열 그리드는 썸네일이 있을 때(당근 상품 카드) 유효하다. 병원은 사용자가 스캔하는 정보가
+ * 이미지가 아니라 주소·지하철·진료과 텍스트인데, 좁은 2열에서는 그게 전부 잘린다.
+ * 그래서 모바일은 전폭 로우로 두고 주소를 온전히 보여준다.
+ */
 export function HospitalGridCard({ hospital: h }: { hospital: Hospital }) {
   const st = h.nearestStation;
-  const walk = st ? Math.max(1, Math.round(st.distanceM / 67)) : 0;
+  const walk = st ? walkMinutes(st.distanceM) : 0;
+
+  const badges = (
+    <div className="flex shrink-0 flex-wrap justify-end gap-1">
+      {isPartnerHospital(h.id) && (
+        <Badge variant="solid" tone="brand">
+          제휴
+        </Badge>
+      )}
+      {h.isOpenNow != null && (
+        <Badge variant="weak" tone={h.isOpenNow ? "positive" : "neutral"}>
+          {h.isOpenNow ? "영업중" : "영업종료"}
+        </Badge>
+      )}
+    </div>
+  );
 
   return (
     <Link
       href={`/hospitals/${h.slug}`}
-      className="group flex h-full flex-col rounded-2xl p-4 transition-colors hover:bg-neutral-weak"
+      className="group flex h-full gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-neutral-weak sm:flex-col sm:gap-0 sm:p-4"
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-weak text-brand">
+      {/* 아이콘 (sm 이상에선 배지와 같은 줄) */}
+      <div className="flex shrink-0 items-start justify-between sm:w-full">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-weak text-brand">
           <BuildingIcon />
         </span>
-        <div className="flex flex-wrap justify-end gap-1">
-          {isPartnerHospital(h.id) && (
-            <Badge variant="solid" tone="brand">
-              제휴
-            </Badge>
-          )}
-          {h.isOpenNow != null && (
-            <Badge variant="weak" tone={h.isOpenNow ? "positive" : "neutral"}>
-              {h.isOpenNow ? "영업중" : "영업종료"}
-            </Badge>
-          )}
-        </div>
+        <div className="hidden sm:block">{badges}</div>
       </div>
 
-      <h3 className="mt-3 line-clamp-2 text-[15px] font-bold text-neutral">
-        {h.name}
-      </h3>
-      <p className="mt-1 line-clamp-1 text-[13px] text-muted">
-        {h.type}
-        {h.departments.length > 0 && ` · ${h.departments.slice(0, 3).join("·")}`}
-      </p>
-      <p className="mt-0.5 line-clamp-1 text-xs text-subtle">
-        {h.region.sigungu}
-        {st && ` · ${st.name} 도보 ${walk}분`}
-      </p>
-      <p className="mt-2 line-clamp-1 text-xs text-subtle">
-        {h.roadAddress ?? h.address}
-      </p>
+      <div className="min-w-0 flex-1 sm:mt-2.5">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="line-clamp-2 text-[15px] font-bold text-neutral">
+            {h.name}
+          </h3>
+          {/* 모바일은 이름 옆에 배지 */}
+          <div className="sm:hidden">{badges}</div>
+        </div>
 
-      <span className="mt-auto inline-flex items-center gap-1 pt-3 text-[13px] font-bold text-brand">
-        상세 보기
-        <svg
-          className="transition-transform group-hover:translate-x-0.5"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="m9 18 6-6-6-6" />
-        </svg>
-      </span>
+        <p className="mt-0.5 line-clamp-1 text-[13px] text-muted sm:mt-1">
+          {h.type}
+          {h.departments.length > 0 && ` · ${h.departments.slice(0, 3).join("·")}`}
+        </p>
+
+        {/*
+         * 모바일은 전폭이라 지역·역·주소를 한 줄에 합친다(행 높이 ↓ → 화면당 병원 수 ↑).
+         * 좁은 그리드 카드(sm~)에서는 한 줄에 다 넣으면 잘리므로 두 줄로 나눈다.
+         */}
+        <p className="mt-0.5 line-clamp-1 text-xs text-subtle sm:hidden">
+          {[
+            h.region.sigungu,
+            st ? `${st.name} 도보 ${walk}분` : null,
+            h.roadAddress ?? h.address,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+
+        <p className="mt-0.5 hidden line-clamp-1 text-xs text-subtle sm:block">
+          {h.region.sigungu}
+          {st && ` · ${st.name} 도보 ${walk}분`}
+        </p>
+        <p className="mt-1 hidden line-clamp-1 text-xs text-subtle sm:block">
+          {h.roadAddress ?? h.address}
+        </p>
+      </div>
     </Link>
   );
 }
@@ -72,8 +88,8 @@ export function HospitalGridCard({ hospital: h }: { hospital: Hospital }) {
 function BuildingIcon() {
   return (
     <svg
-      width="22"
-      height="22"
+      width="20"
+      height="20"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

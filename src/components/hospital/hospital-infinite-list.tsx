@@ -74,16 +74,16 @@ export function HospitalInfiniteList({
 
   return (
     <>
-      <p className="mb-4 text-sm text-muted">
-        총{" "}
+      <p className="mb-2 text-xs text-subtle">
+        {hasNextPage ? "" : "총 "}
         <span className="font-bold text-neutral">
-          {items.length.toLocaleString()}
-          {hasNextPage ? "+" : ""}
+          {items.length.toLocaleString()}곳
         </span>
-        곳
+        {hasNextPage ? " 이상 표시 중" : ""}
       </p>
 
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 xl:grid-cols-4">
+      {/* 모바일 1열 로우(주소가 잘리지 않도록) → sm부터 그리드 카드 */}
+      <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5 md:grid-cols-3 xl:grid-cols-4">
         {items.map((h) => (
           <li key={h.id}>
             <HospitalGridCard hospital={h} />

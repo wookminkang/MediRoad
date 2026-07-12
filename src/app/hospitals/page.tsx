@@ -7,10 +7,10 @@ import { Text } from "@seed-design/react";
 import { getHospitals } from "@/api/hospital";
 import { HospitalInfiniteList } from "@/components/hospital/hospital-infinite-list";
 import { ActiveFilterChips } from "@/components/search/active-filter-chips";
-import { DepartmentFilter } from "@/components/search/department-filter";
-import { FilterPanel } from "@/components/search/filter-panel";
+import { FilterSheet } from "@/components/search/filter-sheet";
 import { FilterSidebar } from "@/components/search/filter-sidebar";
-import { HospitalSearchBox } from "@/components/search/hospital-search-box";
+import { SearchTrigger } from "@/components/search/search-trigger";
+import { TabRow } from "@/components/search/tab-row";
 import { PageContainer } from "@/components/ui/page-container";
 import { MEDICAL_DEPARTMENTS, type MedicalDepartment } from "@/constants/hospital";
 import { DEFAULT_LOCATION } from "@/constants/location";
@@ -95,37 +95,86 @@ export default async function HospitalsPage({
     Boolean,
   ).length;
 
+  const sidebar = (
+    <FilterSidebar
+      q={q}
+      activeDepartment={department}
+      activeSido={sido}
+      activeRadius={radius}
+      lat={lat}
+      lng={lng}
+      openNow={openNow}
+    />
+  );
+
+  // 진료과목 탭 (전체 + 14개 과) — URL 기반 링크
+  const deptHref = (dept?: string) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (dept) params.set("department", dept);
+    const qs = params.toString();
+    return qs ? `/hospitals?${qs}` : "/hospitals";
+  };
+  const tabs = [
+    { id: "", label: "전체", href: deptHref() },
+    ...MEDICAL_DEPARTMENTS.map((d) => ({ id: d, label: d, href: deptHref(d) })),
+  ];
+
   return (
     <PageContainer maxWidth="max-w-7xl">
-      {/* 결과 타이틀 */}
-      <Text as="h1" textStyle="t8Bold">
-        {label ? `“${label}” 검색 결과` : "전체 병원"}
-      </Text>
+      {/*
+       * 스티키 바 — 제목 + 검색 아이콘 / 필터 + 진료과목 탭.
+       * 인라인 검색바(≈56px)를 걷어내고 아이콘으로 바꿔 그 자리를 리스트에 돌려준다.
+       * 컨테이너 좌우 거터는 음수 마진으로 뚫어 화면 끝까지 배경을 깐다.
+       */}
+      <div className="sticky top-14 z-30 -mx-4 bg-white px-4 pb-2 pt-1 md:-mx-6 md:px-6">
+        {/*
+         * 제목 + 검색 아이콘 줄 — 모바일에서는 통째로 감춘다.
+         * 헤더 앱바가 이미 "병원찾기" 제목과 검색 아이콘을 들고 있어 그대로 두면 두 번 나온다.
+         * h1은 DOM에 남으므로(display:none) SEO에는 영향이 없고,
+         * 검색어 맥락은 아래 ActiveFilterChips가 칩으로 계속 보여준다.
+         */}
+        <div className="hidden items-center justify-between gap-2 md:flex">
+          <Text as="h1" textStyle="t8Bold">
+            {label ? `“${label}” 검색 결과` : "전체 병원"}
+          </Text>
+          <div>
+            <SearchTrigger
+              action="/hospitals"
+              placeholder="병원 이름·지역으로 검색"
+              q={q}
+              suggestions={[
+                "내과",
+                "치과",
+                "정형외과",
+                "피부과",
+                "한방",
+                "소아청소년과",
+                "이비인후과",
+                "산부인과",
+              ]}
+            />
+          </div>
+        </div>
 
-      {/* 병원명 검색 + 선택된 필터 칩 */}
-      <div className="mt-4">
-        <HospitalSearchBox />
+        <div className="mt-1">
+          <TabRow
+            items={tabs}
+            activeId={department ?? ""}
+            leading={
+              <div className="lg:hidden">
+                <FilterSheet activeCount={activeCount}>{sidebar}</FilterSheet>
+              </div>
+            }
+          />
+        </div>
+
         <ActiveFilterChips />
       </div>
 
-      {/* 진료과목 카테고리 — 빠른 필터 */}
-      <div className="mt-4 overflow-x-auto">
-        <DepartmentFilter q={q} active={department} />
-      </div>
-
-      {/* 필터 + 무한스크롤 그리드 */}
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
-        <FilterPanel activeCount={activeCount}>
-          <FilterSidebar
-            q={q}
-            activeDepartment={department}
-            activeSido={sido}
-            activeRadius={radius}
-            lat={lat}
-            lng={lng}
-            openNow={openNow}
-          />
-        </FilterPanel>
+      {/* 필터 사이드바(데스크톱) + 무한스크롤 그리드 */}
+      <div className="mt-4 grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]">
+        <aside className="hidden lg:block">{sidebar}</aside>
 
         {/* min-height로 결과 적을 때 레이아웃 붕괴 방지 */}
         <section aria-label="검색 결과" className="min-h-[60vh]">

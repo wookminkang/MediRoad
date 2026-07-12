@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import "@seed-design/css/all.layered.css";
 import "./brand.css"; // MediRoad 브랜드 색(메디컬 블루) — Seed brand 토큰 오버라이드(unlayered)
 import "./globals.css"; // Pretendard 폰트 포함
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { ChromeOnMap } from "@/components/layout/chrome-on-map";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
@@ -116,6 +117,8 @@ export default function RootLayout({
           <ChromeOnMap>
             <Footer />
           </ChromeOnMap>
+          {/* 모바일 하단 탭바 — 지도 페이지에서는 스스로 렌더하지 않는다 */}
+          <BottomNav />
         </AppProviders>
       </body>
     </html>
