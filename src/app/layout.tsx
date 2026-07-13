@@ -108,15 +108,20 @@ export default function RootLayout({
         />
       </head>
       {/*
-       * 앱 쉘 — 데스크톱에서도 모바일 UI를 640px 칸에 그대로. (강남언니 패턴)
-       * 바깥은 배경색, 안쪽 640 칸이 앱 화면. 쉘 폭이 640을 넘지 않으므로
+       * 앱 쉘 — 데스크톱에서도 모바일 UI를 좁은 칸에 그대로. (강남언니 패턴)
+       * 폭은 globals.css의 --app-shell-max 한 곳에서 정한다.
+       * 바깥은 배경색, 안쪽 칸이 앱 화면. 쉘 폭이 좁으므로
        * ≥768(md/lg/xl)을 가정한 레이아웃은 이 코드베이스에서 쓰지 않는다.
        */}
       {/* 쉘 바깥 배경 — Seed가 body 배경을 흰색으로 잡아 Tailwind 클래스가 밀린다. 인라인으로 확정 */}
       <body className="min-h-full" style={{ backgroundColor: "#EDF0F4" }}>
         <AppProviders>
           <SkipLink />
-          <div className="mx-auto flex min-h-dvh w-full max-w-[640px] flex-col bg-white">
+          {/* 폭은 인라인으로 — 임의값 클래스 생성에 기대지 않고 CSS 변수 한 곳(globals.css)만 본다 */}
+          <div
+            className="mx-auto flex min-h-dvh w-full flex-col bg-white"
+            style={{ maxWidth: "var(--app-shell-max)" }}
+          >
             <Header />
             <main id="main" className="flex-1">
               {children}

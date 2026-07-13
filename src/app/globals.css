@@ -78,8 +78,16 @@ figcaption {
 }
 
 /*
- * 앱 쉘 — 데스크톱에서도 모바일 UI를 640px 칸에 그대로 보여준다. (강남언니 패턴)
+ * 앱 쉘 — 데스크톱에서도 모바일 UI를 이 폭의 칸에 그대로 보여준다. (강남언니 패턴)
  *
+ * 폭은 여기 한 곳에서만 정한다. 레이아웃(쉘 div)과 .shell-fixed가 같은 값을 써야
+ * 하단 탭바·전체화면 패널이 쉘과 정확히 겹친다.
+ */
+:root {
+  --app-shell-max: 540px;
+}
+
+/*
  * position:fixed는 뷰포트 기준이라 쉘을 벗어난다. 하단 탭바·전체화면 패널처럼
  * 고정되는 요소는 이 클래스로 쉘 폭 안에 가둬야 한다.
  *
@@ -90,7 +98,7 @@ figcaption {
   position: fixed;
   left: 50%;
   width: 100%;
-  max-width: var(--app-shell-max, 640px);
+  max-width: var(--app-shell-max);
   transform: translateX(-50%);
 }
 

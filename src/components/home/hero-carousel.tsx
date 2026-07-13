@@ -94,7 +94,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           <li
             key={s.image}
             // 카드 폭을 100%보다 좁게 잡아야 옆 카드가 살짝 보인다(= 더 있다는 신호)
-            className="w-[86%] shrink-0 snap-center sm:w-[420px]"
+            className="w-[86%] shrink-0 snap-center"
           >
             {/*
              * 활성 카드만 원래 크기, 옆 카드는 살짝 줄인다 — 지금 보는 게 어느 카드인지
@@ -113,7 +113,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 src={s.image}
                 alt=""
                 fill
-                sizes="(max-width: 640px) 86vw, 420px"
+                sizes="(max-width: 540px) 86vw, 465px"
                 // 첫 장은 LCP — 먼저 받는다
                 priority={i === 0}
                 className="object-cover"

@@ -54,7 +54,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
         className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 md:px-6"
       >
         {slides.map((s) => (
-          <li key={s.image} className="w-full shrink-0 snap-center md:w-[560px]">
+          <li key={s.image} className="w-full shrink-0 snap-center">
             <Link
               href={s.href}
               className="relative flex h-[104px] items-center overflow-hidden rounded-2xl bg-neutral-weak"
@@ -63,7 +63,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
                 src={s.image}
                 alt=""
                 fill
-                sizes="(max-width: 768px) 100vw, 560px"
+                sizes="(max-width: 540px) 100vw, 508px"
                 className="object-cover"
               />
               {/* 카피가 놓이는 좌측을 살짝 눌러 대비를 확보한다 */}

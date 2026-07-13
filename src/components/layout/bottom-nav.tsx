@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { SECTIONS, matchSection } from "@/constants/nav";
 
 /**
- * 하단 탭바 — 앱 쉘(640px)이라 데스크톱에서도 그대로 쓴다.
+ * 하단 탭바 — 앱 쉘이라 데스크톱에서도 그대로 쓴다.
  *
  * 항목은 constants/nav의 SECTIONS(앱바 타이틀과 공유)에서 가져온다 — 아이콘만 여기서 붙인다.
  * 지도(/map)에서는 숨긴다 — 풀스크린 지도 + 하단 시트(mobile-bottom-sheet)와 자리가 겹친다.
