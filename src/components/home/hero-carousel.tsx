@@ -77,9 +77,14 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section aria-label="주요 안내" className="bg-white pt-3">
+      {/*
+       * justify-center를 걸면 안 된다. 가로 스크롤 컨테이너에 걸면 콘텐츠가 양쪽으로 넘쳐
+       * scrollLeft=0이 첫 카드가 아니게 되고(첫 카드는 스크롤로 닿지도 못한다),
+       * 스크롤 위치로 역산하는 현재 인덱스가 화면과 어긋난다(카운터는 01인데 2번이 커져 있음).
+       */}
       <ul
         ref={trackRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4 md:justify-center md:px-6"
+        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4"
         onPointerDown={() => setPaused(true)}
         onPointerUp={() => setPaused(false)}
         onMouseEnter={() => setPaused(true)}
