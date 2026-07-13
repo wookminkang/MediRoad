@@ -93,6 +93,18 @@ export function buildMedicalClinicLd(h: Hospital) {
         name: s,
       })),
     }),
+    /*
+     * 의료진 — E-E-A-T. "누가 진료하는가"가 AI가 병원을 신뢰할지 판단하는 근거가 된다.
+     * 화면의 "의료진" 섹션과 같은 값이라 숨은 데이터가 아니다(가이드 §3-3).
+     */
+    ...(h.doctors?.length && {
+      physician: h.doctors.map((d) => ({
+        "@type": "Physician",
+        name: d.name,
+        ...(d.title && { jobTitle: d.title }),
+        ...(d.specialty && { medicalSpecialty: d.specialty }),
+      })),
+    }),
     ...(sameAs.length && { sameAs }),
   };
 }

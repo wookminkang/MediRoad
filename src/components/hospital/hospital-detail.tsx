@@ -13,7 +13,6 @@ import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { HospitalPostList } from "./hospital-post-list";
 import { TodayStatus } from "./today-status";
-import { PostActions } from "@/components/hospital/post-actions";
 import { isPartnerHospital } from "@/constants/partners";
 import {
   buildAutoDescription,
@@ -153,20 +152,6 @@ export function HospitalDetail({
                   )}
                 </div>
               </div>
-              <div className="shrink-0">
-                <PostActions
-                  title={h.name}
-                  summary={summaryBullets}
-                  bodyText={introText}
-                  showSpeak={false}
-                  showPrint={false}
-                  statusSlot={
-                    hasHours ? (
-                      <TodayStatus hours={h.hours!} prominent />
-                    ) : undefined
-                  }
-                />
-              </div>
             </div>
 
             {/* 병원 사진 5칸 (없으면 플레이스홀더) */}
@@ -253,6 +238,37 @@ export function HospitalDetail({
                   상태와 의료진 판단에 따라 달라질 수 있으며, 방문 전 상담으로
                   확인하시기 바랍니다.
                 </p>
+              </section>
+            )}
+
+            {/*
+             * 의료진 — E-E-A-T. hospital_doctors 테이블은 진작 있었는데 화면에도 JSON-LD에도
+             * 안 그려서, 데이터를 넣어도 아무 데도 안 보였다. "누가 진료하는가"는 AI가 병원을
+             * 신뢰할지 판단하는 핵심 근거라 본문에 이름·직함·전문분야를 그대로 적는다.
+             */}
+            {h.doctors && h.doctors.length > 0 && (
+              <section aria-labelledby="doctors" className="mt-6">
+                <h2 id="doctors" className="text-[15px] font-bold text-neutral">
+                  {h.name} 의료진
+                </h2>
+                <ul className="mt-3 flex flex-col gap-2.5">
+                  {h.doctors.map((d) => (
+                    <li
+                      key={`${d.name}-${d.title}`}
+                      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
+                    >
+                      <span className="text-[15px] font-bold text-neutral">
+                        {d.name}
+                      </span>
+                      <span className="text-[13px] text-muted">{d.title}</span>
+                      {d.specialty && (
+                        <span className="text-[13px] text-subtle">
+                          · {d.specialty}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </section>
             )}
 
