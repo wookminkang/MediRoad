@@ -1,6 +1,6 @@
 import { getNeighborDistricts } from "@/constants/region-neighbors";
 import { SITE_URL } from "@/constants/site";
-import { walkMinutes } from "@/lib/hospital";
+import { buildAutoDescription, walkMinutes } from "@/lib/hospital";
 import type { Hospital } from "@/types/hospital";
 
 /**
@@ -33,7 +33,9 @@ export function buildMedicalClinicLd(h: Hospital) {
     "@context": "https://schema.org",
     "@type": "MedicalClinic",
     name: h.name,
-    ...(h.description && { description: h.description }),
+    // 소개글이 없는 병원(대다수)은 description이 통째로 빠져 있었다.
+    // 화면에 뿌리는 자동 소개문과 같은 문장을 넣는다 — 화면·구조화 데이터 불일치 없음.
+    description: h.description ?? buildAutoDescription(h),
     url,
     ...(h.phone && { telephone: h.phone }),
     ...(h.photos?.length && { image: h.photos.map((p) => p.url) }),
@@ -79,7 +81,18 @@ export function buildMedicalClinicLd(h: Hospital) {
         value: true,
       })),
     }),
-    ...(h.symptoms?.length && { keywords: h.symptoms.join(", ") }),
+    ...(h.symptoms?.length && {
+      keywords: h.symptoms.join(", "),
+      /*
+       * 병원이 다루는 진료 항목을 서비스로도 표현한다. keywords만으로는 "이 병원이 무엇을
+       * 진료하는가"가 기계가 읽을 형태로 남지 않는다. 화면의 "진료하는 항목"과 같은 값이라
+       * 숨은 데이터가 아니다(가이드 §3-3).
+       */
+      availableService: h.symptoms.map((s) => ({
+        "@type": "MedicalTherapy",
+        name: s,
+      })),
+    }),
     ...(sameAs.length && { sameAs }),
   };
 }

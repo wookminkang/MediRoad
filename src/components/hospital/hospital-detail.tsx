@@ -131,8 +131,19 @@ export function HospitalDetail({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-neutral sm:text-5xl">
-                    {h.name}
+                  {/*
+                   * H1은 "{병원명} | {지역} {기관유형}" (SEO 가이드 §3-2).
+                   * 병원명만 두면 "강동구 한방병원" 같은 질의에 걸릴 맥락이 H1에 없다.
+                   * 지역·유형을 h1 안의 두 번째 줄로 넣어 문서 주제를 한 줄로 말하게 한다.
+                   */}
+                  <h1 className="min-w-0">
+                    <span className="block text-4xl font-extrabold leading-tight tracking-tight text-neutral sm:text-5xl">
+                      {h.name}
+                    </span>
+                    <span className="mt-2 block text-sm text-muted">
+                      {h.region.sigungu} {h.type}
+                      {h.nearestStation ? ` · ${h.nearestStation.name}` : ""}
+                    </span>
                   </h1>
                   {isPartnerHospital(h.id) && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand-weak px-2.5 py-1 text-xs font-bold text-brand">
@@ -141,9 +152,6 @@ export function HospitalDetail({
                     </span>
                   )}
                 </div>
-                <p className="mt-2 text-sm text-muted">
-                  {h.type} · {h.region.sigungu}
-                </p>
               </div>
               <div className="shrink-0">
                 <PostActions
@@ -185,6 +193,68 @@ export function HospitalDetail({
             <p className="mt-6 text-[15px] leading-relaxed text-neutral sm:text-base">
               {introText}
             </p>
+
+            {/*
+             * 한눈에 보는 정보 — AI·검색엔진이 그대로 인용할 사실 문장. (SEO 가이드 §3-2)
+             *
+             * 같은 문장을 "AI요약" 모달에도 쓰지만, 모달은 클릭해야 열리므로 크롤러·AI는 못 본다.
+             * 인용되길 바라는 문장은 본문에 있어야 한다.
+             */}
+            <section
+              aria-labelledby="at-a-glance"
+              className="mt-5 rounded-2xl bg-neutral-weak p-5"
+            >
+              <h2
+                id="at-a-glance"
+                className="text-[15px] font-bold text-neutral"
+              >
+                한눈에 보는 {h.name}
+              </h2>
+              <ul className="mt-3 flex flex-col gap-1.5">
+                {summaryBullets.map((s) => (
+                  <li
+                    key={s}
+                    className="flex gap-2 text-[14px] leading-relaxed text-neutral"
+                  >
+                    <span aria-hidden className="text-brand">
+                      ·
+                    </span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/*
+             * 진료 키워드 — 지금까지 symptoms는 JSON-LD(keywords)에만 넣고 화면에는 안 그렸다.
+             * 가이드 §3-3이 금지하는 "사용자에게 보이지 않는 정보를 JSON-LD에만 넣는 방식"이고,
+             * AI는 본문을 읽으므로 GEO 효과도 없었다. 화면에 사실로 적는다.
+             */}
+            {h.symptoms && h.symptoms.length > 0 && (
+              <section aria-labelledby="care-topics" className="mt-6">
+                <h2
+                  id="care-topics"
+                  className="text-[15px] font-bold text-neutral"
+                >
+                  {h.name}이 진료하는 항목
+                </h2>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {h.symptoms.map((s) => (
+                    <li
+                      key={s}
+                      className="rounded-full bg-brand-weak px-3 py-1.5 text-[13px] font-medium text-brand"
+                    >
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-subtle">
+                  병원이 제공한 진료 항목입니다. 실제 진료 가능 여부는 환자
+                  상태와 의료진 판단에 따라 달라질 수 있으며, 방문 전 상담으로
+                  확인하시기 바랍니다.
+                </p>
+              </section>
+            )}
 
             <hr className="my-6 border-t border-black/[0.07]" />
 

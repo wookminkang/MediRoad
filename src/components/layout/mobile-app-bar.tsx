@@ -36,9 +36,14 @@ export function MobileAppBar() {
   return (
     <div className="grid w-full grid-cols-[2.5rem_1fr_2.5rem] items-center">
       <BackButton />
-      <h2 className="truncate text-center text-[17px] font-bold text-neutral">
+      {/*
+       * 헤딩(h1~h6)으로 만들면 안 된다. 이 문구는 페이지 주제가 아니라 내비게이션 라벨인데,
+       * 헤딩으로 두면 문서 아웃라인에서 본문 H1보다 앞서 나와("병원찾기" → "리움한방병원")
+       * 크롤러·AI가 페이지 주제를 잘못 읽는다.
+       */}
+      <p className="truncate text-center text-[17px] font-bold text-neutral">
         {section.label}
-      </h2>
+      </p>
       <div className="flex justify-end">
         <HeaderSearch {...search} />
       </div>
