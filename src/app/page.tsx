@@ -195,44 +195,6 @@ export default async function Home() {
 
       <PromoCarousel slides={PROMO_SLIDES} />
 
-      {/* 어디에서나 — 인기 지역 (사진 카드) */}
-      <section aria-labelledby="regions" className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-12">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <SectionHeading
-              title={"어디에서나,\n같은 기준의 병원 찾기"}
-              align="left"
-              id="regions"
-            />
-            <ActionButton asChild variant="neutralWeak" size="medium">
-              <Link href="/map">지도에서 찾기</Link>
-            </ActionButton>
-          </div>
-          <ul className="mt-10 grid grid-cols-2 gap-6">
-            {REGIONS.map((r) => (
-              <li key={r.name}>
-                <Link href={areaMapHref(r)} className="block">
-                  <Image
-                    src={r.image}
-                    alt={`${r.name} 병원 찾기`}
-                    width={600}
-                    height={450}
-                    className="aspect-[4/3] w-full rounded-2xl object-cover"
-                  />
-                  <h3 className="mt-4 text-lg font-bold text-neutral">{r.name}</h3>
-                  <p className="mt-1 text-sm text-muted">{r.desc}</p>
-                </Link>
-                <div className="mt-4">
-                  <ActionButton asChild variant="neutralWeak" size="small">
-                    <Link href={areaMapHref(r)}>병원 둘러보기</Link>
-                  </ActionButton>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* 병원이 전하는 건강정보 — 병원별 포스트 (실데이터) */}
       {posts.length > 0 && (
         <section aria-labelledby="hospital-posts" className="bg-white">
@@ -304,6 +266,44 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* 어디에서나 — 인기 지역 (사진 카드) */}
+      <section aria-labelledby="regions" className="bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-12">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <SectionHeading
+              title={"어디에서나,\n같은 기준의 병원 찾기"}
+              align="left"
+              id="regions"
+            />
+            <ActionButton asChild variant="neutralWeak" size="medium">
+              <Link href="/map">지도에서 찾기</Link>
+            </ActionButton>
+          </div>
+          <ul className="mt-10 grid grid-cols-2 gap-6">
+            {REGIONS.map((r) => (
+              <li key={r.name}>
+                <Link href={areaMapHref(r)} className="block">
+                  <Image
+                    src={r.image}
+                    alt={`${r.name} 병원 찾기`}
+                    width={600}
+                    height={450}
+                    className="aspect-[4/3] w-full rounded-2xl object-cover"
+                  />
+                  <h3 className="mt-4 text-lg font-bold text-neutral">{r.name}</h3>
+                  <p className="mt-1 text-sm text-muted">{r.desc}</p>
+                </Link>
+                <div className="mt-4">
+                  <ActionButton asChild variant="neutralWeak" size="small">
+                    <Link href={areaMapHref(r)}>병원 둘러보기</Link>
+                  </ActionButton>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
       {/* 건강 이야기 — 최신 칼럼 (실데이터) */}
       {columns.length > 0 && (
