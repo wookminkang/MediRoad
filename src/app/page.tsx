@@ -32,28 +32,39 @@ export const revalidate = 600;
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    image: "/home/hero-v4-1-map.webp",
-    eyebrow: "우리 동네 병원 찾기",
+    image: "/home/hero-v7-1-map.webp",
+    badge: "지도로 찾기",
     title: "내 주변 병원,\n지도로 빠르게",
     sub: "위치·진료시간·진료과목을 한눈에",
     href: "/map",
-    cta: "지도에서 찾기",
   },
   {
-    image: "/home/hero-v4-2-night.webp",
-    eyebrow: "지금 문 연 병원",
+    image: "/home/hero-v7-2-night.webp",
+    badge: "지금 문 연 병원",
     title: "지금 진료 중인\n병원만 모아보기",
     sub: "영업 중인 병원을 바로 확인하세요",
     href: "/hospitals?open=1",
-    cta: "진료 중인 병원 보기",
   },
   {
-    image: "/home/hero-v4-3-time.webp",
-    eyebrow: "진료시간 확인",
+    image: "/home/hero-v7-3-time.webp",
+    badge: "진료시간 확인",
     title: "헛걸음 없이,\n진료시간부터 확인",
     sub: "요일별 진료시간과 휴진일을 미리 확인하세요",
     href: "/hospitals",
-    cta: "병원 찾아보기",
+  },
+  {
+    image: "/home/hero-v7-4-area.webp",
+    badge: "지역·지하철역",
+    title: "우리 동네부터\n역세권 병원까지",
+    sub: "지역과 지하철역으로 가까운 병원 찾기",
+    href: "/near",
+  },
+  {
+    image: "/home/hero-v7-5-health.webp",
+    badge: "건강정보",
+    title: "증상이 궁금할 때\n먼저 읽어보세요",
+    sub: "의료진이 감수한 증상·질환·관리법",
+    href: "/health",
   },
 ];
 
