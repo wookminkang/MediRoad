@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import {
   ActionButton,
+  AvatarFallback,
+  AvatarRoot,
   TagGroupItem,
   TagGroupItemLabel,
   TagGroupRoot,
@@ -10,6 +12,7 @@ import {
 import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 
+import { ExpandableText } from "./expandable-text";
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { HospitalPostList } from "./hospital-post-list";
 import { TodayStatus } from "./today-status";
@@ -174,10 +177,12 @@ export function HospitalDetail({
                   ))}
             </div>
 
-            {/* 소개 문장 */}
-            <p className="mt-6 text-[15px] leading-relaxed text-neutral sm:text-base">
-              {introText}
-            </p>
+            {/*
+             * 소개 문장 — 접어서 보여준다. 병원이 소개글을 채우면 문단이 길어져
+             * 아무도 안 읽는다. 다만 텍스트는 DOM에 전부 남는다(line-clamp는 시각적 절단일 뿐).
+             * 소개글은 AI가 인용하는 GEO 자산이라 잘라내면 안 된다.
+             */}
+            <ExpandableText text={introText} lines={3} />
 
             {/*
              * 한눈에 보는 정보 — AI·검색엔진이 그대로 인용할 사실 문장. (SEO 가이드 §3-2)
@@ -251,21 +256,28 @@ export function HospitalDetail({
                 <h2 id="doctors" className="text-[15px] font-bold text-neutral">
                   {h.name} 의료진
                 </h2>
-                <ul className="mt-3 flex flex-col gap-2.5">
+                <ul className="mt-3 flex flex-col gap-4">
                   {h.doctors.map((d) => (
-                    <li
-                      key={`${d.name}-${d.title}`}
-                      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
-                    >
-                      <span className="text-[15px] font-bold text-neutral">
-                        {d.name}
-                      </span>
-                      <span className="text-[13px] text-muted">{d.title}</span>
-                      {d.specialty && (
-                        <span className="text-[13px] text-subtle">
-                          · {d.specialty}
-                        </span>
-                      )}
+                    <li key={`${d.name}-${d.title}`} className="flex gap-3.5">
+                      {/* 사진은 쓰지 않는다(초상권). 이름 이니셜 폴백으로 충분하다 */}
+                      <AvatarRoot className="h-12 w-12 shrink-0">
+                        <AvatarFallback>{d.name.slice(0, 1)}</AvatarFallback>
+                      </AvatarRoot>
+                      <div className="min-w-0 flex-1">
+                        <p className="flex flex-wrap items-baseline gap-x-2">
+                          <span className="text-[15px] font-bold text-neutral">
+                            {d.name}
+                          </span>
+                          <span className="text-[13px] text-muted">
+                            {d.title}
+                          </span>
+                        </p>
+                        {d.specialty && (
+                          <p className="mt-1 text-[13px] leading-relaxed text-subtle">
+                            {d.specialty}
+                          </p>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>
