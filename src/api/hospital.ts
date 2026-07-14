@@ -329,45 +329,72 @@ export async function getHospitals(
   const deptSel = useDeptJoin
     ? "hospital_departments!inner(name)"
     : "hospital_departments(name)";
-  let query = getSupabaseServer()
-    .from("hospitals")
-    .select(
-      `${baseSel}, ${deptSel}`,
-      // exact count는 진료과목 조인 필터에서 매우 느림(수만 건 카운트) → planned 추정치로 15배↑
-      { count: "planned" },
-    );
+  const sel = `${baseSel}, ${deptSel}`;
 
-  if (type) query = query.eq("type", type);
-  if (region) query = query.eq("sigungu", region);
-  // 역세권: station_name은 "역" 접미 없이 저장되고 일부는 괄호 부기명(예: "서울대입구(관악구청)")
-  // → clean 이름 접두 매칭. (/near 랜딩)
-  if (station) query = query.ilike("station_name", `${station}%`);
-  if (sido) query = query.eq("sido", sido);
-  if (deptTypes) query = query.in("type", deptTypes as string[]);
-  else if (department) query = query.eq("hospital_departments.name", department);
-  if (q) {
-    const s = q.replace(/[,()%]/g, " ").trim();
-    if (s) query = query.ilike("name", `%${s}%`);
+  /**
+   * 필터가 적용된 조회를 새로 만든다 — 제휴 조회와 본 조회가 같은 조건을 공유해야
+   * 어긋나지 않는다. 클로저가 매번 fresh 쿼리를 만들어 반환하므로 타입도 깔끔하다.
+   */
+  const makeFiltered = () => {
+    let qb = getSupabaseServer()
+      .from("hospitals")
+      // exact count는 진료과목 조인 필터에서 매우 느림 → planned 추정치
+      .select(sel, { count: "planned" });
+    if (type) qb = qb.eq("type", type);
+    if (region) qb = qb.eq("sigungu", region);
+    // 역세권: station_name은 "역" 접미 없이 저장되고 일부는 괄호 부기명 → clean 접두 매칭
+    if (station) qb = qb.ilike("station_name", `${station}%`);
+    if (sido) qb = qb.eq("sido", sido);
+    if (deptTypes) qb = qb.in("type", deptTypes as string[]);
+    else if (department) qb = qb.eq("hospital_departments.name", department);
+    if (q) {
+      const s = q.replace(/[,()%]/g, " ").trim();
+      if (s) qb = qb.ilike("name", `%${s}%`);
+    }
+    if (center && radiusKm) {
+      const dLat = radiusKm / 111;
+      const dLng = radiusKm / (111 * Math.cos((center.lat * Math.PI) / 180));
+      qb = qb
+        .gte("lat", center.lat - dLat)
+        .lte("lat", center.lat + dLat)
+        .gte("lng", center.lng - dLng)
+        .lte("lng", center.lng + dLng);
+    }
+    return qb;
+  };
+
+  /**
+   * 제휴 병원을 목록 맨 앞에 보여준다.
+   *
+   * 첫 페이지에서만 제휴를 따로 조회해 앞에 붙이고, 본 목록에서는 제휴를 제외한다.
+   * 이렇게 해야 제휴가 중복으로 뜨지 않고, 페이지네이션(range)도 어긋나지 않는다.
+   * 화면에는 "제휴" 표시를 하지 않으므로(뱃지 제거) 자연스러운 상위 노출로 보인다.
+   */
+  const partnerIds = [...PARTNER_HOSPITAL_IDS];
+
+  let partnerItems: Hospital[] = [];
+  if (page === 1) {
+    const { data: pData, error: pErr } = await makeFiltered()
+      .in("id", partnerIds)
+      .order("name");
+    if (pErr) throw pErr;
+    partnerItems = (pData as unknown as HospitalRow[])
+      .map(rowToHospital)
+      .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }));
   }
-  // 반경: 위경도 bounding box 선필터
-  if (center && radiusKm) {
-    const dLat = radiusKm / 111;
-    const dLng = radiusKm / (111 * Math.cos((center.lat * Math.PI) / 180));
-    query = query
-      .gte("lat", center.lat - dLat)
-      .lte("lat", center.lat + dLat)
-      .gte("lng", center.lng - dLng)
-      .lte("lng", center.lng + dLng);
-  }
 
-  query = query.order("name").range(start, start + pageSize - 1);
-
-  const { data, count, error } = await query;
+  const { data, count, error } = await makeFiltered()
+    .not("id", "in", `(${partnerIds.join(",")})`)
+    .order("name")
+    .range(start, start + pageSize - 1);
   if (error) throw error;
 
-  let items = (data as unknown as HospitalRow[])
-    .map(rowToHospital)
-    .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }));
+  let items = [
+    ...partnerItems,
+    ...(data as unknown as HospitalRow[])
+      .map(rowToHospital)
+      .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) })),
+  ];
   // 영업중만 보기 — 해당 페이지 결과에서 영업중만 (무한스크롤이 계속 로드)
   if (openNow) items = items.filter((h) => h.isOpenNow === true);
   if (center && radiusKm) {

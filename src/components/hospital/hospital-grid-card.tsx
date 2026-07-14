@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Badge } from "@seed-design/react";
 
-import { isPartnerHospital } from "@/constants/partners";
 import { walkMinutes } from "@/lib/hospital";
 import {
   latestWeekdayCloseClock,
@@ -42,13 +41,9 @@ export function HospitalGridCard({
     if (s) hoursBadge = `일 ${s}`;
   }
 
+  // "제휴" 뱃지는 노출하지 않는다 — 제휴 병원은 목록 상단에 자연스럽게 배치된다(hospital.ts).
   const badges = (
     <div className="flex shrink-0 flex-wrap justify-end gap-1">
-      {isPartnerHospital(h.id) && (
-        <Badge variant="solid" tone="brand">
-          제휴
-        </Badge>
-      )}
       {hoursBadge ? (
         <Badge variant="weak" tone="brand">
           {hoursBadge}
