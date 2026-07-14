@@ -101,6 +101,8 @@ export default async function AreaRegionPage({ params }: { params: Params }) {
         <AreaLanding
           slug={slug}
           region={label}
+          nightCount={reg?.nightCount ?? 0}
+          sundayCount={reg?.sundayCount ?? 0}
           nearbyRegions={nearbyRegionsOf(slug)}
           filters={filters}
           regionDepartments={regionDepartments}

@@ -1,4 +1,4 @@
-import { AREA_REGIONS } from "@/constants/area-regions";
+import { AREA_REGIONS, MIN_OPEN_LATE } from "@/constants/area-regions";
 import { SITE_URL } from "@/constants/site";
 import { type SitemapUrl, urlsetXml, xmlResponse } from "@/lib/sitemap-xml";
 
@@ -31,6 +31,23 @@ export async function GET() {
         lastmod: now,
         changefreq: "weekly",
         priority: 0.7,
+      });
+    }
+    // 야간·일요일 진료 목록 — 병원 수가 넉넉한 지역만. 우리만 가진 데이터라 우선순위를 높인다.
+    if (r.nightCount >= MIN_OPEN_LATE) {
+      urls.push({
+        url: `${SITE_URL}/area/${r.slug}/night`,
+        lastmod: now,
+        changefreq: "weekly",
+        priority: 0.8,
+      });
+    }
+    if (r.sundayCount >= MIN_OPEN_LATE) {
+      urls.push({
+        url: `${SITE_URL}/area/${r.slug}/sunday`,
+        lastmod: now,
+        changefreq: "weekly",
+        priority: 0.8,
       });
     }
   }

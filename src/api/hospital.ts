@@ -1,5 +1,12 @@
 import { MOCK_HOSPITALS } from "@/api/mock/hospitals";
 import { PARTNER_HOSPITAL_IDS } from "@/constants/partners";
+import {
+  fmtTime,
+  type HourRow,
+  latestWeekdayClose,
+  NIGHT_FROM,
+  sundayHours,
+} from "@/lib/open-hours";
 import { publishedCutoff } from "@/lib/post-schedule";
 import { normalizeLine, normalizeStationName } from "@/lib/station";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -564,6 +571,96 @@ export async function getGridClusters(
 export async function getAllHospitalIds(): Promise<string[]> {
   if (!isSupabaseConfigured) return MOCK_HOSPITALS.map((h) => h.id);
   return [];
+}
+
+/** 야간·일요일 진료 목록에 쓰는 최소 정보 */
+export type OpenLateHospital = {
+  id: string;
+  slug: string;
+  name: string;
+  type: string;
+  phone: string | null;
+  address: string | null;
+  station: string | null;
+  /** 야간: 평일 가장 늦은 마감 "21:30" / 일요일: "09:00~13:00" */
+  hoursLabel: string;
+  /** 정렬용 — 야간은 마감 시각(HHMM), 일요일은 마감 시각 */
+  sortKey: number;
+  departments: string[];
+};
+
+/**
+ * 지역별 야간·일요일 진료 병원.
+ *
+ * 이 데이터는 공공데이터에 있지만 아무도 지역별로 정리해두지 않았다.
+ * "송파구에서 밤 9시까지 하는 병원"을 찾으려면 지금은 병원을 하나씩 눌러봐야 한다.
+ *
+ * 진료시간 필터를 DB에서 걸지 않고 가져와서 판정한다. 심평원 시간 표기가
+ * 지저분해서(자정 넘김을 "2600"으로 적는 등) SQL 비교로는 놓치는 게 생긴다.
+ * 지역 하나의 병원 수는 최대 3,000곳 남짓이라 메모리에서 걸러도 부담이 없다.
+ */
+export async function getOpenLateHospitals(
+  sido: string,
+  sigungu: string,
+  kind: "night" | "sunday",
+): Promise<{ items: OpenLateHospital[]; total: number }> {
+  if (!isSupabaseConfigured) return { items: [], total: 0 };
+
+  const rows: HospitalRow[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await getSupabaseServer()
+      .from("hospitals")
+      .select(
+        "id,slug,name,type,phone,address,road_address,station_name,station_line," +
+          "hospital_hours(day,open,close,closed), hospital_departments(name)",
+      )
+      .eq("sido", sido)
+      .eq("sigungu", sigungu)
+      .range(from, from + 999);
+    if (error) throw error;
+    if (!data?.length) break;
+    rows.push(...(data as unknown as HospitalRow[]));
+    if (data.length < 1000) break;
+  }
+
+  const items: OpenLateHospital[] = [];
+  for (const r of rows) {
+    if (!r.slug) continue; // 슬러그 없는 레코드는 링크를 걸 수 없다
+    const hours = (r.hospital_hours ?? []) as HourRow[];
+    let hoursLabel = "";
+    let sortKey = 0;
+
+    if (kind === "night") {
+      const close = latestWeekdayClose(hours);
+      if (close === null || close < NIGHT_FROM) continue;
+      hoursLabel = `평일 ${fmtTime(String(close).padStart(4, "0"))}까지`;
+      sortKey = close;
+    } else {
+      const sun = sundayHours(hours);
+      if (!sun) continue;
+      hoursLabel = `일요일 ${fmtTime(sun.open)}~${fmtTime(sun.close)}`;
+      sortKey = Number.parseInt(sun.close ?? "0", 10) || 0;
+    }
+
+    items.push({
+      id: r.id,
+      slug: r.slug,
+      name: r.name,
+      type: r.type,
+      phone: r.phone ?? null,
+      address: r.road_address ?? r.address ?? null,
+      station: r.station_name
+        ? `${r.station_line ?? ""} ${r.station_name}역`.trim()
+        : null,
+      hoursLabel,
+      sortKey,
+      departments: (r.hospital_departments ?? []).map((d) => d.name),
+    });
+  }
+
+  // 늦게까지 하는 순 — 사용자가 실제로 궁금해하는 순서다
+  items.sort((a, b) => b.sortKey - a.sortKey || a.name.localeCompare(b.name));
+  return { items, total: items.length };
 }
 
 /**

@@ -18,6 +18,10 @@ export type AreaRegion = {
   label: string;
   /** 병원 수 (생성 시점) */
   count: number;
+  /** 평일 20시 이후 마감하는 병원 수 — 야간진료 페이지를 열지 정하는 기준 */
+  nightCount: number;
+  /** 일요일 진료 병원 수 */
+  sundayCount: number;
   /** 이 지역에 실제로 있는 진료과목 — /area/[지역]/[과목] 생성 근거 */
   departments: string[];
 };
@@ -32,6 +36,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강남구",
     "label": "강남구",
     "count": 3031,
+    "nightCount": 1079,
+    "sundayCount": 192,
     "departments": [
       "가정의학과",
       "내과",
@@ -54,6 +60,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "성남시",
     "label": "성남시",
     "count": 1905,
+    "nightCount": 432,
+    "sundayCount": 300,
     "departments": [
       "가정의학과",
       "내과",
@@ -76,6 +84,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "수원시",
     "label": "수원시",
     "count": 1772,
+    "nightCount": 458,
+    "sundayCount": 162,
     "departments": [
       "가정의학과",
       "내과",
@@ -98,6 +108,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서초구",
     "label": "서초구",
     "count": 1489,
+    "nightCount": 537,
+    "sundayCount": 116,
     "departments": [
       "가정의학과",
       "내과",
@@ -120,6 +132,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "고양시",
     "label": "고양시",
     "count": 1390,
+    "nightCount": 248,
+    "sundayCount": 114,
     "departments": [
       "가정의학과",
       "내과",
@@ -142,6 +156,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "창원시",
     "label": "창원시",
     "count": 1346,
+    "nightCount": 261,
+    "sundayCount": 69,
     "departments": [
       "가정의학과",
       "내과",
@@ -163,6 +179,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "송파구",
     "label": "송파구",
     "count": 1305,
+    "nightCount": 439,
+    "sundayCount": 118,
     "departments": [
       "가정의학과",
       "내과",
@@ -185,6 +203,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "용인시",
     "label": "용인시",
     "count": 1272,
+    "nightCount": 194,
+    "sundayCount": 85,
     "departments": [
       "가정의학과",
       "내과",
@@ -207,6 +227,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "부천시",
     "label": "부천시",
     "count": 1165,
+    "nightCount": 238,
+    "sundayCount": 80,
     "departments": [
       "가정의학과",
       "내과",
@@ -229,6 +251,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "청주시",
     "label": "청주시",
     "count": 1130,
+    "nightCount": 256,
+    "sundayCount": 94,
     "departments": [
       "가정의학과",
       "내과",
@@ -250,6 +274,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "전주시",
     "label": "전주시",
     "count": 1109,
+    "nightCount": 217,
+    "sundayCount": 51,
     "departments": [
       "가정의학과",
       "내과",
@@ -272,6 +298,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "화성시",
     "label": "화성시",
     "count": 1023,
+    "nightCount": 260,
+    "sundayCount": 114,
     "departments": [
       "가정의학과",
       "내과",
@@ -293,6 +321,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강서구",
     "label": "서울 강서구",
     "count": 966,
+    "nightCount": 335,
+    "sundayCount": 99,
     "departments": [
       "가정의학과",
       "내과",
@@ -315,6 +345,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강동구",
     "label": "강동구",
     "count": 934,
+    "nightCount": 315,
+    "sundayCount": 119,
     "departments": [
       "가정의학과",
       "내과",
@@ -337,6 +369,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "안양시",
     "label": "안양시",
     "count": 928,
+    "nightCount": 171,
+    "sundayCount": 72,
     "departments": [
       "가정의학과",
       "내과",
@@ -359,6 +393,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서구",
     "label": "대전 서구",
     "count": 918,
+    "nightCount": 218,
+    "sundayCount": 54,
     "departments": [
       "가정의학과",
       "내과",
@@ -381,6 +417,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "수성구",
     "label": "수성구",
     "count": 895,
+    "nightCount": 118,
+    "sundayCount": 37,
     "departments": [
       "가정의학과",
       "내과",
@@ -403,6 +441,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "부산진구",
     "label": "부산진구",
     "count": 864,
+    "nightCount": 188,
+    "sundayCount": 45,
     "departments": [
       "가정의학과",
       "내과",
@@ -425,6 +465,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "달서구",
     "label": "달서구",
     "count": 852,
+    "nightCount": 118,
+    "sundayCount": 45,
     "departments": [
       "가정의학과",
       "내과",
@@ -446,6 +488,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남양주시",
     "label": "남양주시",
     "count": 848,
+    "nightCount": 183,
+    "sundayCount": 107,
     "departments": [
       "가정의학과",
       "내과",
@@ -468,6 +512,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "천안시",
     "label": "천안시",
     "count": 847,
+    "nightCount": 217,
+    "sundayCount": 80,
     "departments": [
       "가정의학과",
       "내과",
@@ -490,6 +536,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "영등포구",
     "label": "영등포구",
     "count": 827,
+    "nightCount": 292,
+    "sundayCount": 73,
     "departments": [
       "가정의학과",
       "내과",
@@ -511,6 +559,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "안산시",
     "label": "안산시",
     "count": 806,
+    "nightCount": 193,
+    "sundayCount": 92,
     "departments": [
       "가정의학과",
       "내과",
@@ -533,6 +583,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "마포구",
     "label": "마포구",
     "count": 777,
+    "nightCount": 301,
+    "sundayCount": 66,
     "departments": [
       "가정의학과",
       "내과",
@@ -555,6 +607,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "제주시",
     "label": "제주시",
     "count": 772,
+    "nightCount": 126,
+    "sundayCount": 74,
     "departments": [
       "가정의학과",
       "내과",
@@ -577,6 +631,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남동구",
     "label": "남동구",
     "count": 768,
+    "nightCount": 226,
+    "sundayCount": 79,
     "departments": [
       "가정의학과",
       "내과",
@@ -599,6 +655,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "노원구",
     "label": "노원구",
     "count": 752,
+    "nightCount": 206,
+    "sundayCount": 62,
     "departments": [
       "가정의학과",
       "내과",
@@ -620,6 +678,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "은평구",
     "label": "은평구",
     "count": 708,
+    "nightCount": 218,
+    "sundayCount": 61,
     "departments": [
       "가정의학과",
       "내과",
@@ -642,6 +702,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "해운대구",
     "label": "해운대구",
     "count": 708,
+    "nightCount": 127,
+    "sundayCount": 36,
     "departments": [
       "가정의학과",
       "내과",
@@ -664,6 +726,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "관악구",
     "label": "관악구",
     "count": 707,
+    "nightCount": 252,
+    "sundayCount": 59,
     "departments": [
       "가정의학과",
       "내과",
@@ -686,6 +750,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "평택시",
     "label": "평택시",
     "count": 700,
+    "nightCount": 134,
+    "sundayCount": 78,
     "departments": [
       "가정의학과",
       "내과",
@@ -707,6 +773,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서구",
     "label": "인천 서구",
     "count": 691,
+    "nightCount": 240,
+    "sundayCount": 119,
     "departments": [
       "가정의학과",
       "내과",
@@ -729,6 +797,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "양천구",
     "label": "양천구",
     "count": 688,
+    "nightCount": 213,
+    "sundayCount": 69,
     "departments": [
       "가정의학과",
       "내과",
@@ -751,6 +821,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "부평구",
     "label": "부평구",
     "count": 680,
+    "nightCount": 165,
+    "sundayCount": 60,
     "departments": [
       "가정의학과",
       "내과",
@@ -773,6 +845,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "포항시",
     "label": "포항시",
     "count": 664,
+    "nightCount": 73,
+    "sundayCount": 29,
     "departments": [
       "가정의학과",
       "내과",
@@ -795,6 +869,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동대문구",
     "label": "동대문구",
     "count": 635,
+    "nightCount": 178,
+    "sundayCount": 86,
     "departments": [
       "가정의학과",
       "내과",
@@ -817,6 +893,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "북구",
     "label": "광주 북구",
     "count": 623,
+    "nightCount": 44,
+    "sundayCount": 12,
     "departments": [
       "가정의학과",
       "내과",
@@ -839,6 +917,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "의정부시",
     "label": "의정부시",
     "count": 616,
+    "nightCount": 137,
+    "sundayCount": 64,
     "departments": [
       "가정의학과",
       "내과",
@@ -861,6 +941,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남구",
     "label": "울산 남구",
     "count": 615,
+    "nightCount": 133,
+    "sundayCount": 30,
     "departments": [
       "가정의학과",
       "내과",
@@ -883,6 +965,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동작구",
     "label": "동작구",
     "count": 608,
+    "nightCount": 166,
+    "sundayCount": 47,
     "departments": [
       "가정의학과",
       "내과",
@@ -905,6 +989,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "구로구",
     "label": "구로구",
     "count": 601,
+    "nightCount": 186,
+    "sundayCount": 46,
     "departments": [
       "가정의학과",
       "내과",
@@ -927,6 +1013,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "광진구",
     "label": "광진구",
     "count": 596,
+    "nightCount": 198,
+    "sundayCount": 49,
     "departments": [
       "가정의학과",
       "내과",
@@ -948,6 +1036,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "김해시",
     "label": "김해시",
     "count": 591,
+    "nightCount": 108,
+    "sundayCount": 45,
     "departments": [
       "가정의학과",
       "내과",
@@ -970,6 +1060,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "북구",
     "label": "대구 북구",
     "count": 589,
+    "nightCount": 83,
+    "sundayCount": 23,
     "departments": [
       "가정의학과",
       "내과",
@@ -992,6 +1084,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "서울 중구",
     "count": 586,
+    "nightCount": 217,
+    "sundayCount": 63,
     "departments": [
       "가정의학과",
       "내과",
@@ -1014,6 +1108,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중랑구",
     "label": "중랑구",
     "count": 583,
+    "nightCount": 177,
+    "sundayCount": 61,
     "departments": [
       "가정의학과",
       "내과",
@@ -1035,6 +1131,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서구",
     "label": "광주 서구",
     "count": 573,
+    "nightCount": 133,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -1057,6 +1155,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "시흥시",
     "label": "시흥시",
     "count": 570,
+    "nightCount": 128,
+    "sundayCount": 53,
     "departments": [
       "가정의학과",
       "내과",
@@ -1079,6 +1179,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "김포시",
     "label": "김포시",
     "count": 555,
+    "nightCount": 108,
+    "sundayCount": 43,
     "departments": [
       "가정의학과",
       "내과",
@@ -1101,6 +1203,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "성북구",
     "label": "성북구",
     "count": 550,
+    "nightCount": 152,
+    "sundayCount": 40,
     "departments": [
       "가정의학과",
       "내과",
@@ -1123,6 +1227,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동래구",
     "label": "동래구",
     "count": 534,
+    "nightCount": 83,
+    "sundayCount": 45,
     "departments": [
       "가정의학과",
       "내과",
@@ -1145,6 +1251,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "파주시",
     "label": "파주시",
     "count": 527,
+    "nightCount": 110,
+    "sundayCount": 53,
     "departments": [
       "가정의학과",
       "내과",
@@ -1167,6 +1275,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "미추홀구",
     "label": "미추홀구",
     "count": 522,
+    "nightCount": 139,
+    "sundayCount": 59,
     "departments": [
       "가정의학과",
       "내과",
@@ -1189,6 +1299,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "연수구",
     "label": "연수구",
     "count": 517,
+    "nightCount": 179,
+    "sundayCount": 60,
     "departments": [
       "가정의학과",
       "내과",
@@ -1211,6 +1323,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "광산구",
     "label": "광산구",
     "count": 516,
+    "nightCount": 81,
+    "sundayCount": 25,
     "departments": [
       "가정의학과",
       "내과",
@@ -1233,6 +1347,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "원주시",
     "label": "원주시",
     "count": 499,
+    "nightCount": 83,
+    "sundayCount": 48,
     "departments": [
       "가정의학과",
       "내과",
@@ -1255,6 +1371,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "유성구",
     "label": "유성구",
     "count": 498,
+    "nightCount": 114,
+    "sundayCount": 41,
     "departments": [
       "가정의학과",
       "내과",
@@ -1277,6 +1395,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동구",
     "label": "대구 동구",
     "count": 498,
+    "nightCount": 58,
+    "sundayCount": 24,
     "departments": [
       "가정의학과",
       "내과",
@@ -1299,6 +1419,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "성동구",
     "label": "성동구",
     "count": 487,
+    "nightCount": 144,
+    "sundayCount": 41,
     "departments": [
       "가정의학과",
       "내과",
@@ -1321,6 +1443,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "광명시",
     "label": "광명시",
     "count": 487,
+    "nightCount": 114,
+    "sundayCount": 34,
     "departments": [
       "가정의학과",
       "내과",
@@ -1343,6 +1467,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "진주시",
     "label": "진주시",
     "count": 477,
+    "nightCount": 46,
+    "sundayCount": 18,
     "departments": [
       "가정의학과",
       "내과",
@@ -1365,6 +1491,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "대구 중구",
     "count": 472,
+    "nightCount": 99,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -1387,6 +1515,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "종로구",
     "label": "종로구",
     "count": 463,
+    "nightCount": 114,
+    "sundayCount": 29,
     "departments": [
       "가정의학과",
       "내과",
@@ -1409,6 +1539,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "구미시",
     "label": "구미시",
     "count": 463,
+    "nightCount": 72,
+    "sundayCount": 24,
     "departments": [
       "가정의학과",
       "내과",
@@ -1431,6 +1563,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "하남시",
     "label": "하남시",
     "count": 460,
+    "nightCount": 138,
+    "sundayCount": 53,
     "departments": [
       "가정의학과",
       "내과",
@@ -1453,6 +1587,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강북구",
     "label": "강북구",
     "count": 459,
+    "nightCount": 145,
+    "sundayCount": 41,
     "departments": [
       "가정의학과",
       "내과",
@@ -1474,6 +1610,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서대문구",
     "label": "서대문구",
     "count": 447,
+    "nightCount": 136,
+    "sundayCount": 39,
     "departments": [
       "가정의학과",
       "내과",
@@ -1496,6 +1634,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "사하구",
     "label": "사하구",
     "count": 440,
+    "nightCount": 65,
+    "sundayCount": 33,
     "departments": [
       "가정의학과",
       "내과",
@@ -1518,6 +1658,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "양산시",
     "label": "양산시",
     "count": 421,
+    "nightCount": 88,
+    "sundayCount": 35,
     "departments": [
       "가정의학과",
       "내과",
@@ -1539,6 +1681,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남구",
     "label": "부산 남구",
     "count": 408,
+    "nightCount": 63,
+    "sundayCount": 20,
     "departments": [
       "가정의학과",
       "내과",
@@ -1561,6 +1705,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "익산시",
     "label": "익산시",
     "count": 399,
+    "nightCount": 40,
+    "sundayCount": 16,
     "departments": [
       "가정의학과",
       "내과",
@@ -1583,6 +1729,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "연제구",
     "label": "연제구",
     "count": 394,
+    "nightCount": 74,
+    "sundayCount": 20,
     "departments": [
       "가정의학과",
       "내과",
@@ -1605,6 +1753,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "북구",
     "label": "부산 북구",
     "count": 386,
+    "nightCount": 71,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -1627,6 +1777,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "계양구",
     "label": "계양구",
     "count": 380,
+    "nightCount": 92,
+    "sundayCount": 36,
     "departments": [
       "가정의학과",
       "내과",
@@ -1648,6 +1800,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "아산시",
     "label": "아산시",
     "count": 379,
+    "nightCount": 73,
+    "sundayCount": 45,
     "departments": [
       "가정의학과",
       "내과",
@@ -1669,6 +1823,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "도봉구",
     "label": "도봉구",
     "count": 376,
+    "nightCount": 86,
+    "sundayCount": 27,
     "departments": [
       "가정의학과",
       "내과",
@@ -1691,6 +1847,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "춘천시",
     "label": "춘천시",
     "count": 374,
+    "nightCount": 48,
+    "sundayCount": 32,
     "departments": [
       "가정의학과",
       "내과",
@@ -1713,6 +1871,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "여수시",
     "label": "여수시",
     "count": 371,
+    "nightCount": 34,
+    "sundayCount": 13,
     "departments": [
       "가정의학과",
       "내과",
@@ -1735,6 +1895,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "순천시",
     "label": "순천시",
     "count": 365,
+    "nightCount": 45,
+    "sundayCount": 18,
     "departments": [
       "가정의학과",
       "내과",
@@ -1757,6 +1919,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "금천구",
     "label": "금천구",
     "count": 364,
+    "nightCount": 117,
+    "sundayCount": 23,
     "departments": [
       "가정의학과",
       "내과",
@@ -1779,6 +1943,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "광주시",
     "label": "광주시",
     "count": 363,
+    "nightCount": 72,
+    "sundayCount": 34,
     "departments": [
       "가정의학과",
       "내과",
@@ -1800,6 +1966,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "금정구",
     "label": "금정구",
     "count": 362,
+    "nightCount": 42,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -1822,6 +1990,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "군산시",
     "label": "군산시",
     "count": 361,
+    "nightCount": 57,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -1844,6 +2014,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "구리시",
     "label": "구리시",
     "count": 352,
+    "nightCount": 111,
+    "sundayCount": 34,
     "departments": [
       "가정의학과",
       "내과",
@@ -1865,6 +2037,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "대전 중구",
     "count": 352,
+    "nightCount": 46,
+    "sundayCount": 20,
     "departments": [
       "가정의학과",
       "내과",
@@ -1887,6 +2061,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남구",
     "label": "광주 남구",
     "count": 350,
+    "nightCount": 43,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -1909,6 +2085,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "경산시",
     "label": "경산시",
     "count": 345,
+    "nightCount": 34,
+    "sundayCount": 23,
     "departments": [
       "가정의학과",
       "내과",
@@ -1931,6 +2109,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "수영구",
     "label": "수영구",
     "count": 336,
+    "nightCount": 66,
+    "sundayCount": 11,
     "departments": [
       "가정의학과",
       "내과",
@@ -1953,6 +2133,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동구",
     "label": "대전 동구",
     "count": 336,
+    "nightCount": 44,
+    "sundayCount": 20,
     "departments": [
       "가정의학과",
       "내과",
@@ -1975,6 +2157,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "군포시",
     "label": "군포시",
     "count": 336,
+    "nightCount": 52,
+    "sundayCount": 25,
     "departments": [
       "가정의학과",
       "내과",
@@ -1997,6 +2181,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "용산구",
     "label": "용산구",
     "count": 320,
+    "nightCount": 80,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -2019,6 +2205,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "경주시",
     "label": "경주시",
     "count": 301,
+    "nightCount": 18,
+    "sundayCount": 11,
     "departments": [
       "가정의학과",
       "내과",
@@ -2041,6 +2229,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "목포시",
     "label": "목포시",
     "count": 293,
+    "nightCount": 31,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -2063,6 +2253,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "달성군",
     "label": "달성군",
     "count": 281,
+    "nightCount": 41,
+    "sundayCount": 14,
     "departments": [
       "가정의학과",
       "내과",
@@ -2085,6 +2277,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "충주시",
     "label": "충주시",
     "count": 272,
+    "nightCount": 39,
+    "sundayCount": 18,
     "departments": [
       "가정의학과",
       "내과",
@@ -2107,6 +2301,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서귀포시",
     "label": "서귀포시",
     "count": 272,
+    "nightCount": 23,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -2128,6 +2324,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강릉시",
     "label": "강릉시",
     "count": 272,
+    "nightCount": 20,
+    "sundayCount": 10,
     "departments": [
       "가정의학과",
       "내과",
@@ -2150,6 +2348,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서구",
     "label": "대구 서구",
     "count": 268,
+    "nightCount": 23,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -2172,6 +2372,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "이천시",
     "label": "이천시",
     "count": 262,
+    "nightCount": 43,
+    "sundayCount": 33,
     "departments": [
       "가정의학과",
       "내과",
@@ -2194,6 +2396,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "오산시",
     "label": "오산시",
     "count": 256,
+    "nightCount": 86,
+    "sundayCount": 42,
     "departments": [
       "가정의학과",
       "내과",
@@ -2216,6 +2420,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남구",
     "label": "대구 남구",
     "count": 256,
+    "nightCount": 25,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -2238,6 +2444,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "양주시",
     "label": "양주시",
     "count": 248,
+    "nightCount": 53,
+    "sundayCount": 34,
     "departments": [
       "가정의학과",
       "내과",
@@ -2259,6 +2467,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "사상구",
     "label": "사상구",
     "count": 242,
+    "nightCount": 26,
+    "sundayCount": 11,
     "departments": [
       "가정의학과",
       "내과",
@@ -2280,6 +2490,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "거제시",
     "label": "거제시",
     "count": 236,
+    "nightCount": 48,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -2302,6 +2514,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "울산 중구",
     "count": 234,
+    "nightCount": 29,
+    "sundayCount": 10,
     "departments": [
       "가정의학과",
       "내과",
@@ -2324,6 +2538,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동구",
     "label": "광주 동구",
     "count": 233,
+    "nightCount": 18,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -2346,6 +2562,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "안동시",
     "label": "안동시",
     "count": 224,
+    "nightCount": 12,
+    "sundayCount": 2,
     "departments": [
       "가정의학과",
       "내과",
@@ -2368,6 +2586,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "대덕구",
     "label": "대덕구",
     "count": 216,
+    "nightCount": 26,
+    "sundayCount": 14,
     "departments": [
       "가정의학과",
       "내과",
@@ -2390,6 +2610,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "안성시",
     "label": "안성시",
     "count": 215,
+    "nightCount": 30,
+    "sundayCount": 17,
     "departments": [
       "가정의학과",
       "내과",
@@ -2412,6 +2634,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서산시",
     "label": "서산시",
     "count": 213,
+    "nightCount": 22,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -2434,6 +2658,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "기장군",
     "label": "기장군",
     "count": 209,
+    "nightCount": 30,
+    "sundayCount": 22,
     "departments": [
       "가정의학과",
       "내과",
@@ -2456,6 +2682,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "당진시",
     "label": "당진시",
     "count": 205,
+    "nightCount": 22,
+    "sundayCount": 13,
     "departments": [
       "가정의학과",
       "내과",
@@ -2478,6 +2706,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "울주군",
     "label": "울주군",
     "count": 205,
+    "nightCount": 24,
+    "sundayCount": 12,
     "departments": [
       "가정의학과",
       "내과",
@@ -2500,6 +2730,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "논산시",
     "label": "논산시",
     "count": 199,
+    "nightCount": 3,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -2522,6 +2754,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "제천시",
     "label": "제천시",
     "count": 194,
+    "nightCount": 12,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -2544,6 +2778,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "북구",
     "label": "울산 북구",
     "count": 190,
+    "nightCount": 32,
+    "sundayCount": 13,
     "departments": [
       "가정의학과",
       "내과",
@@ -2566,6 +2802,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "정읍시",
     "label": "정읍시",
     "count": 190,
+    "nightCount": 5,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -2587,6 +2825,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "나주시",
     "label": "나주시",
     "count": 169,
+    "nightCount": 14,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -2608,6 +2848,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동구",
     "label": "울산 동구",
     "count": 168,
+    "nightCount": 11,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -2629,6 +2871,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "의왕시",
     "label": "의왕시",
     "count": 167,
+    "nightCount": 25,
+    "sundayCount": 10,
     "departments": [
       "가정의학과",
       "내과",
@@ -2651,6 +2895,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "공주시",
     "label": "공주시",
     "count": 167,
+    "nightCount": 8,
+    "sundayCount": 11,
     "departments": [
       "가정의학과",
       "내과",
@@ -2673,6 +2919,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "통영시",
     "label": "통영시",
     "count": 160,
+    "nightCount": 19,
+    "sundayCount": 11,
     "departments": [
       "가정의학과",
       "내과",
@@ -2694,6 +2942,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "포천시",
     "label": "포천시",
     "count": 157,
+    "nightCount": 14,
+    "sundayCount": 12,
     "departments": [
       "가정의학과",
       "내과",
@@ -2716,6 +2966,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "광양시",
     "label": "광양시",
     "count": 157,
+    "nightCount": 7,
+    "sundayCount": 2,
     "departments": [
       "가정의학과",
       "내과",
@@ -2738,6 +2990,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "김천시",
     "label": "김천시",
     "count": 155,
+    "nightCount": 13,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -2759,6 +3013,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동구",
     "label": "부산 동구",
     "count": 154,
+    "nightCount": 10,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -2780,6 +3036,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "인천 중구",
     "count": 147,
+    "nightCount": 32,
+    "sundayCount": 19,
     "departments": [
       "가정의학과",
       "내과",
@@ -2802,6 +3060,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "양평군",
     "label": "양평군",
     "count": 147,
+    "nightCount": 4,
+    "sundayCount": 9,
     "departments": [
       "가정의학과",
       "내과",
@@ -2824,6 +3084,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "보령시",
     "label": "보령시",
     "count": 147,
+    "nightCount": 3,
+    "sundayCount": 9,
     "departments": [
       "가정의학과",
       "내과",
@@ -2845,6 +3107,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "영천시",
     "label": "영천시",
     "count": 146,
+    "nightCount": 5,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -2867,6 +3131,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "상주시",
     "label": "상주시",
     "count": 144,
+    "nightCount": 1,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -2888,6 +3154,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "영주시",
     "label": "영주시",
     "count": 142,
+    "nightCount": 11,
+    "sundayCount": 4,
     "departments": [
       "가정의학과",
       "내과",
@@ -2909,6 +3177,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "홍성군",
     "label": "홍성군",
     "count": 141,
+    "nightCount": 9,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -2930,6 +3200,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "서구",
     "label": "부산 서구",
     "count": 140,
+    "nightCount": 11,
+    "sundayCount": 9,
     "departments": [
       "가정의학과",
       "내과",
@@ -2952,6 +3224,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "김제시",
     "label": "김제시",
     "count": 140,
+    "nightCount": 5,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -2974,6 +3248,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "사천시",
     "label": "사천시",
     "count": 139,
+    "nightCount": 9,
+    "sundayCount": 2,
     "departments": [
       "가정의학과",
       "내과",
@@ -2995,6 +3271,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "중구",
     "label": "부산 중구",
     "count": 138,
+    "nightCount": 18,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -3017,6 +3295,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "남원시",
     "label": "남원시",
     "count": 138,
+    "nightCount": 2,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -3039,6 +3319,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "여주시",
     "label": "여주시",
     "count": 137,
+    "nightCount": 11,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -3061,6 +3343,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "밀양시",
     "label": "밀양시",
     "count": 136,
+    "nightCount": 10,
+    "sundayCount": 4,
     "departments": [
       "가정의학과",
       "내과",
@@ -3082,6 +3366,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "속초시",
     "label": "속초시",
     "count": 134,
+    "nightCount": 7,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -3104,6 +3390,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "영도구",
     "label": "영도구",
     "count": 132,
+    "nightCount": 13,
+    "sundayCount": 7,
     "departments": [
       "가정의학과",
       "내과",
@@ -3125,6 +3413,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "강서구",
     "label": "부산 강서구",
     "count": 128,
+    "nightCount": 40,
+    "sundayCount": 21,
     "departments": [
       "가정의학과",
       "내과",
@@ -3146,6 +3436,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "완주군",
     "label": "완주군",
     "count": 128,
+    "nightCount": 16,
+    "sundayCount": 5,
     "departments": [
       "가정의학과",
       "내과",
@@ -3167,6 +3459,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "음성군",
     "label": "음성군",
     "count": 126,
+    "nightCount": 15,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -3189,6 +3483,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "칠곡군",
     "label": "칠곡군",
     "count": 120,
+    "nightCount": 17,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -3210,6 +3506,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "과천시",
     "label": "과천시",
     "count": 120,
+    "nightCount": 31,
+    "sundayCount": 6,
     "departments": [
       "가정의학과",
       "내과",
@@ -3232,6 +3530,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "무안군",
     "label": "무안군",
     "count": 114,
+    "nightCount": 13,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -3253,6 +3553,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "예산군",
     "label": "예산군",
     "count": 111,
+    "nightCount": 5,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -3275,6 +3577,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "문경시",
     "label": "문경시",
     "count": 110,
+    "nightCount": 2,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -3297,6 +3601,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "화순군",
     "label": "화순군",
     "count": 107,
+    "nightCount": 1,
+    "sundayCount": 0,
     "departments": [
       "가정의학과",
       "내과",
@@ -3318,6 +3624,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "고흥군",
     "label": "고흥군",
     "count": 105,
+    "nightCount": 0,
+    "sundayCount": 0,
     "departments": [
       "가정의학과",
       "내과",
@@ -3339,6 +3647,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "동해시",
     "label": "동해시",
     "count": 105,
+    "nightCount": 4,
+    "sundayCount": 3,
     "departments": [
       "가정의학과",
       "내과",
@@ -3360,6 +3670,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "해남군",
     "label": "해남군",
     "count": 103,
+    "nightCount": 0,
+    "sundayCount": 0,
     "departments": [
       "가정의학과",
       "내과",
@@ -3382,6 +3694,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "부여군",
     "label": "부여군",
     "count": 102,
+    "nightCount": 0,
+    "sundayCount": 2,
     "departments": [
       "가정의학과",
       "내과",
@@ -3403,6 +3717,8 @@ export const AREA_REGIONS: readonly AreaRegion[] = [
     "sigungu": "진천군",
     "label": "진천군",
     "count": 102,
+    "nightCount": 19,
+    "sundayCount": 2,
     "departments": [
       "가정의학과",
       "내과",
@@ -3436,6 +3752,12 @@ export function findAreaRegion(slug: string): AreaRegion | undefined {
 export function nearbyRegionsOf(slug: string, limit = 8): AreaRegion[] {
   const me = BY_SLUG.get(slug);
   if (!me) return [];
-  return AREA_REGIONS.filter((r) => r.sido === me.sido && r.slug !== slug)
-    .slice(0, limit); // AREA_REGIONS는 이미 병원 수 내림차순이다
+  // AREA_REGIONS는 이미 병원 수 내림차순이다
+  return AREA_REGIONS.filter((r) => r.sido === me.sido && r.slug !== slug).slice(
+    0,
+    limit,
+  );
 }
+
+/** 야간·일요일 페이지를 여는 최소 병원 수. 이보다 적으면 페이지가 얇다. */
+export const MIN_OPEN_LATE = 10;

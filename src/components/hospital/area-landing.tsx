@@ -17,6 +17,9 @@ type Props = {
   /** 화면에 보이는 이름 */
   region: string;
   department?: string;
+  /** 야간·일요일 진료 병원 수 — 0이면 배너를 숨긴다 */
+  nightCount?: number;
+  sundayCount?: number;
   /** 무한스크롤 목록 필터 (region[, department]) */
   filters: HospitalSearchFilters;
   /** 지역 내 진료과목 (허브·인접 탐색) */
@@ -33,6 +36,8 @@ export function AreaLanding({
   slug,
   region,
   department,
+  nightCount = 0,
+  sundayCount = 0,
   filters,
   regionDepartments,
   nearbyRegions = [],
@@ -86,6 +91,31 @@ export function AreaLanding({
               {d}
             </ChipLink>
           ))}
+        </nav>
+      )}
+
+      {/*
+       * 야간·일요일 진료 바로가기 — 우리만 가진 데이터로 만든 페이지로 보낸다.
+       * "지금 문 연 병원"은 사용자가 가장 급하게 찾는 것이라 눈에 띄게 둔다.
+       */}
+      {!department && (nightCount > 0 || sundayCount > 0) && (
+        <nav aria-label="시간대별 진료" className="mt-4 flex flex-wrap gap-2">
+          {nightCount > 0 && (
+            <Link
+              href={`/area/${slug}/night`}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-weak px-4 py-2.5 text-sm font-bold text-brand transition-opacity hover:opacity-80"
+            >
+              🌙 야간진료 {nightCount}곳
+            </Link>
+          )}
+          {sundayCount > 0 && (
+            <Link
+              href={`/area/${slug}/sunday`}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-weak px-4 py-2.5 text-sm font-bold text-brand transition-opacity hover:opacity-80"
+            >
+              ☀️ 일요일 진료 {sundayCount}곳
+            </Link>
+          )}
         </nav>
       )}
 
