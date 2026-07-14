@@ -10,6 +10,7 @@ import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { SkipLink } from "@/components/layout/skip-link";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
+import { buildOrganizationLd } from "@/lib/seo/organization";
 import AppProviders from "@/providers/app-providers";
 
 // 서치콘솔 소유 확인 — 환경변수가 있으면 그걸 쓰고, 없으면 등록된 값으로 폴백.
@@ -109,6 +110,13 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_LD) }}
+        />
+        {/* 운영 주체 — AI는 의료 정보를 인용하기 전에 "누가 썼는가"를 본다 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(buildOrganizationLd()),
+          }}
         />
       </head>
       {/*

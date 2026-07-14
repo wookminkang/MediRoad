@@ -66,6 +66,7 @@ export function Footer() {
           </FooterCol>
 
           <FooterCol title="고객지원">
+            <FooterLink href="/about">메디로드 소개</FooterLink>
             <FooterLink href="/faq">자주 묻는 질문(FAQ)</FooterLink>
             <FooterLink href="mailto:kangmu238@gmail.com?subject=%5B메디로드%5D%20문의">
               문의하기
