@@ -24,6 +24,10 @@ export async function GET(req: NextRequest) {
     region: sp.get("region") ?? undefined,
     station: sp.get("station") ?? undefined,
     openNow: sp.get("open") === "1" || undefined,
+    openLate:
+      sp.get("openLate") === "night" || sp.get("openLate") === "sunday"
+        ? (sp.get("openLate") as "night" | "sunday")
+        : undefined,
     center: lat && lng ? { lat: Number(lat), lng: Number(lng) } : undefined,
     radiusKm: radius ? Number(radius) : undefined,
     page: sp.get("page") ? Number(sp.get("page")) : 1,

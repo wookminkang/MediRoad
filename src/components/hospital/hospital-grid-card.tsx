@@ -4,6 +4,11 @@ import { Badge } from "@seed-design/react";
 
 import { isPartnerHospital } from "@/constants/partners";
 import { walkMinutes } from "@/lib/hospital";
+import {
+  latestWeekdayCloseClock,
+  numToClock,
+  sundayLabelClock,
+} from "@/lib/open-hours";
 import type { Hospital } from "@/types/hospital";
 
 /**
@@ -13,9 +18,29 @@ import type { Hospital } from "@/types/hospital";
  * 이미지가 아니라 주소·지하철·진료과 텍스트인데, 좁은 2열에서는 그게 전부 잘린다.
  * 그래서 모바일은 전폭 로우로 두고 주소를 온전히 보여준다.
  */
-export function HospitalGridCard({ hospital: h }: { hospital: Hospital }) {
+export function HospitalGridCard({
+  hospital: h,
+  openLate,
+}: {
+  hospital: Hospital;
+  /** 야간·일요일 목록에서 해당 진료시간을 뱃지로 강조 */
+  openLate?: "night" | "sunday";
+}) {
   const st = h.nearestStation;
   const walk = st ? walkMinutes(st.distanceM) : 0;
+
+  // 야간·일요일 목록이면 그 시간을 뱃지로 보여준다 — 사용자가 이 페이지에서 궁금한 값
+  let hoursBadge: string | null = null;
+  if (openLate === "night") {
+    const c = latestWeekdayCloseClock(h.hours ?? []);
+    // 자정(2400)·자정 넘김은 "24:00까지"보다 "밤 12시 이후"가 자연스럽다
+    if (c != null) {
+      hoursBadge = c >= 2400 ? "평일 밤 12시 이후" : `평일 ${numToClock(c)}까지`;
+    }
+  } else if (openLate === "sunday") {
+    const s = sundayLabelClock(h.hours ?? []);
+    if (s) hoursBadge = `일 ${s}`;
+  }
 
   const badges = (
     <div className="flex shrink-0 flex-wrap justify-end gap-1">
@@ -24,10 +49,16 @@ export function HospitalGridCard({ hospital: h }: { hospital: Hospital }) {
           제휴
         </Badge>
       )}
-      {h.isOpenNow != null && (
-        <Badge variant="weak" tone={h.isOpenNow ? "positive" : "neutral"}>
-          {h.isOpenNow ? "영업중" : "영업종료"}
+      {hoursBadge ? (
+        <Badge variant="weak" tone="brand">
+          {hoursBadge}
         </Badge>
+      ) : (
+        h.isOpenNow != null && (
+          <Badge variant="weak" tone={h.isOpenNow ? "positive" : "neutral"}>
+            {h.isOpenNow ? "영업중" : "영업종료"}
+          </Badge>
+        )
       )}
     </div>
   );

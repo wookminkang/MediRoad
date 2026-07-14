@@ -56,3 +56,51 @@ export function isNightOpen(hours: HourRow[]): boolean {
 export function sundayHours(hours: HourRow[]): HourRow | null {
   return hours.find((h) => h.day === 7 && !h.closed && h.open && h.close) ?? null;
 }
+
+/* ── 아래는 Hospital.hours("09:00" 콜론 포맷)용. 위 HourRow("0900")와 포맷이 다르다. ── */
+
+type ClockHours = {
+  day: number;
+  open?: string;
+  close?: string;
+  closed?: boolean;
+};
+
+/** "21:30" → 2130. 자정("00:00")은 2400으로 본다(가장 이른 값이 되지 않게). */
+function clockToNum(v?: string): number | null {
+  if (!v) return null;
+  const [h, m] = v.split(":").map((x) => Number.parseInt(x, 10));
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  const n = h * 100 + m;
+  return n === 0 ? 2400 : n;
+}
+
+/** 평일 가장 늦은 마감(HHMM). 없으면 null */
+export function latestWeekdayCloseClock(hours: ClockHours[]): number | null {
+  let latest: number | null = null;
+  for (const h of hours) {
+    if (h.closed || h.day < 1 || h.day > 5) continue;
+    const c = clockToNum(h.close);
+    if (c === null) continue;
+    if (latest === null || c > latest) latest = c;
+  }
+  return latest;
+}
+
+export function isNightOpenClock(hours: ClockHours[]): boolean {
+  const c = latestWeekdayCloseClock(hours);
+  return c !== null && c >= NIGHT_FROM;
+}
+
+/** 일요일 진료 시간 "09:00~13:00" (없으면 null) */
+export function sundayLabelClock(hours: ClockHours[]): string | null {
+  const s = hours.find((h) => h.day === 7 && !h.closed && h.open && h.close);
+  return s ? `${s.open}~${s.close}` : null;
+}
+
+/** "2130" → "21:30", 2400 → "24:00" */
+export function numToClock(n: number): string {
+  const h = Math.floor(n / 100);
+  const m = n % 100;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}

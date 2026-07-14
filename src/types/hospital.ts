@@ -135,6 +135,8 @@ export type HospitalSearchFilters = {
   sido?: string;
   /** 영업중만 보기 */
   openNow?: boolean;
+  /** 야간(평일 20시 이후 마감)·일요일 진료만 보기. 심평원 시간 표기가 지저분해 서버에서 판정한다. */
+  openLate?: "night" | "sunday";
   /** 기준 좌표 (반경 필터·거리 정렬 기준) */
   center?: LatLng;
   /** 반경(km) — center 기준 이내만. center와 함께 사용 */

@@ -3,9 +3,12 @@ import { PARTNER_HOSPITAL_IDS } from "@/constants/partners";
 import {
   fmtTime,
   type HourRow,
+  isNightOpenClock,
   latestWeekdayClose,
+  latestWeekdayCloseClock,
   NIGHT_FROM,
   sundayHours,
+  sundayLabelClock,
 } from "@/lib/open-hours";
 import { publishedCutoff } from "@/lib/post-schedule";
 import { normalizeLine, normalizeStationName } from "@/lib/station";
@@ -300,8 +303,14 @@ export async function getHospitals(
     }
   }
 
-  const { q, department, type, region, station, sido, openNow, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
+  const { q, department, type, region, station, sido, openNow, openLate, center, radiusKm, page = 1, pageSize = DEFAULT_PAGE_SIZE } = filters;
   const start = (page - 1) * pageSize;
+
+  // 야간·일요일은 시간 판정을 코드에서 하므로 DB 페이지네이션과 안 맞는다.
+  // 지역 전체를 판정·정렬한 뒤 페이지만큼 잘라 넘긴다(무한스크롤이 같은 카드로 그린다).
+  if (openLate && sido && region) {
+    return openLatePage(sido, region, openLate, page, pageSize);
+  }
 
   const deptTypes = department ? DEPT_AS_TYPE[department] : undefined;
   const useDeptJoin = Boolean(department) && !deptTypes; // 한방·치과는 조인 대신 종별
@@ -367,6 +376,66 @@ export async function getHospitals(
       .sort((a, b) => distanceInMeters(center, a.location) - distanceInMeters(center, b.location));
   }
   return { items, total: count ?? 0, page, pageSize };
+}
+
+/**
+ * 야간·일요일 진료 병원 — 시간 판정 후 페이지네이션.
+ *
+ * DB에서 시간으로 못 거른다(심평원 표기가 "2600"·"0000" 등 지저분). 지역 전체를
+ * 가져와 코드로 판정·정렬한 뒤 page만큼 슬라이스한다. 지역 하나는 최대 3,000곳이라
+ * 감당 가능하고, 한 번 캐시되면 페이지마다 다시 안 훑는다(ISR revalidate).
+ * 반환 타입은 Hospital 그대로라 무한스크롤이 같은 카드로 그린다.
+ */
+async function openLatePage(
+  sido: string,
+  region: string,
+  kind: "night" | "sunday",
+  page: number,
+  pageSize: number,
+): Promise<Paginated<Hospital>> {
+  const rows: HospitalRow[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await getSupabaseServer()
+      .from("hospitals")
+      .select(
+        "*, hospital_hours(day,open,close,closed)," +
+          " hospital_photos(url,alt,category,is_primary,sort_order)," +
+          " hospital_departments(name)",
+      )
+      .eq("sido", sido)
+      .eq("sigungu", region)
+      .range(from, from + 999);
+    if (error) throw error;
+    if (!data?.length) break;
+    rows.push(...(data as unknown as HospitalRow[]));
+    if (data.length < 1000) break;
+  }
+
+  const all = rows
+    .map(rowToHospital)
+    .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }))
+    .filter((h) =>
+      kind === "night"
+        ? isNightOpenClock(h.hours ?? [])
+        : Boolean(sundayLabelClock(h.hours ?? [])),
+    );
+
+  // 늦게 닫는 순 (일요일은 일요일 마감 순) — 사용자가 궁금해하는 순서
+  all.sort((a, b) => openLateSortKey(b, kind) - openLateSortKey(a, kind));
+
+  const startIdx = (page - 1) * pageSize;
+  return {
+    items: all.slice(startIdx, startIdx + pageSize),
+    total: all.length,
+    page,
+    pageSize,
+  };
+}
+
+function openLateSortKey(h: Hospital, kind: "night" | "sunday"): number {
+  if (kind === "night") return latestWeekdayCloseClock(h.hours ?? []) ?? 0;
+  const sun = (h.hours ?? []).find((x) => x.day === 7 && !x.closed && x.close);
+  return sun?.close ? Number.parseInt(sun.close.replace(":", ""), 10) : 0;
 }
 
 const DETAIL_SELECT =

@@ -20,6 +20,7 @@ function toParams(f: HospitalSearchFilters, page: number): string {
   if (f.region) p.set("region", f.region);
   if (f.station) p.set("station", f.station);
   if (f.openNow) p.set("open", "1");
+  if (f.openLate) p.set("openLate", f.openLate);
   if (f.center) {
     p.set("lat", String(f.center.lat));
     p.set("lng", String(f.center.lng));
@@ -86,7 +87,7 @@ export function HospitalInfiniteList({
       <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-5">
         {items.map((h) => (
           <li key={h.id}>
-            <HospitalGridCard hospital={h} />
+            <HospitalGridCard hospital={h} openLate={filters.openLate} />
           </li>
         ))}
       </ul>
