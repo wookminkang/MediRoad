@@ -14,6 +14,7 @@ import {
   type PromoSlide,
 } from "@/components/home/promo-carousel";
 import { ScrollRow } from "@/components/home/scroll-row";
+import { AREA_REGIONS } from "@/constants/area-regions";
 import { SITE_URL } from "@/constants/site";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
@@ -107,6 +108,12 @@ const CONCERNS: { dept: string; hint: string; icon: string }[] = [
   { dept: "한방", hint: "한의원·한방병원", icon: "/dept3d/한방.webp" },
 ];
 
+/** 주요 지역 바로가기 — 병원 수 상위 24곳. 홈에서 지역 랜딩으로 가는 크롤 경로. */
+const TOP_REGIONS = [...AREA_REGIONS]
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 24)
+  .map((r) => ({ slug: r.slug, label: r.label }));
+
 /** 인기 지역 (사진 카드) */
 const REGIONS: {
   name: string;
@@ -146,8 +153,14 @@ const REGIONS: {
 ];
 
 /** 지역 카드 → 지도 이동 링크 (좌표 + 구 단위 줌) */
-const areaMapHref = (r: { lat: number; lng: number }) =>
-  `/map?lat=${r.lat}&lng=${r.lng}&zoom=14`;
+/**
+ * 인기 지역 카드는 지역 랜딩으로 보낸다.
+ *
+ * 예전엔 지도(/map?lat=…&lng=…)로 갔다. 지도는 콘텐츠 페이지가 아니라서, 홈이
+ * 지역 랜딩 2,144개에 링크를 하나도 주지 않는 상태였다. 사이트맵에만 있고 링크가
+ * 없는 페이지를 구글은 "발견됨 — 색인되지 않음"으로 방치한다.
+ */
+const areaHref = (r: { name: string }) => `/area/${r.name}`;
 
 export default async function Home() {
   const [{ items: columns }, posts] = await Promise.all([
@@ -294,7 +307,7 @@ export default async function Home() {
           <ul className="mt-10 grid grid-cols-2 gap-6">
             {REGIONS.map((r) => (
               <li key={r.name}>
-                <Link href={areaMapHref(r)} className="block">
+                <Link href={areaHref(r)} className="block">
                   <Image
                     src={r.image}
                     alt={`${r.name} 병원 찾기`}
@@ -307,12 +320,38 @@ export default async function Home() {
                 </Link>
                 <div className="mt-4">
                   <ActionButton asChild variant="neutralWeak" size="small">
-                    <Link href={areaMapHref(r)}>병원 둘러보기</Link>
+                    <Link href={areaHref(r)}>병원 둘러보기</Link>
                   </ActionButton>
                 </div>
               </li>
             ))}
           </ul>
+
+          {/*
+           * 주요 지역 바로가기 — 크롤 경로의 시작점.
+           * 구글은 내부 링크로 "무엇이 중요한지"를 판단한다. 지역 랜딩이 2,144개인데
+           * 홈에서 링크가 없으면 아무리 사이트맵에 넣어도 색인이 밀린다.
+           */}
+          <nav aria-label="주요 지역" className="mt-10 border-t border-line pt-8">
+            <p className="text-sm font-bold text-neutral">주요 지역 바로가기</p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {TOP_REGIONS.map((r) => (
+                <li key={r.slug}>
+                  <Link
+                    href={`/area/${r.slug}`}
+                    className="inline-block rounded-full border border-line px-3.5 py-2 text-sm text-neutral transition-colors hover:border-brand hover:bg-brand-weak"
+                  >
+                    {r.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5">
+              <ActionButton asChild variant="neutralWeak" size="small">
+                <Link href="/area">전국 지역 전체보기</Link>
+              </ActionButton>
+            </div>
+          </nav>
         </div>
       </section>
 

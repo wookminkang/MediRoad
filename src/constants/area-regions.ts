@@ -3426,3 +3426,16 @@ const BY_SLUG = new Map(AREA_REGIONS.map((r) => [r.slug, r]));
 export function findAreaRegion(slug: string): AreaRegion | undefined {
   return BY_SLUG.get(slug);
 }
+
+/**
+ * 같은 시도의 이웃 지역 (병원 수 많은 순).
+ *
+ * 지역 랜딩끼리 서로 링크가 없으면 크롤러가 홈 → 지역 하나에서 멈춘다.
+ * 이 링크가 156개 지역을 잇는 통로다.
+ */
+export function nearbyRegionsOf(slug: string, limit = 8): AreaRegion[] {
+  const me = BY_SLUG.get(slug);
+  if (!me) return [];
+  return AREA_REGIONS.filter((r) => r.sido === me.sido && r.slug !== slug)
+    .slice(0, limit); // AREA_REGIONS는 이미 병원 수 내림차순이다
+}

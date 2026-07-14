@@ -13,7 +13,10 @@ export const revalidate = 86400;
 
 export async function GET() {
   const now = new Date();
-  const urls: SitemapUrl[] = [];
+  const urls: SitemapUrl[] = [
+    // 지역 목록 허브 — 홈에서 여기로, 여기서 156개 지역으로 크롤이 뻗어나간다.
+    { url: `${SITE_URL}/area`, lastmod: now, changefreq: "weekly", priority: 0.9 },
+  ];
 
   for (const r of AREA_REGIONS) {
     urls.push({

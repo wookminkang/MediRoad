@@ -58,7 +58,7 @@ export function Footer() {
         <div className="mt-8 grid gap-8 sm:grid-cols-2">
           <FooterCol title="병원·건강정보">
             <FooterLink href="/hospitals">병원 찾기</FooterLink>
-            <FooterLink href="/area/강남구">지역별 병원</FooterLink>
+            <FooterLink href="/area">지역별 병원</FooterLink>
             <FooterLink href="/near">지하철역으로 찾기</FooterLink>
             <FooterLink href="/hospitals?department=내과">진료과목별 병원</FooterLink>
             <FooterLink href="/health">건강정보</FooterLink>

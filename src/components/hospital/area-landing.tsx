@@ -2,19 +2,27 @@ import Link from "next/link";
 
 import { ActionChip, Text } from "@seed-design/react";
 
-import { FEATURED_REGIONS } from "@/constants/region";
 import { stationSegment } from "@/lib/station-landing";
 import type { HospitalSearchFilters } from "@/types/hospital";
 
 import { HospitalInfiniteList } from "./hospital-infinite-list";
 
 type Props = {
+  /**
+   * URL에 쓰는 값. 표시 이름(region)과 다를 수 있다.
+   * 시군구 이름이 시도끼리 겹치면 slug가 '서울-강서구'인데 표시는 '서울 강서구'다.
+   * 이걸 섞으면 /area/서울 강서구 같은 깨진 링크가 나온다.
+   */
+  slug: string;
+  /** 화면에 보이는 이름 */
   region: string;
   department?: string;
   /** 무한스크롤 목록 필터 (region[, department]) */
   filters: HospitalSearchFilters;
   /** 지역 내 진료과목 (허브·인접 탐색) */
   regionDepartments: string[];
+  /** 인접 지역 (같은 시도) — 크롤러가 156개 지역을 다 돌 수 있게 하는 통로 */
+  nearbyRegions?: { slug: string; label: string }[];
   /** 이 지역 주요 지하철역(clean 역명 — 역세권 랜딩 교차 링크) */
   stations?: string[];
   intro: string;
@@ -22,16 +30,17 @@ type Props = {
 };
 
 export function AreaLanding({
+  slug,
   region,
   department,
   filters,
   regionDepartments,
+  nearbyRegions = [],
   stations = [],
   intro,
   faqs,
 }: Props) {
   const title = department ? `${region} ${department}` : `${region} 병원`;
-  const otherRegions = FEATURED_REGIONS.filter((r) => r !== region);
   const otherDepartments = regionDepartments.filter((d) => d !== department);
 
   return (
@@ -46,7 +55,7 @@ export function AreaLanding({
           <Link href="/">홈</Link>
           {" › "}
           {department ? (
-            <Link href={`/area/${region}`}>{region}</Link>
+            <Link href={`/area/${slug}`}>{region}</Link>
           ) : (
             region
           )}
@@ -73,7 +82,7 @@ export function AreaLanding({
       {!department && regionDepartments.length > 0 && (
         <nav aria-label="진료과목" className="mt-6 flex flex-wrap gap-2">
           {regionDepartments.map((d) => (
-            <ChipLink key={d} href={`/area/${region}/${d}`}>
+            <ChipLink key={d} href={`/area/${slug}/${d}`}>
               {d}
             </ChipLink>
           ))}
@@ -138,7 +147,7 @@ export function AreaLanding({
             ))}
           </div>
         )}
-        {otherRegions.length > 0 && (
+        {nearbyRegions.length > 0 && (
           <div className="flex flex-wrap items-center gap-2">
             <Text
               as="span"
@@ -147,12 +156,16 @@ export function AreaLanding({
             >
               인접 지역
             </Text>
-            {otherRegions.map((r) => (
+            {nearbyRegions.map((r) => (
               <ChipLink
-                key={r}
-                href={department ? `/area/${r}/${department}` : `/area/${r}`}
+                key={r.slug}
+                href={
+                  department
+                    ? `/area/${r.slug}/${department}`
+                    : `/area/${r.slug}`
+                }
               >
-                {r} {department ?? "병원"}
+                {r.label} {department ?? "병원"}
               </ChipLink>
             ))}
           </div>
@@ -167,7 +180,7 @@ export function AreaLanding({
               {region} 다른 과목
             </Text>
             {otherDepartments.map((d) => (
-              <ChipLink key={d} href={`/area/${region}/${d}`}>
+              <ChipLink key={d} href={`/area/${slug}/${d}`}>
                 {d}
               </ChipLink>
             ))}

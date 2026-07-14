@@ -6,7 +6,7 @@ import { dehydrate, HydrationBoundary, type InfiniteData } from "@tanstack/react
 import { getHospitals } from "@/api/hospital";
 import { AreaLanding } from "@/components/hospital/area-landing";
 import { PageContainer } from "@/components/ui/page-container";
-import { findAreaRegion } from "@/constants/area-regions";
+import { findAreaRegion, nearbyRegionsOf } from "@/constants/area-regions";
 import {
   MEDICAL_DEPARTMENTS,
   type MedicalDepartment,
@@ -128,8 +128,10 @@ export default async function AreaDepartmentPage({
     <PageContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <AreaLanding
+          slug={slug}
           region={label}
           department={dept}
+          nearbyRegions={nearbyRegionsOf(slug)}
           filters={filters}
           regionDepartments={regionDepartments}
           stations={topStationsOf(sample)}

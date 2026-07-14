@@ -6,7 +6,11 @@ import { dehydrate, HydrationBoundary, type InfiniteData } from "@tanstack/react
 import { getHospitals } from "@/api/hospital";
 import { AreaLanding } from "@/components/hospital/area-landing";
 import { PageContainer } from "@/components/ui/page-container";
-import { AMBIGUOUS_SIGUNGU, findAreaRegion } from "@/constants/area-regions";
+import {
+  AMBIGUOUS_SIGUNGU,
+  findAreaRegion,
+  nearbyRegionsOf,
+} from "@/constants/area-regions";
 import { FEATURED_REGIONS } from "@/constants/region";
 import { SITE_URL } from "@/constants/site";
 import { buildAreaFaqs, buildAreaIntro, departmentsOf } from "@/lib/area";
@@ -95,7 +99,9 @@ export default async function AreaRegionPage({ params }: { params: Params }) {
     <PageContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <AreaLanding
+          slug={slug}
           region={label}
+          nearbyRegions={nearbyRegionsOf(slug)}
           filters={filters}
           regionDepartments={regionDepartments}
           stations={topStationsOf(sample)}
