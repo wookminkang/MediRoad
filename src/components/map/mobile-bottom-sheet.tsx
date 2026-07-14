@@ -2,9 +2,19 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-// 뷰포트 높이 비율 스냅 지점 (peek / 절반 / 거의 전체)
-const SNAP_POINTS = [0.12, 0.5, 0.9];
+// 뷰포트 높이 비율 스냅 지점 (peek / 절반 / 최대)
+// 최대치는 상단 UI를 덮지 않도록 픽셀로 계산한다 (아래 TOP_GUARD_PX 참고)
+const SNAP_RATIOS = [0.12, 0.5];
 const CLOSE_BELOW = 0.08; // 이보다 낮게 내리고 놓으면 닫기
+
+/**
+ * 시트가 침범하면 안 되는 상단 영역(px).
+ *
+ * 지도 위에는 앱바(~57) · 검색바(69~111) · 필터칩(119~157)이 떠 있다.
+ * 예전엔 vh의 0.92까지 올라가서(844 화면에서 상단 68px) 검색바·필터를 덮어버렸다.
+ * 비율(vh)로 잡으면 화면 높이에 따라 침범 여부가 달라지므로 픽셀로 고정한다.
+ */
+const TOP_GUARD_PX = 169; // 필터칩 하단(157) + 여유 12
 
 /**
  * 모바일 바텀시트 — 핸들바 드래그로 높이를 직접 제어(스냅).
@@ -38,7 +48,11 @@ export function MobileBottomSheet({
 
   if (!open) return null;
 
-  const snapPx = snap * vh;
+  /** 상단 UI를 덮지 않는 최대 높이 — 드래그·스냅 모두 이 선을 넘지 못한다 */
+  const maxPx = Math.max(0, vh - TOP_GUARD_PX);
+  const snapPoints = [...SNAP_RATIOS, vh ? maxPx / vh : 0.9];
+
+  const snapPx = Math.min(snap * vh, maxPx);
   const height = dragPx ?? snapPx;
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -50,7 +64,7 @@ export function MobileBottomSheet({
   const onPointerMove = (e: React.PointerEvent) => {
     if (dragPx == null) return;
     const dy = startY.current - e.clientY; // 위로 올리면 +
-    const next = Math.min(vh * 0.92, Math.max(0, startPx.current + dy));
+    const next = Math.min(maxPx, Math.max(0, startPx.current + dy));
     setDragPx(next);
   };
   const onPointerUp = () => {
@@ -62,8 +76,8 @@ export function MobileBottomSheet({
       return;
     }
     // 가장 가까운 스냅으로
-    let nearest = SNAP_POINTS[0];
-    for (const p of SNAP_POINTS) {
+    let nearest = snapPoints[0];
+    for (const p of snapPoints) {
       if (Math.abs(p - cur) < Math.abs(nearest - cur)) nearest = p;
     }
     onSnapChange(nearest);
