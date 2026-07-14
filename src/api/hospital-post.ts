@@ -1,3 +1,4 @@
+import { publishedCutoff } from "@/lib/post-schedule";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
   HospitalPost,
@@ -81,6 +82,7 @@ export async function getHospitalPosts(hospitalId: string): Promise<HospitalPost
     .select("*")
     .eq("hospital_id", hospitalId)
     .eq("status", "published")
+    .lte("published_at", publishedCutoff())
     .order("published_at", { ascending: false });
   if (error) throw error;
   return (data as PostRow[]).map(rowToPost);
@@ -94,6 +96,7 @@ export async function getHospitalPost(postId: string): Promise<HospitalPost | nu
     .select("*")
     .eq("id", postId)
     .eq("status", "published")
+    .lte("published_at", publishedCutoff())
     .maybeSingle();
   if (error) throw error;
   return data ? rowToPost(data as PostRow) : null;
@@ -124,6 +127,7 @@ export async function getLatestHospitalPosts(
     .from("hospital_posts")
     .select("id,title,excerpt,thumbnail,published_at,hospital_id,hospital:hospitals(slug,name)")
     .eq("status", "published")
+    .lte("published_at", publishedCutoff())
     .order("published_at", { ascending: false })
     .limit(Math.max(60, limit * 8));
   if (error) return [];

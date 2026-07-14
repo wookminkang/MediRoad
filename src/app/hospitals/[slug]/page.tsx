@@ -22,7 +22,9 @@ type Params = Promise<{ slug: string }>;
 
 // 78k건 → 빌드 시 전부 생성 불가. 첫 요청 시 on-demand 렌더 후 ISR 캐시.
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 이 페이지가 병원의 포스트 목록을 들고 있다. 예약 발행 글이 그날 안에 목록에
+// 올라오도록 한 시간으로 줄인다(하루로 두면 최대 24시간 늦게 뜬다).
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const ids = await getAllHospitalIds(); // Supabase면 [] (mock일 때만 목록 = slug)

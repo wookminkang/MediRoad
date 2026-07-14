@@ -1,5 +1,6 @@
 import { MOCK_HOSPITALS } from "@/api/mock/hospitals";
 import { PARTNER_HOSPITAL_IDS } from "@/constants/partners";
+import { publishedCutoff } from "@/lib/post-schedule";
 import { normalizeLine, normalizeStationName } from "@/lib/station";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { Paginated } from "@/types";
@@ -564,7 +565,8 @@ export async function getSitemapHospitals(): Promise<
   const { data: postRows } = await sb
     .from("hospital_posts")
     .select("hospital_id")
-    .eq("status", "published");
+    .eq("status", "published")
+    .lte("published_at", publishedCutoff());
   const postHids = [...new Set((postRows ?? []).map((r) => r.hospital_id))];
   const ids = [...new Set([...PARTNER_HOSPITAL_IDS, ...postHids])];
   if (ids.length === 0) return [];
@@ -586,7 +588,8 @@ export async function getSitemapPosts(): Promise<
   const { data } = await sb
     .from("hospital_posts")
     .select("id, updated_at, hospital:hospitals(slug)")
-    .eq("status", "published");
+    .eq("status", "published")
+    .lte("published_at", publishedCutoff());
   return ((data ?? []) as unknown as {
     id: string;
     updated_at: string | null;

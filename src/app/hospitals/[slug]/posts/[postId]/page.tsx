@@ -16,7 +16,10 @@ import { buildPostMeta } from "@/lib/seo/hospital-post-meta";
 type Params = Promise<{ slug: string; postId: string }>;
 
 export const dynamicParams = true;
-export const revalidate = 86400;
+// 예약 발행 때문에 하루로 두면 안 된다. 아직 발행일이 안 된 글은 404가 나는데,
+// 그 404가 캐시되면 발행일이 지나도 계속 404다. 한 시간이면 아침 9시 발행 글이
+// 늦어도 10시에는 뜬다.
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   return []; // ISR on-demand
