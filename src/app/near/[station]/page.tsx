@@ -34,7 +34,6 @@ export async function generateStaticParams() {
   return [];
 }
 
-const INDEX_MIN = 3;
 const FIRST_PAGE = 24;
 
 export async function generateMetadata({
@@ -47,16 +46,21 @@ export async function generateMetadata({
   );
   if (!station) return {};
 
-  const { items } = await getHospitals({
-    station: stationBase(station),
-    pageSize: FIRST_PAGE,
-  });
+  // noindex라 병원 목록을 조회할 이유가 없다 — 결과를 쓰지도 않으면서 매 요청 DB를 쳤다
   const url = `${SITE_URL}/near/${station}`;
   return {
     title: { absolute: `${station} 병원 | 주변 병원·의원 진료시간·위치 | ${SITE_NAME}` },
     description: `${station} 주변 병원·의원을 진료과목·위치·진료시간으로 비교하세요. 최근접 역 기준 목록.`,
     alternates: { canonical: url },
-    robots: { index: items.length >= INDEX_MIN, follow: true },
+    /*
+     * noindex — 역세권 랜딩은 색인 대상이 아니다.
+     *
+     * 색인시킬 건 병원 상세와 병원이 쓴 포스트다. 신생 도메인에서 역세권 828개를 함께 밀면
+     * 크롤 예산이 그쪽으로 새고, 정작 병원 상세가 늦게 색인된다(사이트맵의 87%가 역세권이었다).
+     *
+     * 페이지는 살려둔다 — follow:true라 여기서 병원 상세로 가는 내부링크 경로는 그대로 남는다.
+     */
+    robots: { index: false, follow: true },
     openGraph: {
       type: "website",
       url,

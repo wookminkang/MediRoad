@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   description:
     "지하철역 주변 병원·의원을 역별로 찾아보세요. 역 이름으로 검색하거나 지역별 주요 역에서 최근접 역 기준 병원 목록을 확인할 수 있습니다.",
   alternates: { canonical: `${SITE_URL}/near` },
-  robots: { index: true, follow: true },
+  // 역세권은 색인 대상이 아니다 — 병원 상세·포스트에 크롤 예산을 몰아준다
+  robots: { index: false, follow: true },
 };
 
 // 시도 표시 순서(수도권·광역시 우선)
