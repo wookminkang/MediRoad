@@ -8,7 +8,6 @@ import { getHospitals } from "@/api/hospital";
 import { HospitalInfiniteList } from "@/components/hospital/hospital-infinite-list";
 import { ActiveFilterChips } from "@/components/search/active-filter-chips";
 import { FilterSheet } from "@/components/search/filter-sheet";
-import { FilterSidebar } from "@/components/search/filter-sidebar";
 import { TabRow } from "@/components/search/tab-row";
 import { PageContainer } from "@/components/ui/page-container";
 import { MEDICAL_DEPARTMENTS, type MedicalDepartment } from "@/constants/hospital";
@@ -107,18 +106,6 @@ export default async function HospitalsPage({
     Boolean,
   ).length;
 
-  const sidebar = (
-    <FilterSidebar
-      q={q}
-      activeDepartment={department}
-      activeSido={sido}
-      activeRadius={radius}
-      lat={lat}
-      lng={lng}
-      openNow={openNow}
-    />
-  );
-
   // 진료과목 탭 (전체 + 14개 과) — URL 기반 링크
   const deptHref = (dept?: string) => {
     const params = new URLSearchParams();
@@ -148,7 +135,7 @@ export default async function HospitalsPage({
         <TabRow
           items={tabs}
           activeId={department ?? ""}
-          leading={<FilterSheet activeCount={activeCount}>{sidebar}</FilterSheet>}
+          leading={<FilterSheet activeCount={activeCount} />}
         />
 
         <ActiveFilterChips />
