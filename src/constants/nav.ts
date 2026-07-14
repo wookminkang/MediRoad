@@ -41,7 +41,7 @@ export const SECTIONS: Section[] = [
   {
     href: "/health",
     label: "건강정보",
-    match: ["/health", "/conditions"],
+    match: ["/health"],
     tab: true,
     search: {
       action: "/health",
