@@ -270,6 +270,41 @@ select:not(:disabled),
   font-size: 0.9em;
 }
 
+/* ── 병원 포스트 본문 ────────────────────────────────────────────
+   .markdown 전역이 아니라 .post-body 안에서만 덮어쓴다.
+   건강정보·메디브리핑은 지금 스타일(✳ 아이콘)을 그대로 쓴다.
+
+   병원 포스트는 문서에 가깝다. 암 환자와 보호자가 "수술 후 뭘 먹어야 하나"를
+   찾아 들어와 끝까지 읽는 글이라, 훑기 좋은 장식보다 읽기 좋은 위계가 낫다. */
+
+/* 섹션 제목 — ✳ 아이콘 대신 왼쪽 파란 바. 스캔선이 생겨 목차처럼 읽힌다. */
+.post-body .markdown h2::before {
+  content: none;
+}
+.post-body .markdown h2 {
+  margin-top: 2.25rem;
+  padding-left: 0.7rem;
+  border-left: 3px solid var(--seed-color-fg-brand);
+  font-size: 1.25rem;
+}
+
+/* "핵심 답변" 인용 박스 — AI가 통째로 인용하는 자리라 눈에 띄어야 한다.
+   본문 파랑과 부딪히지 않도록 앰버 계열로 띄운다. */
+.post-body .markdown blockquote {
+  margin: 0 0 1.5rem;
+  padding: 1.15rem 1.35rem;
+  border-left: 3px solid #b07a2a;
+  border-radius: 0 0.6rem 0.6rem 0;
+  background: #fbf4e7;
+  color: var(--seed-color-fg-neutral);
+}
+.post-body .markdown blockquote strong {
+  color: #8a5e1c;
+}
+.post-body .markdown blockquote > * + * {
+  margin-top: 0.5rem;
+}
+
 /* 표(GFM) — 좁은 화면 가로스크롤 + 카드형 스타일 */
 .markdown .md-table-wrap {
   overflow-x: auto;

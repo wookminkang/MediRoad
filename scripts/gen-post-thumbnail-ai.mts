@@ -159,7 +159,10 @@ async function genOne(postId: string, force: boolean) {
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const hIdx = args.indexOf("--hospital");
-const ids = args.filter((a) => !a.startsWith("--") && a !== args[hIdx + 1]);
+// --hospital이 없으면 hIdx가 -1이라, args[hIdx+1]은 args[0] — 첫 번째 postId다.
+// 그걸 "옵션 값"으로 착각해 걸러내면 첫 글이 조용히 빠진다. 실제로 그랬다.
+const optValue = hIdx >= 0 ? args[hIdx + 1] : undefined;
+const ids = args.filter((a) => !a.startsWith("--") && a !== optValue);
 
 let targets: string[] = ids;
 if (hIdx >= 0) {
