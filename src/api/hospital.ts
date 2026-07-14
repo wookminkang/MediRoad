@@ -300,10 +300,23 @@ export async function getHospitals(
   const useDeptJoin = Boolean(department) && !deptTypes; // 한방·치과는 조인 대신 종별
   const baseSel =
     "*, hospital_hours(day,open,close,closed), hospital_photos(url,alt,category,is_primary,sort_order)";
+  /**
+   * 진료과목은 필터를 걸든 안 걸든 항상 가져온다.
+   *
+   * 예전엔 필터가 걸렸을 때만(!inner) 가져왔다. 그래서 지역만으로 조회하면
+   * 모든 병원의 departments가 빈 배열이었고, departmentsOf()가 늘 0개를 반환해
+   * /area/[구]/[진료과목] 페이지가 한 개도 생성되지 않았다. dynamicParams=false라
+   * 생성 안 된 주소는 전부 404 — "강남구 내과" 같은 최대 검색량 페이지가 통째로 없었다.
+   *
+   * !inner는 "이 과목이 있는 병원만" 이라는 필터 역할이라 조회 시에만 붙인다.
+   */
+  const deptSel = useDeptJoin
+    ? "hospital_departments!inner(name)"
+    : "hospital_departments(name)";
   let query = getSupabaseServer()
     .from("hospitals")
     .select(
-      useDeptJoin ? `${baseSel}, hospital_departments!inner(name)` : baseSel,
+      `${baseSel}, ${deptSel}`,
       // exact count는 진료과목 조인 필터에서 매우 느림(수만 건 카운트) → planned 추정치로 15배↑
       { count: "planned" },
     );

@@ -34,7 +34,11 @@ export async function generateStaticParams() {
   const combos: { region: string; department: string }[] = [];
   for (const region of FEATURED_REGIONS) {
     const { items } = await getHospitals({ region, pageSize: 100 });
+    // DB의 진료과목명은 심평원 원본이라 우리가 페이지를 여는 과목(MEDICAL_DEPARTMENTS)과
+    // 다른 값이 섞여 있다. 걸러내지 않으면 렌더링에서 notFound()로 떨어질 조합까지
+    // 생성해 버린다 — 빌드 시간만 쓰고 결과는 404다.
     for (const department of departmentsOf(items)) {
+      if (!toDepartment(department)) continue;
       combos.push({ region, department });
     }
   }

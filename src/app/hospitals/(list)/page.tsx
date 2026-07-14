@@ -42,12 +42,25 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(" ");
 
+  /**
+   * 필터가 안 걸린 /hospitals는 색인한다. 병원 목록의 대표 페이지이고,
+   * 여기서 병원 상세로 링크가 뻗어 나가는 출발점이다.
+   *
+   * 필터가 걸린 주소(?q=…&department=…)는 여전히 noindex다. 필터 조합은 사실상
+   * 무한히 늘어나는데 내용은 거의 같아서, 전부 색인되면 "비슷한 페이지 수천 개"가
+   * 되어 사이트 전체 평가가 깎인다. 검색결과 페이지를 색인하지 말라는 건 구글의
+   * 오래된 권고이기도 하다. (건강정보 목록도 같은 방식이다.)
+   *
+   * follow는 계속 유지 — 색인은 안 해도 링크는 따라가게 둔다.
+   */
+  const isFiltered = Boolean(label);
+
   return {
     title: label ? `${label} 검색 결과` : "병원 찾기",
     description: label
       ? `${label} 관련 병원을 메디로드 지도에서 찾아보세요. 위치·진료시간·연락처 안내.`
       : "병원·한의원·한방병원을 메디로드 지도에서 검색하세요.",
-    robots: { index: false, follow: true }, // 검색결과 noindex (SEO §1)
+    robots: { index: !isFiltered, follow: true },
     alternates: { canonical: "https://mediroad.io/hospitals" },
   };
 }
