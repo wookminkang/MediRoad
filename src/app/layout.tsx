@@ -12,7 +12,11 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
 import AppProviders from "@/providers/app-providers";
 
-const GOOGLE_VERIFY = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+// 서치콘솔 소유 확인 — 환경변수가 있으면 그걸 쓰고, 없으면 등록된 값으로 폴백.
+// (네이버와 동일 방식. 값 자체는 공개 메타태그라 노출돼도 무방하다)
+const GOOGLE_VERIFY =
+  process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ??
+  "AaM_N_J75eUDc7nUY6OWsxQ4R7x3mD7LIfdIfbSYBfc";
 const NAVER_VERIFY =
   process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION ??
   "9300c3be7933bbd4a0ef49326fb4f0673be37dd9";
