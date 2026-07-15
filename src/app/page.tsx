@@ -83,6 +83,19 @@ const PROMO_SLIDES: PromoSlide[] = [
     sub: "증상·질환·관리법을 쉽게 풀어드려요",
     href: "/health",
   },
+  // 허브 진입점 — 오늘 늘린 지역·야간 데이터로 들어가는 입구
+  {
+    image: "/home/promo-3-openlate.webp",
+    title: "야간·일요일 진료",
+    sub: "지금 문 여는 병원을 지역별로",
+    href: "/area/송파구/night",
+  },
+  {
+    image: "/home/promo-4-area.webp",
+    title: "지역별 병원 찾기",
+    sub: "전국 시·군·구에서 진료과목별로",
+    href: "/area",
+  },
 ];
 
 /**
