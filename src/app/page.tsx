@@ -71,17 +71,20 @@ const HERO_SLIDES: HeroSlide[] = [
 
 /** 프로모 배너 — 콘텐츠(건강정보·메디브리핑) 진입 */
 const PROMO_SLIDES: PromoSlide[] = [
+  // 카피 위치(valign/align)는 배너마다 3D 오브젝트를 피해 빈 곳에 둔다.
   {
     image: "/home/promo-1-briefing.webp",
     title: "메디브리핑",
     sub: "의료 정책·건강 이슈를 한눈에",
     href: "/briefing",
+    valign: "bottom", // 오브젝트가 오른쪽 위 전체 → 카피는 왼쪽 아래
   },
   {
     image: "/home/promo-2-health.webp",
     title: "건강정보",
     sub: "증상·질환·관리법을 쉽게 풀어드려요",
     href: "/health",
+    valign: "center", // 오브젝트 오른쪽 중앙 → 왼쪽 중앙
   },
   // 허브 진입점 — 오늘 늘린 지역·야간 데이터로 들어가는 입구
   {
@@ -89,12 +92,14 @@ const PROMO_SLIDES: PromoSlide[] = [
     title: "야간·일요일 진료",
     sub: "지금 문 여는 병원을 지역별로",
     href: "/area/송파구/night",
+    valign: "top", // 달·시계가 오른쪽 중앙 → 카피는 왼쪽 위
   },
   {
     image: "/home/promo-4-area.webp",
     title: "지역별 병원 찾기",
     sub: "전국 시·군·구에서 진료과목별로",
     href: "/area",
+    valign: "top", // 지도핀이 오른쪽 아래 → 카피는 왼쪽 위
   },
 ];
 
