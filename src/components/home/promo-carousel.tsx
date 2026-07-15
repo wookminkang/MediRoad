@@ -57,7 +57,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
           <li key={s.image} className="w-full shrink-0 snap-center">
             <Link
               href={s.href}
-              className="relative flex h-[104px] items-center overflow-hidden rounded-2xl bg-neutral-weak"
+              className="relative flex h-[160px] items-center overflow-hidden rounded-2xl bg-neutral-weak"
             >
               <Image
                 src={s.image}
