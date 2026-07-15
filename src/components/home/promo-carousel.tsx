@@ -69,10 +69,10 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
               {/* 카피가 놓이는 좌측을 살짝 눌러 대비를 확보한다 */}
               <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/45 to-transparent" />
               <div className="relative z-10 min-w-0 px-5">
-                <p className="truncate text-xl font-extrabold text-neutral">
+                <p className="truncate text-[21px] font-extrabold leading-tight text-neutral">
                   {s.title}
                 </p>
-                <p className="mt-1 truncate text-[15px] text-muted">{s.sub}</p>
+                <p className="mt-1 truncate text-[16px] text-muted">{s.sub}</p>
               </div>
             </Link>
           </li>
