@@ -237,11 +237,16 @@ export default async function Home() {
                     href={`/hospitals/${p.hospitalSlug}/posts/${p.id}`}
                     className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.04] transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   >
-                    {/* 브랜드 틴트 헤더 (썸네일 대체 — 아이콘 + 병원명) */}
+                    {/* 브랜드 틴트 헤더 (썸네일 대체 — 3D 아이콘 + 병원명) */}
                     <div className="relative flex items-center gap-2.5 overflow-hidden bg-brand-weak px-5 py-4">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1E5BD6] text-white">
-                        <PostMarkIcon />
-                      </span>
+                      {/* 3D 아이콘은 자체 파란 타일이 있어 배경 span 없이 그대로 얹는다 */}
+                      <Image
+                        src="/home/post-health-icon.webp"
+                        alt=""
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 shrink-0"
+                      />
                       <span className="truncate text-sm font-bold text-brand">
                         {p.hospitalName}
                       </span>
@@ -466,12 +471,3 @@ function TileLink({
 }
 
 /* ── 아이콘 ── */
-function PostMarkIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
-      <rect x="8" y="2" width="8" height="4" rx="1" />
-      <path d="M8 12h2l1.5 3 2-6L15 12h1" />
-    </svg>
-  );
-}
