@@ -53,3 +53,4 @@ scripts/.enrich-cursor
 # Claude Code 런타임 락
 .claude/scheduled_tasks.lock
 .gstack/
+scripts/.inpatient-cursor

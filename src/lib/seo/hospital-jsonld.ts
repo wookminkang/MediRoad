@@ -38,6 +38,9 @@ export function buildMedicalClinicLd(h: Hospital) {
     description: h.description ?? buildAutoDescription(h),
     url,
     ...(h.phone && { telephone: h.phone }),
+    // 입원실 병상 수 — E-Gen 공공데이터. 있을 때만(대부분 병원급).
+    // 응급실은 availableService 배열에 합류시킨다(아래 symptoms와 키가 겹치지 않게).
+    ...(h.beds && h.beds > 0 && { numberOfBeds: h.beds }),
     ...(h.photos?.length && { image: h.photos.map((p) => p.url) }),
     address: {
       "@type": "PostalAddress",
@@ -81,18 +84,22 @@ export function buildMedicalClinicLd(h: Hospital) {
         value: true,
       })),
     }),
-    ...(h.symptoms?.length && {
-      keywords: h.symptoms.join(", "),
-      /*
-       * 병원이 다루는 진료 항목을 서비스로도 표현한다. keywords만으로는 "이 병원이 무엇을
-       * 진료하는가"가 기계가 읽을 형태로 남지 않는다. 화면의 "진료하는 항목"과 같은 값이라
-       * 숨은 데이터가 아니다(가이드 §3-3).
-       */
-      availableService: h.symptoms.map((s) => ({
-        "@type": "MedicalTherapy",
-        name: s,
-      })),
-    }),
+    ...(h.symptoms?.length && { keywords: h.symptoms.join(", ") }),
+    /*
+     * availableService — 병원이 다루는 진료 항목(symptoms) + 응급실 운영을 한 배열에 담는다.
+     * keywords만으로는 "이 병원이 무엇을 진료하는가"가 기계가 읽을 형태로 남지 않는다.
+     * 화면의 "진료하는 항목"·"한눈에 보기"와 같은 값이라 숨은 데이터가 아니다(가이드 §3-3).
+     * 응급실은 E-Gen 공공데이터. 한 키에 합쳐 키 충돌을 막는다.
+     */
+    ...(() => {
+      const services = [
+        ...(h.symptoms ?? []).map((s) => ({ "@type": "MedicalTherapy", name: s })),
+        ...(h.emergency
+          ? [{ "@type": "MedicalProcedure", name: "응급실 운영" }]
+          : []),
+      ];
+      return services.length ? { availableService: services } : {};
+    })(),
     /*
      * 의료진 — E-E-A-T. "누가 진료하는가"가 AI가 병원을 신뢰할지 판단하는 근거가 된다.
      * 화면의 "의료진" 섹션과 같은 값이라 숨은 데이터가 아니다(가이드 §3-3).

@@ -176,6 +176,14 @@ export function buildHospitalSummaryBullets(h: Hospital): string[] {
   const wd = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
   if (wd?.open && wd?.close) b.push(`평일 진료시간은 ${wd.open}~${wd.close}입니다.`);
 
+  // 입원·응급 — E-Gen 공공데이터. 있을 때만(대부분 병원급). 병상 수까지 있으면 함께.
+  if (h.beds && h.beds > 0) {
+    b.push(`입원실을 운영하며, 병상은 ${h.beds.toLocaleString()}개입니다.`);
+  }
+  if (h.emergency) {
+    b.push("응급실을 운영합니다.");
+  }
+
   b.push("정확한 진료시간·휴진 여부는 방문 전 전화로 확인하시는 것을 권장합니다.");
 
   return b;

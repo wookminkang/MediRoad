@@ -108,6 +108,10 @@ export type Hospital = {
   holidayClosed?: boolean;
   /** 병원 소개글 (소개·진료철학) */
   description?: string;
+  /** 입원실 병상 수 (E-Gen). 0/undefined면 입원실 없음 */
+  beds?: number;
+  /** 응급실 운영 (E-Gen) */
+  emergency?: boolean;
   /** 편의·특화 (주차·야간진료·일요일진료 등) */
   amenities?: HospitalAmenity[];
   /** 증상·질환 키워드 (내부링크·GEO) */

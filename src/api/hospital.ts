@@ -77,6 +77,8 @@ type HospitalRow = {
   lat: number | null;
   lng: number | null;
   description: string | null;
+  beds: number | null;
+  er_available: boolean | null;
   homepage_url: string | null;
   booking_url: string | null;
   station_name: string | null;
@@ -128,6 +130,8 @@ function rowToHospital(r: HospitalRow): Hospital {
     },
     address: r.address,
     roadAddress: r.road_address ?? undefined,
+    beds: r.beds ?? undefined,
+    emergency: r.er_available ?? undefined,
     phone: r.phone ?? undefined,
     location: { lat: r.lat ?? 0, lng: r.lng ?? 0 },
     photos: r.hospital_photos?.length
