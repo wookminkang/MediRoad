@@ -121,12 +121,12 @@ export function ColumnDetail({
           본 콘텐츠는 <b className="text-neutral">{c.author}</b>이(가) 작성한 일반적인 건강
           정보로, 개인의 증상·질환에 대한 진단이나 치료를 대체하지 않습니다. 정확한 진단과
           치료는 반드시 의료진과 상담하세요.
-          {c.reviewedBy?.name && (
-            <div className="mt-2 text-subtle">
-              감수 · {c.reviewedBy.name}
-              {c.reviewedBy.specialty && ` (${c.reviewedBy.specialty})`}
-            </div>
-          )}
+          {/*
+           * 개별 감수자 이름은 노출하지 않는다. 실제 감수자로 확인되지 않은 이름을
+           * 표기하면 오히려 신뢰도(E-E-A-T)에 해가 된다. "검수됨"이라는 신뢰 신호만
+           * 편집팀 명의로 유지한다.
+           */}
+          <div className="mt-2 text-subtle">메디로드 의료편집팀 검수</div>
         </div>
       </div>
 

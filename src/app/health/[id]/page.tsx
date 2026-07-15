@@ -43,7 +43,8 @@ export async function generateMetadata({
       "건강정보",
       ...(c.tags ?? []),
     ],
-    authors: [{ name: c.author }, { name: c.reviewedBy.name }],
+    // 감수자 개인 이름은 메타데이터에도 넣지 않는다(화면 표시와 동일 방침).
+    authors: [{ name: c.author }],
     creator: SITE_NAME,
     publisher: SITE_NAME,
     alternates: { canonical: url },
@@ -57,7 +58,7 @@ export async function generateMetadata({
       locale: "ko_KR",
       publishedTime: c.publishedAt,
       modifiedTime: c.updatedAt,
-      authors: [c.reviewedBy.name],
+      authors: [c.author],
       ...(c.thumbnail && { images: [{ url: c.thumbnail }] }),
     },
     other: {

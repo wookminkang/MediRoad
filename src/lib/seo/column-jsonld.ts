@@ -14,10 +14,11 @@ export function buildColumnArticleLd(c: Column) {
     dateModified: c.updatedAt,
     lastReviewed: c.updatedAt,
     author: { "@type": "Organization", name: c.author },
+    // 감수는 개인(Person) 이름 대신 편집팀(Organization) 명의로. 확인되지 않은 개인
+    // 이름을 구조화 데이터에 넣으면 AI·검색엔진에도 그대로 노출돼 신뢰도에 해가 된다.
     reviewedBy: {
-      "@type": "Person",
-      name: c.reviewedBy.name,
-      jobTitle: c.reviewedBy.specialty,
+      "@type": "Organization",
+      name: `${SITE_NAME} 의료편집팀`,
     },
     publisher: {
       "@type": "Organization",
