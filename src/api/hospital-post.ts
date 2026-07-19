@@ -1,3 +1,4 @@
+import { isCuratedPostId } from "@/constants/hospital-keyword-pages";
 import { publishedCutoff } from "@/lib/post-schedule";
 import { getSupabaseServer, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
@@ -145,6 +146,7 @@ export async function getLatestHospitalPosts(
   for (const r of (data ?? []) as Row[]) {
     const h = Array.isArray(r.hospital) ? r.hospital[0] : r.hospital;
     if (!h) continue;
+    if (isCuratedPostId(r.id)) continue; // 키워드 허브 전용 글은 홈 피드에서 제외
     if (seenHospitals.has(r.hospital_id)) continue; // 병원당 1개
     seenHospitals.add(r.hospital_id);
     out.push({

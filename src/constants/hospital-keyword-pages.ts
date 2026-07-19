@@ -1,46 +1,140 @@
 /**
- * 병원별 키워드 랜딩(/[병원slug]/search/[키워드]) 큐레이션 목록.
+ * 병원별 "가이드(Topic Hub)" 큐레이션.
  *
- * 정책(중요): **사람이 고른 키워드만** 페이지가 된다. URL의 키워드가 이 목록에 없으면 404 —
- * 무한 자동생성(doorway) 금지. 각 페이지는 그 병원의 실제 정보(위치·진료·FAQ)를 담아
- * thin-page가 아니도록 한다. 키워드는 그 병원이 실제로 진료·해당하는 것(위치·진료분야)으로
- * 고른다. 경쟁 병원명·효과 단정 등 의료광고법 위반 소지가 있는 키워드는 넣지 않는다.
+ * 구조: 가이드 1개 = 키워드 1개. 각 가이드는 그 검색의도에 맞는 포스팅 5~7개를 묶는 대표 랜딩이다.
+ *  - 가이드 허브 URL: /[병원slug]/guide/[키워드slug]   (예: /리움한방병원-강동송파/guide/강동구-재활통증치료)
+ *  - 개별 포스팅 URL: /[병원slug]/[postId]              (예: /리움한방병원-강동송파/rium-gangdong-rehab-pain)
+ *  - 허브 ↔ 포스팅 양방향 내부링크.
  *
- * 운영: 제휴 병원별 키워드를 편집팀이 큐레이션해 아래에 추가한다.
+ * 정책: **사람이 고른 키워드/포스팅만** 페이지가 된다(목록에 없으면 404 — doorway 금지).
+ * 키워드는 실제 진료·위치 기반, 의료광고법 위반 소지(경쟁 병원명·효과 단정) 없이 고른다.
  */
-export type HospitalKeywordPage = {
-  /** 대상 병원 slug (URL 첫 세그먼트, getHospitalBySlug 키) */
+export type HospitalGuide = {
+  /** 대상 병원 slug (URL 첫 세그먼트) */
   hospitalSlug: string;
-  /** 표시·검색 키워드 (URL 마지막 세그먼트, 인코딩되어 들어감) */
+  /** 허브 대표 키워드 (지역+증상/유형) — URL slug·검색 타깃 */
   keyword: string;
-  /** 선택: 이 키워드에 맞춘 커스텀 소개문. 없으면 병원 데이터에서 자동 생성. */
+  /** 허브 H1(검색의도형, 브랜드 없음). 없으면 keyword 사용 */
+  title?: string;
+  /** 허브 소개문(선택). 없으면 병원 데이터 자동 생성 */
   intro?: string;
+  /** 이 가이드에 묶이는 포스팅 id들(hospital_posts.id) 5~7개 */
+  postIds: string[];
 };
 
-export const HOSPITAL_KEYWORD_PAGES: HospitalKeywordPage[] = [
-  // 리움한방병원(강동송파) — 최우선. 전부 위치·진료분야 기반(의료광고법 안전).
-  { hospitalSlug: "리움한방병원-강동구", keyword: "강동구 재활통증치료" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "송파구 재활치료" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "송파구 한방치료" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "송파구 유방암 재활" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "둔촌동역 한방병원" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "둔촌동 한방병원" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "올림픽공원역 한방병원" },
-  { hospitalSlug: "리움한방병원-강동구", keyword: "강동 암재활 한방병원" },
+export const HOSPITAL_GUIDES: HospitalGuide[] = [
+  // ── 샘플 가이드: 강동구 재활통증치료 (포스팅 5편) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "강동구 재활통증치료",
+    title: "강동구 재활통증치료 어디서 받을까",
+    postIds: [
+      "rium-gangdong-rehab-pain",
+      "rium-gangdong-traffic-injury",
+      "rium-gangdong-chuna",
+      "rium-gangdong-disc",
+      "rium-gangdong-yakchim",
+    ],
+  },
+  // ── 강동 암재활 가이드 (기존 암 관련 2편) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "강동 암재활",
+    title: "강동 암재활, 무엇을 어떻게 관리할까",
+    postIds: ["rium-gangdong-cancer-rehab-guide", "rium-gangdong-breast-cancer-rehab"],
+  },
+  // ── 위치 키워드 가이드(포스팅 확산 대기) ──
+  { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 재활치료", postIds: [] },
+  { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 한방치료", postIds: [] },
+  { hospitalSlug: "리움한방병원-강동송파", keyword: "둔촌동역 한방병원", postIds: [] },
+  { hospitalSlug: "리움한방병원-강동송파", keyword: "둔촌동 한방병원", postIds: [] },
+  { hospitalSlug: "리움한방병원-강동송파", keyword: "올림픽공원역 한방병원", postIds: [] },
 ];
 
-/** 이 병원(slug)의 큐레이션 키워드 페이지들. */
-export function keywordPagesForHospital(hospitalSlug: string): HospitalKeywordPage[] {
-  return HOSPITAL_KEYWORD_PAGES.filter((p) => p.hospitalSlug === hospitalSlug);
+/** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
+export function guideSlug(keyword: string): string {
+  return keyword.trim().replace(/\s+/g, "-");
 }
 
-/** (병원slug, 키워드)로 큐레이션 항목 찾기 — 없으면 undefined(→ 404). */
-export function findKeywordPage(
+/** 허브 표시 제목(없으면 키워드). */
+export function guideTitle(g: HospitalGuide): string {
+  return g.title ?? g.keyword;
+}
+
+/** 이 병원의 가이드들. */
+export function guidesForHospital(hospitalSlug: string): HospitalGuide[] {
+  return HOSPITAL_GUIDES.filter((g) => g.hospitalSlug === hospitalSlug);
+}
+
+/** (병원slug, slug 또는 원본 키워드)로 가이드 찾기 — 없으면 undefined(→404). */
+export function findGuide(
   hospitalSlug: string,
-  keyword: string,
-): HospitalKeywordPage | undefined {
-  const k = keyword.trim();
-  return HOSPITAL_KEYWORD_PAGES.find(
-    (p) => p.hospitalSlug === hospitalSlug && p.keyword === k,
+  slugOrKeyword: string,
+): HospitalGuide | undefined {
+  const s = slugOrKeyword.trim();
+  const asKeyword = s.replace(/-/g, " ");
+  return HOSPITAL_GUIDES.find(
+    (g) =>
+      g.hospitalSlug === hospitalSlug &&
+      (guideSlug(g.keyword) === s || g.keyword === s || g.keyword === asKeyword),
   );
+}
+
+/** 이 포스팅이 속한 가이드(백링크용). */
+export function findGuideForPost(
+  hospitalSlug: string,
+  postId: string,
+): HospitalGuide | undefined {
+  return HOSPITAL_GUIDES.find(
+    (g) => g.hospitalSlug === hospitalSlug && g.postIds.includes(postId),
+  );
+}
+
+/** (병원slug, postId)가 큐레이션된 포스팅인가(포스팅 라우트 whitelist·긴 URL 301 판정). */
+export function isGuidePost(hospitalSlug: string, postId: string): boolean {
+  return HOSPITAL_GUIDES.some(
+    (g) => g.hospitalSlug === hospitalSlug && g.postIds.includes(postId),
+  );
+}
+
+/** postId가 어느 병원이든 큐레이션 포스팅인가(getSitemapPosts 제외 판정). */
+export function isCuratedPostId(postId: string): boolean {
+  return HOSPITAL_GUIDES.some((g) => g.postIds.includes(postId));
+}
+
+/**
+ * 포스팅이 속한 가이드 내 순번(0-based) — 없으면 -1.
+ * 썸네일 액센트·배경사진을 가이드 순서대로 배정해, 한 캐러셀 안에서 서로 겹치지 않게 한다.
+ */
+export function curatedPostIndex(postId: string): number {
+  for (const g of HOSPITAL_GUIDES) {
+    const i = g.postIds.indexOf(postId);
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+/** 가이드 허브 URL — /[병원slug]/guide/[키워드slug]. */
+export function guideUrl(hospitalSlug: string, keyword: string): string {
+  return `/${encodeURIComponent(hospitalSlug)}/guide/${encodeURIComponent(guideSlug(keyword))}`;
+}
+
+/** 개별 포스팅 URL — /[병원slug]/[postId]. */
+export function postUrl(hospitalSlug: string, postId: string): string {
+  return `/${encodeURIComponent(hospitalSlug)}/${encodeURIComponent(postId)}`;
+}
+
+/** 모든 (병원slug, postId) — 사이트맵·301 공용(중복 제거). */
+export function allGuidePosts(): { hospitalSlug: string; postId: string }[] {
+  const seen = new Set<string>();
+  const out: { hospitalSlug: string; postId: string }[] = [];
+  for (const g of HOSPITAL_GUIDES) {
+    for (const postId of g.postIds) {
+      const key = `${g.hospitalSlug}|${postId}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ hospitalSlug: g.hospitalSlug, postId });
+    }
+  }
+  return out;
 }

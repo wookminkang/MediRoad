@@ -16,10 +16,11 @@ import { ExpandableText } from "./expandable-text";
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { HospitalPostList } from "./hospital-post-list";
 import { TodayStatus } from "./today-status";
-import { keywordPagesForHospital } from "@/constants/hospital-keyword-pages";
+import { guidesForHospital, guideUrl } from "@/constants/hospital-keyword-pages";
 import { isPartnerHospital } from "@/constants/partners";
 import {
   buildAutoDescription,
+  buildHospitalGlanceBrief,
   buildHospitalSummaryBullets,
   walkMinutes,
 } from "@/lib/hospital";
@@ -54,12 +55,15 @@ export function HospitalDetail({
   related = [],
   posts = [],
   headingAs = "h1",
+  embedded = false,
 }: {
   hospital: Hospital;
   related?: Hospital[];
   posts?: HospitalPost[];
-  /** 병원명 제목 태그 — 키워드 랜딩에 임베드할 땐 "h2"로 낮춰 h1 중복을 막는다. */
-  headingAs?: "h1" | "h2";
+  /** 병원명 제목 태그 — 상위 섹션에 임베드할 땐 "h2"/"h3"로 낮춰 제목 위계 중복을 막는다. */
+  headingAs?: "h1" | "h2" | "h3";
+  /** 가이드 허브 등에 임베드 — 빵부스러기·제휴 배지·개요 주소/진료과목 칩을 숨긴다. */
+  embedded?: boolean;
 }) {
   const NameTag = headingAs;
   const addr = h.roadAddress ?? h.address;
@@ -67,7 +71,9 @@ export function HospitalDetail({
   const st = h.nearestStation;
   const stWalk = st ? walkMinutes(st.distanceM) : 0;
   const introText = h.description ?? buildAutoDescription(h);
-  const summaryBullets = buildHospitalSummaryBullets(h);
+  const summaryBullets = embedded
+    ? buildHospitalGlanceBrief(h)
+    : buildHospitalSummaryBullets(h);
   const hasHours = !!(h.hours && h.hours.length > 0);
   const hasFaqs = !!(h.faqs && h.faqs.length > 0);
 
@@ -97,43 +103,48 @@ export function HospitalDetail({
     <article>
       <div className="flex flex-col">
         <div className="flex min-w-0 flex-col">
-          {/* 빵부스러기 — BreadcrumbList JSON-LD와 동일 경로 */}
-          <nav aria-label="현재 위치" className="mb-4">
-            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
-              <li>
-                <Link href="/" className="hover:text-brand hover:underline">
-                  홈
-                </Link>
-              </li>
-              <li aria-hidden className="text-subtle/50">
-                ›
-              </li>
-              <li>
-                <Link
-                  href={`/area/${encodeURIComponent(h.region.sigungu)}`}
-                  className="hover:text-brand hover:underline"
-                >
-                  {h.region.sigungu}
-                </Link>
-              </li>
-              <li aria-hidden className="text-subtle/50">
-                ›
-              </li>
-              <li aria-current="page" className="font-semibold text-neutral">
-                {h.name}
-              </li>
-            </ol>
-          </nav>
+          {/* 빵부스러기 — BreadcrumbList JSON-LD와 동일 경로 (임베드에선 상위가 담당) */}
+          {!embedded && (
+            <nav aria-label="현재 위치" className="mb-4">
+              <ol className="flex flex-wrap items-center gap-1.5 text-xs text-subtle">
+                <li>
+                  <Link href="/" className="hover:text-brand hover:underline">
+                    홈
+                  </Link>
+                </li>
+                <li aria-hidden className="text-subtle/50">
+                  ›
+                </li>
+                <li>
+                  <Link
+                    href={`/area/${encodeURIComponent(h.region.sigungu)}`}
+                    className="hover:text-brand hover:underline"
+                  >
+                    {h.region.sigungu}
+                  </Link>
+                </li>
+                <li aria-hidden className="text-subtle/50">
+                  ›
+                </li>
+                <li aria-current="page" className="font-semibold text-neutral">
+                  {h.name}
+                </li>
+              </ol>
+            </nav>
+          )}
 
           {/* 소개 — 상태·이름·사진·소개·통계·주소·CTA */}
           <section id="intro" className="scroll-mt-24">
-            {/* 상태 */}
-            {hasHours && (
+            {/* 상태 (임베드에선 숨김) */}
+            {!embedded && hasHours && (
               <div className="mb-2">
                 <TodayStatus hours={h.hours!} />
               </div>
             )}
 
+            {/* 한눈에 보는 위쪽(이름·사진·소개)은 임베드에서 숨김 */}
+            {!embedded && (
+              <>
             {/* 이름 + 제휴 배지 / AI요약·공유 */}
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -152,7 +163,7 @@ export function HospitalDetail({
                       {h.nearestStation ? ` · ${h.nearestStation.name}` : ""}
                     </span>
                   </NameTag>
-                  {isPartnerHospital(h.id) && (
+                  {!embedded && isPartnerHospital(h.id) && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand-weak px-2.5 py-1 text-xs font-bold text-brand">
                       <span className="h-1.5 w-1.5 rounded-full bg-brand" />
                       제휴병원
@@ -188,6 +199,8 @@ export function HospitalDetail({
              * 소개글은 AI가 인용하는 GEO 자산이라 잘라내면 안 된다.
              */}
             <ExpandableText text={introText} lines={3} />
+              </>
+            )}
 
             {/*
              * 한눈에 보는 정보 — AI·검색엔진이 그대로 인용할 사실 문장. (SEO 가이드 §3-2)
@@ -311,25 +324,29 @@ export function HospitalDetail({
 
             <hr className="my-6 border-t border-black/[0.07]" />
 
-            {/* 주소 + 진료과목 칩 */}
-            <address className="flex items-start gap-2 not-italic">
-              <span className="mt-0.5 shrink-0 text-subtle">
-                <PinSmallIcon />
-              </span>
-              <span className="text-[15px] text-neutral">{addr}</span>
-            </address>
-            {h.departments.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {h.departments.map((d) => (
-                  <Link
-                    key={d}
-                    href={`/hospitals?department=${encodeURIComponent(d)}`}
-                    className="rounded-full border border-black/[0.08] px-3 py-1 text-[13px] font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
-                  >
-                    {d}
-                  </Link>
-                ))}
-              </div>
+            {/* 주소 + 진료과목 칩 (허브 임베드에선 숨김) */}
+            {!embedded && (
+              <>
+                <address className="flex items-start gap-2 not-italic">
+                  <span className="mt-0.5 shrink-0 text-subtle">
+                    <PinSmallIcon />
+                  </span>
+                  <span className="text-[15px] text-neutral">{addr}</span>
+                </address>
+                {h.departments.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {h.departments.map((d) => (
+                      <Link
+                        key={d}
+                        href={`/hospitals?department=${encodeURIComponent(d)}`}
+                        className="rounded-full border border-black/[0.08] px-3 py-1 text-[13px] font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
+                      >
+                        {d}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
 
             {/* CTA — 전화 문의 / 길찾기 */}
@@ -535,9 +552,9 @@ export function HospitalDetail({
             </section>
           )}
 
-          {/* 키워드별 안내 페이지 (내부링크) */}
-          {keywordPagesForHospital(h.slug).length > 0 && (
-            <section id="keyword-pages" className="mt-12 scroll-mt-24">
+          {/* 키워드 가이드 (내부링크) */}
+          {guidesForHospital(h.slug).length > 0 && (
+            <section id="guide-links" className="mt-12 scroll-mt-24">
               <h2 className="text-lg font-bold text-neutral">
                 {h.name} 이렇게도 찾아요
               </h2>
@@ -545,13 +562,13 @@ export function HospitalDetail({
                 위치·진료분야별 안내를 따로 정리했어요.
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {keywordPagesForHospital(h.slug).map((p) => (
-                  <li key={p.keyword}>
+                {guidesForHospital(h.slug).map((g) => (
+                  <li key={g.keyword}>
                     <Link
-                      href={`/${encodeURIComponent(h.slug)}/search/${encodeURIComponent(p.keyword)}`}
+                      href={guideUrl(h.slug, g.keyword)}
                       className="inline-flex rounded-full border border-line px-3 py-1.5 text-sm text-neutral transition-colors hover:bg-neutral-weak"
                     >
-                      {p.keyword}
+                      {g.keyword}
                     </Link>
                   </li>
                 ))}

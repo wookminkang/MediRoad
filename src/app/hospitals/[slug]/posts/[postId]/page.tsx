@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { getHospitalBySlug } from "@/api/hospital";
 import { getHospitalPost } from "@/api/hospital-post";
 import { HospitalPostDetail } from "@/components/hospital/hospital-post-detail";
 import { PageContainer } from "@/components/ui/page-container";
-import { SITE_NAME, SITE_URL } from "@/constants/site";
 import {
-  buildHospitalPostLd,
-  buildPostBreadcrumbLd,
-  buildPostFaqLd,
-} from "@/lib/seo/hospital-post-jsonld";
+  isCuratedPostId,
+  postUrl,
+} from "@/constants/hospital-keyword-pages";
+import { SITE_NAME, SITE_URL } from "@/constants/site";
+import { buildPostGraphLd } from "@/lib/seo/hospital-post-jsonld";
 import { buildPostMeta } from "@/lib/seo/hospital-post-meta";
 
 type Params = Promise<{ slug: string; postId: string }>;
@@ -50,7 +50,13 @@ export async function generateMetadata({
     creator: SITE_NAME,
     publisher: SITE_NAME,
     alternates: { canonical: url },
-    robots: { index: !post.seo?.noindex, follow: true },
+    robots: {
+      index: !post.seo?.noindex,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
     openGraph: {
       type: "article",
       url,
@@ -84,15 +90,14 @@ export default async function HospitalPostPage({
   const h = await getHospitalBySlug(decodeURIComponent(slug));
   // 글이 없거나, 글이 이 병원 소속이 아니면 404
   if (!post || !h || post.hospitalId !== h.id) notFound();
+  // 큐레이션 포스팅은 짧은 URL(/[병원]/[postId])이 정식 — 긴 URL은 301로 넘긴다(중복 방지).
+  if (isCuratedPostId(post.id)) permanentRedirect(postUrl(h.slug, post.id));
 
-  const jsonLd = [
-    buildHospitalPostLd(h, post),
-    buildPostBreadcrumbLd(h, post),
-    buildPostFaqLd(post),
-  ].filter(Boolean);
+  const url = `${SITE_URL}/hospitals/${h.slug}/posts/${post.id}`;
+  const jsonLd = [buildPostGraphLd(h, post, url)];
 
   return (
-    <PageContainer maxWidth="max-w-5xl">
+    <PageContainer maxWidth="max-w-3xl">
       <HospitalPostDetail hospital={h} post={post} />
       {jsonLd.map((ld, i) => (
         <script

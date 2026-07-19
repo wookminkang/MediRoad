@@ -1,4 +1,5 @@
 import { MOCK_HOSPITALS } from "@/api/mock/hospitals";
+import { isCuratedPostId } from "@/constants/hospital-keyword-pages";
 import { PARTNER_HOSPITAL_IDS } from "@/constants/partners";
 import {
   fmtTime,
@@ -524,17 +525,28 @@ export async function getHospitalById(id: string): Promise<Hospital | null> {
   return data ? rowToHospital(data as unknown as HospitalRow) : null;
 }
 
-/** 상세 조회 (slug 우선, 옛 URL 호환 위해 id 폴백). 없으면 null
+/**
+ * 옛 slug → 현재 slug 별칭. 병원명/slug을 바꿨을 때 색인된 옛 URL을 301로 보내기 위함.
+ * getHospitalBySlug가 별칭을 현재 slug로 정규화 → 각 페이지의 `slug !== h.slug` 분기가 301을 건다.
+ */
+const OLD_SLUG_ALIASES: Record<string, string> = {
+  "리움한방병원-강동구": "리움한방병원-강동송파",
+};
+
+/** 상세 조회 (slug 우선, 옛 slug 별칭·옛 id 폴백). 없으면 null
  *  최근접 지하철역은 station_* 컬럼에 사전계산돼 있어 rowToHospital이 바로 채움(런타임 RPC 없음). */
 export async function getHospitalBySlug(slug: string): Promise<Hospital | null> {
+  const resolved = OLD_SLUG_ALIASES[slug] ?? slug;
   if (!isSupabaseConfigured)
-    return MOCK_HOSPITALS.find((h) => h.slug === slug || h.id === slug) ?? null;
+    return (
+      MOCK_HOSPITALS.find((h) => h.slug === resolved || h.id === resolved) ?? null
+    );
 
   const sb = getSupabaseServer();
   const bySlug = await sb
     .from("hospitals")
     .select(DETAIL_SELECT)
-    .eq("slug", slug)
+    .eq("slug", resolved)
     .maybeSingle();
   if (bySlug.error) throw bySlug.error;
   if (bySlug.data) return rowToHospital(bySlug.data as unknown as HospitalRow);
@@ -844,7 +856,8 @@ export async function getSitemapPosts(): Promise<
     updated_at: string | null;
     hospital: { slug: string } | null;
   }[])
-    .filter((r) => r.hospital?.slug)
+    // 큐레이션 포스팅은 짧은 URL(guide-posts)로 색인 — 긴 URL은 사이트맵에서 제외.
+    .filter((r) => r.hospital?.slug && !isCuratedPostId(r.id))
     .map((r) => ({
       slug: r.hospital!.slug,
       postId: r.id,

@@ -8,6 +8,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
+import { curatedPostIndex } from "../src/constants/hospital-keyword-pages.js";
 import { BUCKET, compose, seedOf } from "./lib/post-thumb.mjs";
 
 const sb = createClient(
@@ -29,7 +30,7 @@ async function hospitalPhotos(hospitalId: string): Promise<string[]> {
 async function genOne(postId: string) {
   const { data: post } = await sb
     .from("hospital_posts")
-    .select("id,title,hospital_id,hospital:hospitals(name,sigungu)")
+    .select("id,title,tags,hospital_id,hospital:hospitals(name,sigungu)")
     .eq("id", postId)
     .single();
   if (!post) {
@@ -42,12 +43,22 @@ async function genOne(postId: string) {
     console.log(`  ✗ ${postId}: 병원 사진 없음 (${hosp?.name})`);
     return;
   }
-  const seed = seedOf(post.id);
+  // 가이드에 묶인 포스팅은 순번(0,1,2…)으로 액센트·사진을 배정 → 같은 캐러셀 안에서 서로 겹치지 않음.
+  // 그 외(가이드 밖)는 id 해시로 결정적 배정.
+  const gi = curatedPostIndex(post.id);
+  const seed = gi >= 0 ? gi : seedOf(post.id);
   const photoUrl = photos[seed % photos.length]; // 포스트마다 다른 사진
   const region = (hosp?.sigungu ?? "").replace(/[구시군]$/, "");
-  const nameText = region ? `${hosp?.name} (${region})` : hosp?.name || "";
+  // 병원명에 이미 지점(괄호)이 있으면 지역을 덧붙이지 않는다. 예: "리움한방병원(강동송파)"
+  const baseName = hosp?.name ?? "";
+  const nameText = /[()]/.test(baseName)
+    ? baseName
+    : region
+      ? `${baseName} (${region})`
+      : baseName;
   const photo = Buffer.from(await (await fetch(photoUrl)).arrayBuffer());
-  const webp = await compose(photo, nameText, post.title, seed);
+  const eyebrow = Array.isArray(post.tags) ? (post.tags[0] as string) : undefined;
+  const webp = await compose(photo, nameText, post.title, seed, eyebrow);
   const key = `post-thumbs/${post.id}.webp`;
   const up = await sb.storage.from(BUCKET).upload(key, webp, {
     contentType: "image/webp",

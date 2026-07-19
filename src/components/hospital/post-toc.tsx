@@ -1,67 +1,80 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { TocItem } from "@/lib/headings";
 
-/** docs 스타일 "On this page" 목차 — 스크롤 위치에 따라 활성 헤딩 강조 */
+/**
+ * 포스트 목차 — 상단 sticky 가로 탭. 스크롤하면 헤더 아래로 따라붙고(top-0),
+ * 현재 보고 있는 섹션 탭을 강조(스크롤 스파이). 탭 클릭 시 해당 H2로 스무스 이동.
+ * 앵커 id는 마크다운 렌더러(makeSlugger)와 동일 규칙이라 그대로 매칭된다.
+ */
 export function PostToc({ headings }: { headings: TocItem[] }) {
-  const [active, setActive] = useState<string>(headings[0]?.id ?? "");
+  const tabs = headings.filter((t) => t.level === 2); // H2만 탭으로(H3 제외)
+  const [active, setActive] = useState<string | undefined>(tabs[0]?.id);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (tabs.length < 2) return;
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible) setActive(visible.target.id);
       },
-      { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
+      { rootMargin: "-64px 0px -70% 0px", threshold: 0 },
     );
-    for (const h of headings) {
-      const el = document.getElementById(h.id);
+    for (const t of tabs) {
+      const el = document.getElementById(t.id);
       if (el) obs.observe(el);
     }
     return () => obs.disconnect();
-  }, [headings]);
+  }, [tabs]);
 
-  if (!headings.length) return null;
+  // 활성 탭을 가로 바 안에서 보이도록 스크롤
+  useEffect(() => {
+    if (!active) return;
+    const el = barRef.current?.querySelector<HTMLElement>(`[data-id="${active}"]`);
+    el?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [active]);
+
+  if (tabs.length < 2) return null;
+
+  const go = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 60;
+    window.scrollTo({ top: y, behavior: "smooth" });
+    setActive(id);
+  };
 
   return (
-    <nav aria-label="목차" className="text-sm">
-      <p className="flex items-center gap-2 font-bold text-neutral">
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <path d="M4 6h16M4 12h16M4 18h12" />
-        </svg>
-        On this page
-      </p>
-      <ul className="mt-3 border-l border-line">
-        {headings.map((h) => (
-          <li key={h.id}>
-            <a
-              href={`#${h.id}`}
-              onClick={() => setActive(h.id)}
-              className={`-ml-px block border-l-2 py-1.5 transition-colors ${
-                h.level === 3 ? "pl-7" : "pl-4"
-              } ${
-                active === h.id
-                  ? "border-brand font-bold text-neutral"
-                  : "border-transparent text-muted hover:text-neutral"
-              }`}
-            >
-              {h.text}
-            </a>
-          </li>
+    <nav
+      aria-label="목차"
+      className="sticky top-0 z-30 -mx-4 border-b border-black/[0.06] bg-white/95 px-4 backdrop-blur"
+    >
+      <div
+        ref={barRef}
+        className="flex gap-1.5 overflow-x-auto py-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {tabs.map((t) => (
+          <a
+            key={t.id}
+            data-id={t.id}
+            href={`#${t.id}`}
+            onClick={(e) => go(e, t.id)}
+            className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
+              active === t.id
+                ? "bg-brand-solid text-white"
+                : "bg-neutral-weak text-muted hover:text-neutral"
+            }`}
+          >
+            {t.text}
+          </a>
         ))}
-      </ul>
+      </div>
     </nav>
   );
 }

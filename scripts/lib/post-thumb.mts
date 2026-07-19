@@ -56,139 +56,152 @@ async function renderText(
     .toBuffer();
 }
 
-/** 디자인 변주 — 오버레이 톤 + 액센트 색 (포스트마다 다름) */
-const TONES = ["#0d1526", "#0a1a33", "#141024", "#05201e", "#1a1410"];
-const ACCENTS = ["#4a82ea", "#2fbfa8", "#f5709a", "#f5a623", "#9b7cf6", "#5ac8fa"];
-const NAME_DPI = 470; // 고정 — 전 썸네일 동일 글씨 크기
-const TITLE_DPI = 238;
+/**
+ * 포스트별 액센트 팔레트 — 같은 병원이라도 글마다 색 무드가 달라 캐러셀에서 구별된다.
+ * accent=포인트색(토픽 배지·언더라인·테두리), card=카드/색보정 다크 틴트(액센트 계열).
+ */
+// 순번 0~4가 한 캐러셀에 함께 뜨므로, 앞쪽 5색을 색상환에서 최대한 벌려 배치한다.
+const PALETTE = [
+  { accent: "#3cc7ae", card: "#0b221e" }, // 0 teal
+  { accent: "#f2895a", card: "#241206" }, // 1 orange
+  { accent: "#5b93f5", card: "#0d1830" }, // 2 blue
+  { accent: "#ec6f96", card: "#260f1a" }, // 3 rose
+  { accent: "#a888f7", card: "#180f2c" }, // 4 violet
+  { accent: "#40c6dd", card: "#07222a" }, // 5 cyan
+];
+const NAME_DPI = 428; // 병원명(크게)
+const SUB_DPI = 162; // 부제
+const EYE_DPI = 80; // 토픽 배지
 
-/** 장식 오버레이 6종 — 중앙 텍스트를 건드리지 않는 가장자리/코너 디자인 */
-function decorSvg(d: number, accent: string): string {
-  const p = Math.round(S * 0.05);
-  const e = S - p;
-  switch (d) {
-    case 0: {
-      const a = Math.round(S * 0.062);
-      const w = 6;
-      const L = (path: string) =>
-        `<path d="${path}" stroke="${accent}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-      return (
-        L(`M${p} ${p + a} L${p} ${p} L${p + a} ${p}`) +
-        L(`M${e - a} ${p} L${e} ${p} L${e} ${p + a}`) +
-        L(`M${p} ${e - a} L${p} ${e} L${p + a} ${e}`) +
-        L(`M${e - a} ${e} L${e} ${e} L${e} ${e - a}`)
-      );
-    }
-    case 1:
-      return `<rect x="${p}" y="${p}" width="${S - 2 * p}" height="${S - 2 * p}" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3"/>`;
-    case 2:
-      return `<polygon points="${S},0 ${S},${Math.round(S * 0.2)} ${Math.round(S * 0.8)},0" fill="${accent}" opacity="0.9"/>`;
-    case 3:
-      return `<circle cx="${S}" cy="0" r="${Math.round(S * 0.36)}" fill="${accent}" opacity="0.16"/><circle cx="0" cy="${S}" r="${Math.round(S * 0.3)}" fill="${accent}" opacity="0.12"/>`;
-    case 4: {
-      const x = p + Math.round(S * 0.02);
-      const w = S - 2 * x;
-      return (
-        `<rect x="${x}" y="${Math.round(S * 0.075)}" width="${w}" height="4" rx="2" fill="${accent}" opacity="0.8"/>` +
-        `<rect x="${x}" y="${S - Math.round(S * 0.075)}" width="${w}" height="4" rx="2" fill="${accent}" opacity="0.8"/>`
-      );
-    }
-    default: {
-      const t = Math.round(S * 0.18);
-      return (
-        `<polygon points="0,${S} 0,${S - t} ${t},${S}" fill="${accent}" opacity="0.85"/>` +
-        `<polygon points="${S},0 ${S},${t} ${S - t},0" fill="${accent}" opacity="0.85"/>`
-      );
-    }
-  }
-}
-
+/**
+ * 병원 사진을 액센트 색으로 그레이딩(무드 변주)하고, 중앙 다크 카드에
+ *   [토픽 배지] → 병원명(크게) → 액센트 언더라인 → 부제(제목)
+ * 을 얹는다. variant(seed)로 액센트가 포스트마다 달라진다.
+ */
 export async function compose(
   background: Buffer,
   name: string,
   title: string,
   variant: number,
+  eyebrow?: string,
 ): Promise<Buffer> {
-  const tone = TONES[variant % TONES.length];
-  const accent = ACCENTS[variant % ACCENTS.length];
-  const decor = variant % 6;
-  const textW = Math.round(S * 0.84);
+  const pal = PALETTE[Math.abs(variant) % PALETTE.length];
+  const textW = Math.round(S * 0.66);
+  const cx = (w: number) => Math.round((S - w) / 2);
 
-  const base = await sharp(background).resize(S, S, { fit: "cover" }).toBuffer();
-  const scrim = Buffer.from(
-    `<svg width="${S}" height="${S}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">` +
-      `<stop offset="0%" stop-color="${tone}" stop-opacity="0.46"/>` +
-      `<stop offset="50%" stop-color="${tone}" stop-opacity="0.52"/>` +
-      `<stop offset="100%" stop-color="${tone}" stop-opacity="0.66"/>` +
-      `</linearGradient></defs><rect width="${S}" height="${S}" fill="url(#g)"/></svg>`,
+  // 배경: 채도 낮춰 액센트 워시가 무드를 주도하게
+  const base = await sharp(background)
+    .resize(S, S, { fit: "cover" })
+    .modulate({ brightness: 0.78, saturation: 0.68 })
+    .toBuffer();
+  // 액센트 색보정 워시 + 하단 다크 (카드 대비)
+  const wash = Buffer.from(
+    `<svg width="${S}" height="${S}"><defs>` +
+      `<linearGradient id="a" x1="0" y1="0" x2="0.15" y2="1">` +
+      `<stop offset="0%" stop-color="${pal.accent}" stop-opacity="0.12"/>` +
+      `<stop offset="55%" stop-color="${pal.card}" stop-opacity="0.34"/>` +
+      `<stop offset="100%" stop-color="${pal.card}" stop-opacity="0.64"/>` +
+      `</linearGradient></defs>` +
+      `<rect width="${S}" height="${S}" fill="url(#a)"/></svg>`,
   );
 
+  // 텍스트 렌더
   const nameImg = await renderText(
     `<span foreground="#ffffff" weight="bold">${escapeXml(name)}</span>`,
     textW,
     NAME_DPI,
   );
-  const nameShadow = await sharp(
-    await renderText(
-      `<span foreground="#000000" weight="bold">${escapeXml(name)}</span>`,
-      textW,
-      NAME_DPI,
-    ),
-  )
-    .blur(9)
-    .toBuffer();
-
-  const lines = wrap(title, 18);
-  const lineImgs: Buffer[] = [];
-  for (const l of lines) {
-    lineImgs.push(
+  const subLines = wrap(title, 17);
+  const subImgs: Buffer[] = [];
+  for (const l of subLines) {
+    subImgs.push(
       await renderText(
-        `<span foreground="#dfe6f2" weight="600">${escapeXml(l)}</span>`,
+        `<span foreground="#dbe3de" weight="500">${escapeXml(l)}</span>`,
         textW,
-        TITLE_DPI,
+        SUB_DPI,
       ),
     );
   }
-  const lineMetas = await Promise.all(lineImgs.map((b) => sharp(b).metadata()));
-  const lineGap = Math.round(S * 0.018);
-  const titleH =
-    lineMetas.reduce((s, m) => s + (m.height ?? 0), 0) +
-    lineGap * Math.max(0, lines.length - 1);
+  const eyeText = eyebrow && eyebrow.trim() ? eyebrow.trim() : "";
+  const eyeImg = eyeText
+    ? await renderText(
+        `<span foreground="#0c1613" weight="bold">${escapeXml(eyeText)}</span>`,
+        textW,
+        EYE_DPI,
+      )
+    : null;
 
-  const nm = await sharp(nameImg).metadata();
+  // 측정
+  const meta = (b: Buffer) => sharp(b).metadata();
+  const nm = await meta(nameImg);
   const nameH = nm.height ?? 0;
   const nameW = nm.width ?? 0;
-  const cx = (w?: number) => Math.round((S - (w ?? 0)) / 2);
+  const subMetas = await Promise.all(subImgs.map(meta));
+  const subGap = Math.round(S * 0.014);
+  const subH =
+    subMetas.reduce((s, m) => s + (m.height ?? 0), 0) +
+    subGap * Math.max(0, subLines.length - 1);
+  const eyeM = eyeImg ? await meta(eyeImg) : null;
+  const eyeTW = eyeM?.width ?? 0;
+  const eyeTH = eyeM?.height ?? 0;
 
-  const uW = Math.round(S * 0.08);
-  const uH = 5;
-  const uBar = Buffer.from(
-    `<svg width="${uW}" height="${uH}"><rect width="${uW}" height="${uH}" rx="2.5" fill="${accent}"/></svg>`,
+  // 토픽 배지(pill) 크기
+  const pillPadX = Math.round(S * 0.03);
+  const pillPadY = Math.round(S * 0.016);
+  const pillW = eyeImg ? eyeTW + pillPadX * 2 : 0;
+  const pillH = eyeImg ? eyeTH + pillPadY * 2 : 0;
+
+  // 액센트 언더라인
+  const uW = Math.round(S * 0.07);
+  const uH = 6;
+
+  const gapEye = Math.round(S * 0.032);
+  const gapU = Math.round(S * 0.028);
+  const gapSub = Math.round(S * 0.028);
+  const blockH =
+    (eyeImg ? pillH + gapEye : 0) + nameH + gapU + uH + gapSub + subH;
+
+  // 카드 (액센트 테두리)
+  const padX = Math.round(S * 0.07);
+  const padY = Math.round(S * 0.075);
+  const cardW = Math.min(Math.round(S * 0.88), textW + padX * 2);
+  const cardH = blockH + padY * 2;
+  const cardX = cx(cardW);
+  const cardY = Math.round((S - cardH) / 2);
+  const card = Buffer.from(
+    `<svg width="${S}" height="${S}">` +
+      `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="${pal.card}" fill-opacity="0.86"/>` +
+      `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="none" stroke="${pal.accent}" stroke-opacity="0.5" stroke-width="2.5"/>` +
+      `</svg>`,
   );
-  const gapU = Math.round(S * 0.032);
-  const gapTitle = Math.round(S * 0.05);
 
-  const blockH = nameH + gapU + uH + gapTitle + titleH;
-  const top = Math.round((S - blockH) / 2);
-
-  const composites: sharp.OverlayOptions[] = [
-    { input: scrim, top: 0, left: 0 },
-    {
-      input: Buffer.from(`<svg width="${S}" height="${S}">${decorSvg(decor, accent)}</svg>`),
-      top: 0,
-      left: 0,
-    },
-    { input: nameShadow, top: top + 3, left: cx(nameW) },
-    { input: nameImg, top, left: cx(nameW) },
-    { input: uBar, top: top + nameH + gapU, left: cx(uW) },
+  const overlays: sharp.OverlayOptions[] = [
+    { input: wash, top: 0, left: 0 },
+    { input: card, top: 0, left: 0 },
   ];
-  let ty = top + nameH + gapU + uH + gapTitle;
-  for (let i = 0; i < lineImgs.length; i++) {
-    composites.push({ input: lineImgs[i], top: ty, left: cx(lineMetas[i].width) });
-    ty += (lineMetas[i].height ?? 0) + lineGap;
+  let y = cardY + padY;
+  if (eyeImg) {
+    const pillX = cx(pillW);
+    const pill = Buffer.from(
+      `<svg width="${S}" height="${S}"><rect x="${pillX}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/></svg>`,
+    );
+    overlays.push({ input: pill, top: 0, left: 0 });
+    overlays.push({ input: eyeImg, top: y + pillPadY, left: cx(eyeTW) });
+    y += pillH + gapEye;
+  }
+  overlays.push({ input: nameImg, top: y, left: cx(nameW) });
+  y += nameH + gapU;
+  const uBar = Buffer.from(
+    `<svg width="${uW}" height="${uH}"><rect width="${uW}" height="${uH}" rx="3" fill="${pal.accent}"/></svg>`,
+  );
+  overlays.push({ input: uBar, top: y, left: cx(uW) });
+  y += uH + gapSub;
+  for (let i = 0; i < subImgs.length; i++) {
+    overlays.push({ input: subImgs[i], top: y, left: cx(subMetas[i].width ?? 0) });
+    y += (subMetas[i].height ?? 0) + subGap;
   }
 
-  return sharp(base).composite(composites).webp({ quality: WEBP_QUALITY }).toBuffer();
+  return sharp(base).composite(overlays).webp({ quality: WEBP_QUALITY }).toBuffer();
 }
 
 /** post.id 기반 결정적 해시 (같은 포스트 = 항상 같은 디자인) */

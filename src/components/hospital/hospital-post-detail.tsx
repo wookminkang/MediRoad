@@ -1,9 +1,16 @@
 import Link from "next/link";
 
 import { Markdown } from "@/components/column/markdown";
+import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
+import { extractHeadings } from "@/lib/headings";
+import { walkMinutes } from "@/lib/hospital";
 import type { Hospital } from "@/types/hospital";
 import type { HospitalPost } from "@/types/hospital-post";
+
+import { HospitalMiniMap } from "./hospital-mini-map";
+import { OpeningHoursTable } from "./opening-hours-table";
+import { PostToc } from "./post-toc";
 
 const fmtDate = (iso: string) => iso.replaceAll("-", ".");
 
@@ -29,6 +36,9 @@ export function HospitalPostDetail({
 }) {
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
   const addr = h.roadAddress ?? h.address;
+  const toc = extractHeadings(post.body);
+  const station = h.nearestStation;
+  const hasHours = !!(h.hours && h.hours.length > 0);
 
   return (
     <article className="flex flex-col gap-10">
@@ -37,33 +47,21 @@ export function HospitalPostDetail({
         <nav aria-label="경로 안내" className="mb-4">
           <span className="text-[13px] text-subtle">
             <Link href="/" className="hover:text-neutral">
-              홈
+              메디로드
             </Link>
             {" / "}
             <Link href={`/hospitals/${h.slug}`} className="hover:text-neutral">
               {h.name}
             </Link>
-            {" / "}
-            <span className="text-muted">건강정보</span>
           </span>
         </nav>
 
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand">
-          {h.name} · {h.region.sigungu}
-        </p>
-        <h1 className="mt-2.5 text-pretty text-[1.7rem] font-extrabold leading-[1.32] tracking-tight text-neutral sm:text-[2.1rem]">
+        <h1 className="text-pretty text-[1.7rem] font-extrabold leading-[1.32] tracking-tight text-neutral sm:text-[2.1rem]">
           {post.title}
         </h1>
-        {post.excerpt && (
-          <p className="mt-3.5 max-w-[60ch] text-[15px] leading-relaxed text-muted">
-            {post.excerpt}
-          </p>
-        )}
-
         <p className="mt-4 text-[13px] text-subtle">
-          {post.author.name}
+          메디로드
           {post.publishedAt && ` · ${fmtDate(post.publishedAt)}`}
-          {post.readingMinutes ? ` · 읽는 데 약 ${post.readingMinutes}분` : ""}
         </p>
 
         {post.conditions && post.conditions.length > 0 && (
@@ -80,6 +78,38 @@ export function HospitalPostDetail({
         )}
       </header>
 
+      {/* ── 목차 (상단 sticky 가로 탭) ───────────────────── */}
+      <PostToc headings={toc} />
+
+      {/* ── 병원 정보 박스 ───────────────────────────────── */}
+      <div className="rounded-2xl border border-black/[0.07] bg-neutral-weak/40 px-5 py-4">
+        <p className="text-[15px] font-bold text-neutral">
+          {h.name} <span className="font-medium text-muted">({h.type})</span>
+        </p>
+        <dl className="mt-2.5 flex flex-col gap-1.5 text-[13px] text-muted">
+          <div className="flex gap-2">
+            <dt className="w-9 shrink-0 font-semibold text-subtle">주소</dt>
+            <dd>{addr}</dd>
+          </div>
+          {h.phone && (
+            <div className="flex gap-2">
+              <dt className="w-9 shrink-0 font-semibold text-subtle">전화</dt>
+              <dd>{h.phone}</dd>
+            </div>
+          )}
+          {station && (
+            <div className="flex gap-2">
+              <dt className="w-9 shrink-0 font-semibold text-subtle">위치</dt>
+              <dd>
+                {station.name}
+                {station.line ? ` (${station.line})` : ""} 도보{" "}
+                {walkMinutes(station.distanceM)}분
+              </dd>
+            </div>
+          )}
+        </dl>
+      </div>
+
       {post.thumbnail && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -89,9 +119,9 @@ export function HospitalPostDetail({
         />
       )}
 
-      {/* ── 핵심 요약 — AI가 통째로 인용하는 문장들 ─────── */}
+      {/* ── 핵심 요약 — AI가 통째로 인용하는 문장들(speakable) ─────── */}
       {post.summary && post.summary.length > 0 && (
-        <section className="rounded-2xl bg-brand-weak px-6 py-6 sm:px-7">
+        <section className="post-tldr rounded-2xl bg-brand-weak px-6 py-6 sm:px-7">
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand">
             핵심 요약
           </p>
@@ -108,36 +138,6 @@ export function HospitalPostDetail({
       {/* ── 본문 ─────────────────────────────────────────── */}
       <section className="post-body max-w-[65ch]">
         <Markdown>{post.body}</Markdown>
-
-        {post.references && post.references.length > 0 && (
-          <ol className="mt-10 flex list-decimal flex-col gap-1.5 border-t border-black/[0.07] pl-5 pt-6 text-sm text-muted">
-            {post.references.map((r) => (
-              <li key={r.url}>
-                <a
-                  href={r.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-brand underline"
-                >
-                  {r.title}
-                </a>
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {post.tags && post.tags.length > 0 && (
-          <ul className="mt-8 flex flex-wrap gap-2">
-            {post.tags.map((t) => (
-              <li
-                key={t}
-                className="rounded-full border border-black/[0.08] px-3.5 py-1.5 text-sm text-muted"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
-        )}
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────── */}
@@ -153,34 +153,66 @@ export function HospitalPostDetail({
         </section>
       )}
 
-      {/* ── 상담 안내 ────────────────────────────────────── */}
-      <section className="rounded-2xl border border-brand/20 bg-brand-weak px-6 py-9 text-center sm:px-10">
+      {/* ── 찾아오시는 길 · 진료시간 ─────────────────────── */}
+      <section className="border-t border-black/[0.07] pt-9">
         <h2 className="text-xl font-extrabold tracking-tight text-neutral">
-          {h.name}에서 상담받으세요
+          {h.name} 찾아오시는 길
         </h2>
-        <p className="mx-auto mt-2.5 max-w-md text-sm leading-relaxed text-muted">
-          정확한 진료시간·휴진 여부는 방문 전 전화로 확인하시는 것을 권장합니다.
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
-          {h.phone && (
-            <a
-              href={`tel:${h.phone}`}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-solid px-6 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
-            >
-              <PhoneIcon />
-              {h.phone} 전화 상담
-            </a>
+        <div className="mt-5 grid gap-5">
+          {h.location?.lat && h.location?.lng ? (
+            <HospitalMiniMap
+              lat={h.location.lat}
+              lng={h.location.lng}
+              className="h-52 w-full overflow-hidden rounded-xl"
+            />
+          ) : (
+            <MapPlaceholder className="min-h-[13rem] rounded-xl" />
           )}
-          <a
-            href={naverUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-black/[0.12] bg-white px-6 py-3 text-sm font-medium text-neutral transition-colors hover:bg-neutral-weak"
-          >
-            네이버 지도 길찾기
-          </a>
+          <div className="flex flex-col gap-2.5">
+            <address className="text-[15px] not-italic text-neutral">
+              {addr}
+            </address>
+            {station && (
+              <p className="text-sm text-muted">
+                {station.name}
+                {station.line ? ` (${station.line})` : ""}
+                {station.exit ? ` ${station.exit}번 출구` : ""} 도보{" "}
+                {walkMinutes(station.distanceM)}분
+              </p>
+            )}
+            <div className="mt-1 flex flex-wrap gap-2.5">
+              {h.phone && (
+                <a
+                  href={`tel:${h.phone}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-solid px-6 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90"
+                >
+                  <PhoneIcon />
+                  {h.phone}
+                </a>
+              )}
+              <a
+                href={naverUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-black/[0.12] bg-white px-6 py-3 text-sm font-medium text-neutral transition-colors hover:bg-neutral-weak"
+              >
+                네이버 지도 길찾기
+              </a>
+            </div>
+          </div>
         </div>
-        <p className="mt-5 text-[13px] text-subtle">{addr}</p>
+
+        {hasHours && (
+          <div className="mt-8">
+            <h3 className="text-base font-bold text-neutral">진료시간</h3>
+            <p className="mt-1 text-[13px] text-muted">
+              명절·임시 휴진은 다를 수 있어요. 방문 전 확인을 권장합니다.
+            </p>
+            <div className="mt-3">
+              <OpeningHoursTable hours={h.hours!} holidayClosed={h.holidayClosed} />
+            </div>
+          </div>
+        )}
       </section>
 
       {/* ── E-E-A-T 면책 ─────────────────────────────────── */}
@@ -191,11 +223,6 @@ export function HospitalPostDetail({
         <div className="text-sm leading-relaxed text-muted">
           본 콘텐츠는 일반적인 건강정보이며, 개인의 증상·진단을 대신하지 않습니다.
           정확한 진단·치료는 반드시 의료진과 상담하세요.
-          {post.reviewedBy && (
-            <div className="mt-2 text-subtle">
-              감수 · {post.reviewedBy.name} ({post.reviewedBy.specialty})
-            </div>
-          )}
         </div>
       </div>
 

@@ -1,22 +1,12 @@
 import Link from "next/link";
 
 import { FaqAccordion } from "@/components/ui/faq-accordion";
-import { PostActions } from "@/components/hospital/post-actions";
 import { anyCategoryLabel } from "@/constants/briefing";
 import type { Column } from "@/types/column";
 
 import { Markdown } from "./markdown";
 
 const fmtDate = (iso: string) => iso.replaceAll("-", "/");
-
-/** 본문 마크다운 → 평문(음성 읽기용) */
-const toPlain = (md: string) =>
-  md
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/[#*`>_~|-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 
 /** 칼럼/브리핑 상세 — 뉴스룸형 에디토리얼. basePath로 /health·/briefing 공용. */
 export function ColumnDetail({
@@ -43,10 +33,9 @@ export function ColumnDetail({
         {c.title}
       </h1>
 
-      {/* 메타(날짜) + 액션(AI요약·음성·공유·인쇄) */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6">
+      {/* 메타(날짜) */}
+      <div className="mt-6 border-b border-line pb-6">
         <span className="text-[15px] text-muted">{fmtDate(c.publishedAt)}</span>
-        <PostActions title={c.title} summary={c.summary} bodyText={toPlain(c.body)} />
       </div>
 
       {/* 본문 */}
@@ -65,39 +54,6 @@ export function ColumnDetail({
             </li>
           ))}
         </ol>
-      )}
-
-      {/* 태그 */}
-      {c.tags && c.tags.length > 0 && (
-        <div className="mt-8 flex flex-wrap gap-2">
-          {c.tags.map((t) => (
-            <Link
-              key={t}
-              href={`${basePath}?q=${encodeURIComponent(t)}`}
-              className="rounded-full border border-line px-3.5 py-1.5 text-sm text-neutral transition-colors hover:bg-neutral-weak"
-            >
-              {t}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* 관련 병원 */}
-      {c.relatedDepartments && c.relatedDepartments.length > 0 && (
-        <section aria-label="관련 병원" className="mt-10">
-          <h2 className="text-base font-bold text-neutral">이 글과 관련된 병원</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {c.relatedDepartments.map((d) => (
-              <Link
-                key={d}
-                href={`/hospitals?department=${encodeURIComponent(d)}`}
-                className="rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-brand transition-colors hover:bg-brand-weak"
-              >
-                {d} 병원 보기
-              </Link>
-            ))}
-          </div>
-        </section>
       )}
 
       {/* FAQ */}
@@ -121,12 +77,6 @@ export function ColumnDetail({
           본 콘텐츠는 <b className="text-neutral">{c.author}</b>이(가) 작성한 일반적인 건강
           정보로, 개인의 증상·질환에 대한 진단이나 치료를 대체하지 않습니다. 정확한 진단과
           치료는 반드시 의료진과 상담하세요.
-          {/*
-           * 개별 감수자 이름은 노출하지 않는다. 실제 감수자로 확인되지 않은 이름을
-           * 표기하면 오히려 신뢰도(E-E-A-T)에 해가 된다. "검수됨"이라는 신뢰 신호만
-           * 편집팀 명의로 유지한다.
-           */}
-          <div className="mt-2 text-subtle">메디로드 의료편집팀 검수</div>
         </div>
       </div>
 

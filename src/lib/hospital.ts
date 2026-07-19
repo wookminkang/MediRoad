@@ -195,3 +195,35 @@ export function buildHospitalSummaryBullets(h: Hospital): string[] {
 
   return b;
 }
+
+/**
+ * 한눈에 보는 — 가이드 허브 임베드용 간략 버전.
+ * 병원 1줄 소개 · 평일 진료시간 · (입원실 운영 시 병상) 만 담는다.
+ */
+export function buildHospitalGlanceBrief(
+  h: Hospital,
+  opts: { includeHours?: boolean } = {},
+): string[] {
+  const { includeHours = true } = opts;
+  const b: string[] = [];
+
+  // 병원 1줄 소개 — 소개글 첫 문장, 없으면 위치·종별 사실 문장
+  const desc = h.description?.trim();
+  const oneLine = desc
+    ? desc.split(/(?<=[.!?。])\s+/)[0]
+    : `${h.name}${eunNeun(h.name)} ${h.region.sido} ${h.region.sigungu}에 위치한 ${h.type}입니다.`;
+  b.push(oneLine);
+
+  // 진료시간 — 평일 기준(별도 섹션이 있으면 생략)
+  if (includeHours) {
+    const wd = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
+    if (wd?.open && wd?.close) b.push(`평일 진료시간은 ${wd.open}~${wd.close}입니다.`);
+  }
+
+  // 입원실 — 운영할 때만(E-Gen 공공데이터)
+  if (h.beds && h.beds > 0) {
+    b.push(`입원실을 운영하며, 병상은 ${h.beds.toLocaleString()}개입니다.`);
+  }
+
+  return b;
+}

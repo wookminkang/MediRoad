@@ -108,8 +108,9 @@ export default async function HospitalDetailPage({
   const h = await getHospitalBySlug(slug);
   if (!h) notFound();
 
-  // 옛 id(또는 비정규) URL로 들어오면 canonical slug로 301
-  if (slug !== h.slug) permanentRedirect(`/hospitals/${h.slug}`);
+  // 옛 id(또는 비정규) URL로 들어오면 canonical slug로 301 (한글 slug는 인코딩 필요)
+  if (slug !== h.slug)
+    permanentRedirect(`/hospitals/${encodeURIComponent(h.slug)}`);
 
   const related = await getRelatedHospitals(h);
   const posts = await getHospitalPosts(h.id);

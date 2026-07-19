@@ -21,6 +21,7 @@ export function GET() {
   const names = [
     "hospitals",
     "posts",
+    "keyword-posts",
     "keywords",
     "areas",
     "stations",

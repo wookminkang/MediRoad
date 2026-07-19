@@ -45,6 +45,21 @@ function shortId(len = 8) {
   return Array.from(b, (n) => ALPHA[n % ALPHA.length]).join("");
 }
 
+/**
+ * 제목에는 하이픈(-)을 넣지 않는다. 자동 발행 글 제목이 "제목 - 부제"처럼 오면
+ * "제목 (부제)"로 바꾸고, 남은 하이픈류(-, –, —)는 공백으로 정리한다.
+ * 썸네일 줄바꿈·가독성 문제를 막기 위한 정규화(안전망).
+ */
+function sanitizeTitle(raw: string): string {
+  let s = raw.trim();
+  // 첫 하이픈류 구분자 → 괄호
+  const m = s.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+  if (m) s = `${m[1].trim()} (${m[2].trim()})`;
+  // 남은 하이픈류 제거
+  s = s.replace(/[-–—]/g, " ").replace(/\s{2,}/g, " ").trim();
+  return s;
+}
+
 type ImageEntry = { url?: string; file?: string; prompt?: string; alt?: string };
 
 const LOGO_PATH = path.resolve("public/mediroad_logo.svg");
@@ -277,6 +292,9 @@ async function ingestFile(file: string) {
     if (!fm[key]) throw new Error(`${file}: frontmatter '${key}' 누락`);
   }
 
+  // 제목 하이픈 금지 → 괄호로 정규화(자동 발행 안전망)
+  const cleanTitle = sanitizeTitle(String(fm.title));
+
   const id: string = fm.id ?? shortId();
   const mdDir = path.dirname(mdPath);
 
@@ -297,7 +315,7 @@ async function ingestFile(file: string) {
     thumbnail = await resolveThumbnail(
       fm.thumbnail,
       id,
-      fm.thumbnailTitle ?? fm.title,
+      fm.thumbnailTitle ?? cleanTitle,
       mdDir,
     );
 
@@ -306,7 +324,7 @@ async function ingestFile(file: string) {
 
   const row = {
     id,
-    title: fm.title,
+    title: cleanTitle,
     category: fm.category,
     excerpt: fm.excerpt,
     thumbnail,
