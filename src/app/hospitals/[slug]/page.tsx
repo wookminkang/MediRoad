@@ -9,8 +9,10 @@ import {
 import { getHospitalPosts } from "@/api/hospital-post";
 import { HospitalDetail } from "@/components/hospital/hospital-detail";
 import { PageContainer } from "@/components/ui/page-container";
+import { typeSynonyms } from "@/constants/hospital";
+import { hospitalCuratedStations } from "@/constants/partner-stations";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
-import { eunNeun } from "@/lib/hospital";
+import { eunNeun, hospitalKeywords } from "@/lib/hospital";
 import { buildHospitalFaqs } from "@/lib/hospital-faq";
 import {
   buildBreadcrumbLd,
@@ -43,12 +45,19 @@ export async function generateMetadata({
 
   const url = `${SITE_URL}/hospitals/${h.slug}`;
   const sigungu = h.region.sigungu;
+  const emd = h.region.emdong?.trim();
   const st = h.nearestStation?.name?.trim();
   const station = st ? (st.endsWith("역") ? st : `${st}역`) : ""; // "발산역"
 
-  // 제목: "{병원명} | {구} {역} {유형}"  (병원명 선두 → 병원명 검색 매칭)
-  const title =
-    h.seo?.title ?? `${h.name} | ${[sigungu, station, h.type].filter(Boolean).join(" ")}`;
+  // 제목: 위치+종별 키워드를 선두에 패킹 후 병원명.
+  //   예) "봉천동 한의원 · 서울대입구역 한의원 | 이음손한의원"
+  //   → "서울대입구 한의원" 같은 지역 키워드 검색에 잡히면서, 병원명도 그대로 노출.
+  const locKeywords = [
+    emd ? `${emd} ${h.type}` : "",
+    station ? `${station} ${h.type}` : "",
+  ].filter(Boolean);
+  const locPrefix = locKeywords.length ? locKeywords.join(" · ") : `${sigungu} ${h.type}`;
+  const title = h.seo?.title ?? `${locPrefix} | ${h.name}`;
 
   // 설명: "{병원명}은/는 {구} {역}에 위치한 {유형}입니다. 진료시간은 …입니다. 지역은 {시도} {구}입니다."
   const weekday = h.hours?.find((d) => d.day === 1 && !d.closed && d.open && d.close);
@@ -65,12 +74,17 @@ export async function generateMetadata({
     description,
     keywords:
       h.seo?.keywords ??
-      [
-        h.name,
-        `${sigungu} ${h.type}`,
-        ...(station ? [`${sigungu} ${station} ${h.type}`] : []),
-        "메디로드",
-      ],
+      Array.from(
+        new Set([
+          ...hospitalKeywords(h),
+          // 큐레이션 인근 역(제휴 병원) — "서울대입구역 한의원"처럼 최근접역이 아닌
+          // 한 정거장 옆 역 키워드도 상세 페이지에 포함(종별 동의어 포함).
+          ...hospitalCuratedStations(h.id).flatMap((s) =>
+            typeSynonyms(h.type).map((t) => `${s}역 ${t}`),
+          ),
+          "메디로드",
+        ]),
+      ).slice(0, 80),
     alternates: { canonical: url },
     robots: { index: !h.seo?.noindex, follow: true },
     openGraph: {

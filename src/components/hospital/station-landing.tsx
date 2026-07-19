@@ -16,6 +16,10 @@ type Props = {
   stationDepartments: string[];
   /** 역이 속한 시군구 (지역 랜딩 교차 링크) */
   sigungu?: string;
+  /** 같은 시군구의 다른 역 (clean 역명, 내부링크) */
+  nearbyStations?: string[];
+  /** 인접 자치구 (지역 랜딩 교차 링크) */
+  neighborGus?: string[];
   intro: string;
   faqs: { q: string; a: string }[];
 };
@@ -26,9 +30,12 @@ export function StationLanding({
   filters,
   stationDepartments,
   sigungu,
+  nearbyStations = [],
+  neighborGus = [],
   intro,
   faqs,
 }: Props) {
+  const deptSuffix = department ? `/${department}` : "";
   const title = department ? `${station} ${department}` : `${station} 병원`;
   const otherDepartments = stationDepartments.filter((d) => d !== department);
 
@@ -125,6 +132,22 @@ export function StationLanding({
             ))}
           </div>
         )}
+        {nearbyStations.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Text
+              as="span"
+              textStyle="t4Medium"
+              style={{ color: "var(--seed-color-fg-neutral-muted)" }}
+            >
+              {sigungu ? `${sigungu} 다른 역` : "가까운 역"}
+            </Text>
+            {nearbyStations.map((s) => (
+              <ChipLink key={s} href={`/near/${s}역${deptSuffix}`}>
+                {s}역 {department ?? "병원"}
+              </ChipLink>
+            ))}
+          </div>
+        )}
         {sigungu && (
           <div className="flex flex-wrap items-center gap-2">
             <Text
@@ -137,6 +160,11 @@ export function StationLanding({
             <ChipLink href={department ? `/area/${sigungu}/${department}` : `/area/${sigungu}`}>
               {sigungu} {department ?? "병원"}
             </ChipLink>
+            {neighborGus.map((gu) => (
+              <ChipLink key={gu} href={department ? `/area/${gu}/${department}` : `/area/${gu}`}>
+                {gu} {department ?? "병원"}
+              </ChipLink>
+            ))}
           </div>
         )}
       </nav>

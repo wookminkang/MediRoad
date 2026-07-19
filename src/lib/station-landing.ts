@@ -5,7 +5,22 @@
  * - thin page 방지를 위해 고유 소개문·FAQ를 생성. (SEO §4-2)
  */
 
+import { STATION_TARGETS } from "@/constants/stations.generated";
 import type { Hospital } from "@/types/hospital";
+
+/** 같은 시군구의 다른 역(clean) — 병원수 내림차순. (역세권 인접 내부링크) */
+export function nearbyStationsInSigungu(
+  sigungu: string | undefined,
+  excludeStation: string,
+  limit = 6,
+): string[] {
+  if (!sigungu) return [];
+  const ex = cleanStationName(excludeStation);
+  return STATION_TARGETS.filter((s) => s.sigungu === sigungu && s.name !== ex)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((s) => s.name);
+}
 
 /** 병원 목록에서 최근접 역(clean) 상위 N개 — 빈도 내림차순. (지역↔역세권 교차 링크) */
 export function topStationsOf(hospitals: Hospital[], limit = 12): string[] {

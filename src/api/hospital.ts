@@ -410,6 +410,45 @@ export async function getHospitals(
 }
 
 /**
+ * id 목록으로 병원 조회 — 역세권 큐레이션 상단 주입용.
+ *
+ * station_name 접두 매칭으로는 안 잡히는 인근 역(예: 이음손은 봉천인데 서울대입구 페이지)에
+ * 제휴 병원을 강제로 얹기 위한 별도 조회다. department를 주면 과목/종별로도 거른다
+ * (역×과목 페이지에서 관련 없는 병원이 얹히지 않도록). 요청 id 순서를 유지한다.
+ */
+export async function getHospitalsByIds(
+  ids: string[],
+  opts: { department?: string } = {},
+): Promise<Hospital[]> {
+  if (!ids.length) return [];
+  if (!isSupabaseConfigured) {
+    return MOCK_HOSPITALS.filter((h) => ids.includes(h.id));
+  }
+  const { department } = opts;
+  const deptTypes = department ? DEPT_AS_TYPE[department] : undefined;
+  const useDeptJoin = Boolean(department) && !deptTypes;
+  const baseSel =
+    "*, hospital_hours(day,open,close,closed), hospital_photos(url,alt,category,is_primary,sort_order)";
+  const deptSel = useDeptJoin
+    ? "hospital_departments!inner(name)"
+    : "hospital_departments(name)";
+  let qb = getSupabaseServer()
+    .from("hospitals")
+    .select(`${baseSel}, ${deptSel}`)
+    .in("id", ids);
+  if (deptTypes) qb = qb.in("type", deptTypes as string[]);
+  else if (department) qb = qb.eq("hospital_departments.name", department);
+
+  const { data, error } = await qb;
+  if (error) throw error;
+  const order = new Map(ids.map((id, i) => [id, i]));
+  return (data as unknown as HospitalRow[])
+    .map(rowToHospital)
+    .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }))
+    .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+}
+
+/**
  * 야간·일요일 진료 병원 — 시간 판정 후 페이지네이션.
  *
  * DB에서 시간으로 못 거른다(심평원 표기가 "2600"·"0000" 등 지저분). 지역 전체를

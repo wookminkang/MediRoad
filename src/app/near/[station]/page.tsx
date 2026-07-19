@@ -6,6 +6,8 @@ import { dehydrate, HydrationBoundary, type InfiniteData } from "@tanstack/react
 import { getHospitals } from "@/api/hospital";
 import { StationLanding } from "@/components/hospital/station-landing";
 import { PageContainer } from "@/components/ui/page-container";
+import { isPartnerStation } from "@/constants/partner-stations";
+import { getNeighborDistricts } from "@/constants/region-neighbors";
 import { SITE_NAME, SITE_URL } from "@/constants/site";
 import { departmentsOf } from "@/lib/area";
 import { hospitalKeys } from "@/lib/query-keys";
@@ -15,10 +17,12 @@ import {
   buildStationBreadcrumbLd,
   buildStationCollectionLd,
 } from "@/lib/seo/station-jsonld";
+import { injectPartners } from "@/lib/station-inject";
 import {
   buildStationFaqs,
   buildStationIntro,
   cleanStationName,
+  nearbyStationsInSigungu,
   stationBase,
   stationSegment,
 } from "@/lib/station-landing";
@@ -31,6 +35,7 @@ export const dynamicParams = true;
 export const revalidate = 86400;
 
 export async function generateStaticParams() {
+  // 병원 상세와 동일하게 on-demand ISR — 빌드 병렬 프리렌더의 일시 오류 404 굽기를 피한다.
   return [];
 }
 
@@ -46,21 +51,17 @@ export async function generateMetadata({
   );
   if (!station) return {};
 
-  // noindex라 병원 목록을 조회할 이유가 없다 — 결과를 쓰지도 않으면서 매 요청 DB를 쳤다
   const url = `${SITE_URL}/near/${station}`;
+  // 색인 정책 — 기본 noindex(크롤 예산 보호), 제휴 인근 역만 색인 개방.
+  const indexable = isPartnerStation(station);
   return {
     title: { absolute: `${station} 병원 | 주변 병원·의원 진료시간·위치 | ${SITE_NAME}` },
     description: `${station} 주변 병원·의원을 진료과목·위치·진료시간으로 비교하세요. 최근접 역 기준 목록.`,
+    keywords: indexable
+      ? [`${station} 병원`, `${station} 의원`, `${station} 한의원`]
+      : undefined,
     alternates: { canonical: url },
-    /*
-     * noindex — 역세권 랜딩은 색인 대상이 아니다.
-     *
-     * 색인시킬 건 병원 상세와 병원이 쓴 포스트다. 신생 도메인에서 역세권 828개를 함께 밀면
-     * 크롤 예산이 그쪽으로 새고, 정작 병원 상세가 늦게 색인된다(사이트맵의 87%가 역세권이었다).
-     *
-     * 페이지는 살려둔다 — follow:true라 여기서 병원 상세로 가는 내부링크 경로는 그대로 남는다.
-     */
-    robots: { index: false, follow: true },
+    robots: { index: indexable, follow: true },
     openGraph: {
       type: "website",
       url,
@@ -80,14 +81,19 @@ export default async function StationHubPage({ params }: { params: Params }) {
 
   const base = stationBase(station);
   const filters: HospitalSearchFilters = { station: base };
+  const key = hospitalKeys.list(filters);
 
   const queryClient = getQueryClient();
   await queryClient.prefetchInfiniteQuery({
-    queryKey: hospitalKeys.list(filters),
+    queryKey: key,
     queryFn: () => getHospitals({ ...filters, page: 1, pageSize: FIRST_PAGE }),
     initialPageParam: 1,
   });
-  const first = queryClient.getQueryData(hospitalKeys.list(filters)) as
+
+  // 큐레이션 제휴 병원을 상단 주입(인근 역 노출)
+  await injectPartners(queryClient, key, base);
+
+  const first = queryClient.getQueryData(key) as
     | InfiniteData<Paginated<Hospital>>
     | undefined;
   const items = first?.pages?.[0]?.items ?? [];
@@ -97,6 +103,8 @@ export default async function StationHubPage({ params }: { params: Params }) {
   const { items: sample } = await getHospitals({ station: base, pageSize: 60 });
   const stationDepartments = departmentsOf(sample);
   const sigungu = items[0]?.region.sigungu;
+  const nearbyStations = nearbyStationsInSigungu(sigungu, station);
+  const neighborGus = sigungu ? getNeighborDistricts(sigungu) : [];
   const faqs = buildStationFaqs(station);
 
   const jsonLd = [
@@ -113,6 +121,8 @@ export default async function StationHubPage({ params }: { params: Params }) {
           filters={filters}
           stationDepartments={stationDepartments}
           sigungu={sigungu}
+          nearbyStations={nearbyStations}
+          neighborGus={neighborGus}
           intro={buildStationIntro(station)}
           faqs={faqs}
         />

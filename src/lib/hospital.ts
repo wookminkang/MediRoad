@@ -1,3 +1,4 @@
+import { typeSynonyms } from "@/constants/hospital";
 import { getNeighborDistricts } from "@/constants/region-neighbors";
 import type { Hospital, OpeningHours } from "@/types/hospital";
 
@@ -113,34 +114,40 @@ export function hospitalKeywords(h: Hospital): string[] {
   const r = h.region.sigungu; // 관악구
   const sido = h.region.sido; // 서울
   const emd = h.region.emdong; // 봉천동
-  const st = h.nearestStation?.name; // 서울대입구역
+  const rawSt = h.nearestStation?.name?.trim(); // "서울대입구" 또는 "서울대입구역"
+  const st = rawSt ? (rawSt.endsWith("역") ? rawSt : `${rawSt}역`) : undefined; // 항상 "…역"
   const depts = h.departments ?? [];
   const symptoms = h.symptoms ?? []; // 보톡스·필러·여드름 등 시술/증상
   const neighbors = getNeighborDistricts(r); // 인접 자치구
+  // 종별 동의어 — "한방병원"을 "한의원·한방"으로도 검색하는 사용자 대응
+  const types = typeSynonyms(h.type); // 한방병원 → [한방병원, 한의원, 한방]
 
   const kw: string[] = [
     h.name,
-    h.type,
+    ...types,
     r,
     `${sido} ${r}`,
     ...depts,
     ...depts.map((d) => `${r} ${d}`), // 관악구 피부과
     ...depts.map((d) => `${d} 추천`),
     `${r} 병원`,
-    `${r} ${h.type}`,
+    ...types.map((t) => `${r} ${t}`), // 관악구 한방병원 / 관악구 한의원 / 관악구 한방
     `${r} 병원 추천`,
     "내 주변 병원",
     "병원 찾기",
   ];
 
-  // 읍면동 (봉천동 피부과)
+  // 읍면동 (봉천동 한의원 / 봉천동 피부과)
   if (emd) {
-    kw.push(emd, `${emd} 병원`, ...depts.map((d) => `${emd} ${d}`));
+    kw.push(emd, `${emd} 병원`);
+    kw.push(...types.map((t) => `${emd} ${t}`));
+    kw.push(...depts.map((d) => `${emd} ${d}`));
   }
 
-  // 지하철역 — 역+진료과, 역+시술/증상 (예: "서울대입구역 보톡스")
+  // 지하철역 — 역+유형(동의어), 역+진료과, 역+시술/증상 (예: "서울대입구역 한의원")
   if (st) {
-    kw.push(st, `${st} 병원`, `${st} ${h.type}`);
+    kw.push(st, `${st} 병원`);
+    kw.push(...types.map((t) => `${st} ${t}`));
     kw.push(...depts.map((d) => `${st} ${d}`));
     kw.push(...symptoms.slice(0, 8).map((s) => `${st} ${s}`));
   }
@@ -149,13 +156,13 @@ export function hospitalKeywords(h: Hospital): string[] {
   kw.push(...symptoms.slice(0, 8));
   kw.push(...symptoms.slice(0, 8).map((s) => `${r} ${s}`));
 
-  // 인접 자치구 — 근처 지역 검색 노출 (예: "서초구 피부과")
+  // 인접 자치구 — 근처 지역 검색 노출 (예: "송파구 한방병원")
   for (const nb of neighbors) {
-    kw.push(`${nb} ${h.type}`);
+    kw.push(...types.map((t) => `${nb} ${t}`));
     kw.push(...depts.map((d) => `${nb} ${d}`));
   }
 
-  return Array.from(new Set(kw)).filter(Boolean).slice(0, 45);
+  return Array.from(new Set(kw)).filter(Boolean).slice(0, 60);
 }
 
 /**

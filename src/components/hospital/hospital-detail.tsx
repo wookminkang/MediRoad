@@ -16,6 +16,7 @@ import { ExpandableText } from "./expandable-text";
 import { HospitalMiniMap } from "./hospital-mini-map";
 import { HospitalPostList } from "./hospital-post-list";
 import { TodayStatus } from "./today-status";
+import { keywordPagesForHospital } from "@/constants/hospital-keyword-pages";
 import { isPartnerHospital } from "@/constants/partners";
 import {
   buildAutoDescription,
@@ -52,11 +53,15 @@ export function HospitalDetail({
   hospital: h,
   related = [],
   posts = [],
+  headingAs = "h1",
 }: {
   hospital: Hospital;
   related?: Hospital[];
   posts?: HospitalPost[];
+  /** 병원명 제목 태그 — 키워드 랜딩에 임베드할 땐 "h2"로 낮춰 h1 중복을 막는다. */
+  headingAs?: "h1" | "h2";
 }) {
+  const NameTag = headingAs;
   const addr = h.roadAddress ?? h.address;
   const naverUrl = `https://map.naver.com/p/search/${encodeURIComponent(`${h.name} ${h.region.sigungu}`)}`;
   const st = h.nearestStation;
@@ -138,7 +143,7 @@ export function HospitalDetail({
                    * 병원명만 두면 "강동구 한방병원" 같은 질의에 걸릴 맥락이 H1에 없다.
                    * 지역·유형을 h1 안의 두 번째 줄로 넣어 문서 주제를 한 줄로 말하게 한다.
                    */}
-                  <h1 className="min-w-0">
+                  <NameTag className="min-w-0">
                     <span className="block text-4xl font-extrabold leading-tight tracking-tight text-neutral sm:text-5xl">
                       {h.name}
                     </span>
@@ -146,7 +151,7 @@ export function HospitalDetail({
                       {h.region.sigungu} {h.type}
                       {h.nearestStation ? ` · ${h.nearestStation.name}` : ""}
                     </span>
-                  </h1>
+                  </NameTag>
                   {isPartnerHospital(h.id) && (
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/25 bg-brand-weak px-2.5 py-1 text-xs font-bold text-brand">
                       <span className="h-1.5 w-1.5 rounded-full bg-brand" />
@@ -526,6 +531,30 @@ export function HospitalDetail({
                     </li>
                   );
                 })}
+              </ul>
+            </section>
+          )}
+
+          {/* 키워드별 안내 페이지 (내부링크) */}
+          {keywordPagesForHospital(h.slug).length > 0 && (
+            <section id="keyword-pages" className="mt-12 scroll-mt-24">
+              <h2 className="text-lg font-bold text-neutral">
+                {h.name} 이렇게도 찾아요
+              </h2>
+              <p className="mt-1 text-sm text-muted">
+                위치·진료분야별 안내를 따로 정리했어요.
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {keywordPagesForHospital(h.slug).map((p) => (
+                  <li key={p.keyword}>
+                    <Link
+                      href={`/${encodeURIComponent(h.slug)}/search/${encodeURIComponent(p.keyword)}`}
+                      className="inline-flex rounded-full border border-line px-3 py-1.5 text-sm text-neutral transition-colors hover:bg-neutral-weak"
+                    >
+                      {p.keyword}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </section>
           )}
