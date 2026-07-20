@@ -56,6 +56,19 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-gangdong-yoyang-hanbang",
     ],
   },
+  // ── 둔촌동 요양병원 가이드 (다른 각도 5편: 위치·생활·영양·보호자·퇴원) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "둔촌동 요양병원",
+    title: "둔촌동 요양병원, 무엇을 살펴볼까",
+    postIds: [
+      "rium-dunchon-yoyang-location",
+      "rium-dunchon-yoyang-daily",
+      "rium-dunchon-yoyang-nutrition",
+      "rium-dunchon-yoyang-family",
+      "rium-dunchon-yoyang-discharge",
+    ],
+  },
   // ── 위치 키워드 가이드(포스팅 확산 대기) ──
   { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 재활치료", postIds: [] },
   { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 한방치료", postIds: [] },

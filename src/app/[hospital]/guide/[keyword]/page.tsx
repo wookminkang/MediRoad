@@ -176,6 +176,15 @@ export default async function HospitalGuideHubPage({
             position: i + 1,
             url: `${SITE_URL}${postUrl(h.slug, p.id)}`,
             name: p.title,
+            // 네이버 캐러셀 노출용 — 각 항목 대표 이미지(썸네일 1080×1080)
+            ...(p.thumbnail && {
+              image: {
+                "@type": "ImageObject",
+                url: p.thumbnail,
+                width: 1080,
+                height: 1080,
+              },
+            }),
           })),
         }
       : null;

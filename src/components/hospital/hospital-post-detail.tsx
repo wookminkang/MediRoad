@@ -110,15 +110,6 @@ export function HospitalPostDetail({
         </dl>
       </div>
 
-      {post.thumbnail && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={post.thumbnail}
-          alt=""
-          className="-mt-3 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/[0.06]"
-        />
-      )}
-
       {/* ── 핵심 요약 — AI가 통째로 인용하는 문장들(speakable) ─────── */}
       {post.summary && post.summary.length > 0 && (
         <section className="post-tldr rounded-2xl bg-brand-weak px-6 py-6 sm:px-7">
@@ -151,6 +142,16 @@ export function HospitalPostDetail({
           </h2>
           <FaqAccordion faqs={post.faqs} />
         </section>
+      )}
+
+      {/* ── 콘텐츠 하단 대표 이미지(썸네일) ─────────────────── */}
+      {post.thumbnail && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={post.thumbnail}
+          alt={post.title}
+          className="aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/[0.06]"
+        />
       )}
 
       {/* ── 찾아오시는 길 · 진료시간 ─────────────────────── */}
