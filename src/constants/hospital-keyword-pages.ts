@@ -82,6 +82,19 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-asan-yoyang-coop",
     ],
   },
+  // ── 송파구 암요양병원 가이드 (암 요양 각도 5편) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "송파구 암요양병원",
+    title: "송파구 암요양병원, 어떻게 골라야 할까",
+    postIds: [
+      "rium-songpa-cancer-yoyang-guide",
+      "rium-songpa-cancer-yoyang-sideeffect",
+      "rium-songpa-cancer-yoyang-radiation",
+      "rium-songpa-cancer-yoyang-emotion",
+      "rium-songpa-cancer-yoyang-stamina",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
