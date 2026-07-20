@@ -36,13 +36,6 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-gangdong-yakchim",
     ],
   },
-  // ── 강동 암재활 가이드 (기존 암 관련 2편) ──
-  {
-    hospitalSlug: "리움한방병원-강동송파",
-    keyword: "강동 암재활",
-    title: "강동 암재활, 무엇을 어떻게 관리할까",
-    postIds: ["rium-gangdong-cancer-rehab-guide", "rium-gangdong-breast-cancer-rehab"],
-  },
   // ── 강동구 요양병원 가이드 (한방 입원·요양·회복 5편) ──
   {
     hospitalSlug: "리움한방병원-강동송파",
