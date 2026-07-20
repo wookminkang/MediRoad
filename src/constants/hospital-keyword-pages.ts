@@ -69,12 +69,19 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-dunchon-yoyang-discharge",
     ],
   },
-  // ── 위치 키워드 가이드(포스팅 확산 대기) ──
-  { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 재활치료", postIds: [] },
-  { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 한방치료", postIds: [] },
-  { hospitalSlug: "리움한방병원-강동송파", keyword: "둔촌동역 한방병원", postIds: [] },
-  { hospitalSlug: "리움한방병원-강동송파", keyword: "둔촌동 한방병원", postIds: [] },
-  { hospitalSlug: "리움한방병원-강동송파", keyword: "올림픽공원역 한방병원", postIds: [] },
+  // ── 아산병원 근처 요양병원 가이드 (전원·연계 각도 5편) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "아산병원 근처 요양병원",
+    title: "아산병원 근처 요양병원, 치료 후 요양 어디서 이어갈까",
+    postIds: [
+      "rium-asan-yoyang-guide",
+      "rium-asan-yoyang-transfer",
+      "rium-asan-yoyang-cancer",
+      "rium-asan-yoyang-access",
+      "rium-asan-yoyang-coop",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
