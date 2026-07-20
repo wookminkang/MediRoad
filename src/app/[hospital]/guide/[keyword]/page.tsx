@@ -10,6 +10,7 @@ import { MapPlaceholder } from "@/components/map/map-placeholder";
 import { PageContainer } from "@/components/ui/page-container";
 import {
   findGuide,
+  guidesForHospital,
   guideTitle,
   guideUrl,
   type HospitalGuide,
@@ -131,6 +132,10 @@ export default async function HospitalGuideHubPage({
     await Promise.all(guide.postIds.map((id) => getHospitalPost(id)))
   ).filter((p): p is HospitalPost => Boolean(p));
   const repImage = guidePosts.find((p) => p.thumbnail)?.thumbnail;
+  // 이 병원의 다른 대표 키워드(현재 키워드 제외) — 허브 간 내부링크
+  const otherGuides = guidesForHospital(h.slug).filter(
+    (g) => g.keyword !== guide.keyword,
+  );
 
   // ── JSON-LD @graph — BreadcrumbList·WebPage·MedicalClinic·ItemList·ImageObject ──
   const clinicUrl = `${SITE_URL}${detailUrl}`;
@@ -275,6 +280,29 @@ export default async function HospitalGuideHubPage({
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {/* H2 대표 키워드 — 이 병원의 다른 키워드 허브로 크로스링크 */}
+      {otherGuides.length > 0 && (
+        <section aria-labelledby="hub-keywords" className="mt-10">
+          <h2
+            id="hub-keywords"
+            className="text-lg font-extrabold tracking-tight text-neutral"
+          >
+            {h.name} 대표 키워드
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {otherGuides.map((g) => (
+              <Link
+                key={g.keyword}
+                href={guideUrl(h.slug, g.keyword)}
+                className="rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
+              >
+                {g.keyword}
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 

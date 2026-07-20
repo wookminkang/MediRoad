@@ -69,51 +69,57 @@ const PALETTE = [
   { accent: "#a888f7", card: "#180f2c" }, // 4 violet
   { accent: "#40c6dd", card: "#07222a" }, // 5 cyan
 ];
-const NAME_DPI = 428; // 병원명(크게)
 const SUB_DPI = 162; // 부제
 const EYE_DPI = 80; // 토픽 배지
 
-/**
- * 병원 사진을 액센트 색으로 그레이딩(무드 변주)하고, 중앙 다크 카드에
- *   [토픽 배지] → 병원명(크게) → 액센트 언더라인 → 부제(제목)
- * 을 얹는다. variant(seed)로 액센트가 포스트마다 달라진다.
- */
-export async function compose(
-  background: Buffer,
-  name: string,
-  title: string,
-  variant: number,
-  eyebrow?: string,
-): Promise<Buffer> {
-  const pal = PALETTE[Math.abs(variant) % PALETTE.length];
-  const textW = Math.round(S * 0.66);
-  const cx = (w: number) => Math.round((S - w) / 2);
+type Pal = { accent: string; card: string };
+type Ctx = { base: Buffer; pal: Pal; name: string; title: string; eyeText: string };
+type Block = {
+  nameImg: Buffer;
+  nameW: number;
+  nameH: number;
+  subImgs: Buffer[];
+  subMetas: sharp.Metadata[];
+  subGap: number;
+  subH: number;
+  eyeImg: Buffer | null;
+  eyeTW: number;
+  eyeTH: number;
+};
 
-  // 배경: 채도 낮춰 액센트 워시가 무드를 주도하게
-  const base = await sharp(background)
-    .resize(S, S, { fit: "cover" })
-    .modulate({ brightness: 0.78, saturation: 0.68 })
-    .toBuffer();
-  // 액센트 색보정 워시 + 하단 다크 (카드 대비)
-  const wash = Buffer.from(
-    `<svg width="${S}" height="${S}"><defs>` +
-      `<linearGradient id="a" x1="0" y1="0" x2="0.15" y2="1">` +
-      `<stop offset="0%" stop-color="${pal.accent}" stop-opacity="0.12"/>` +
-      `<stop offset="55%" stop-color="${pal.card}" stop-opacity="0.34"/>` +
-      `<stop offset="100%" stop-color="${pal.card}" stop-opacity="0.64"/>` +
-      `</linearGradient></defs>` +
-      `<rect width="${S}" height="${S}" fill="url(#a)"/></svg>`,
-  );
+const measure = (b: Buffer) => sharp(b).metadata();
+const cxOf = (w: number) => Math.round((S - w) / 2);
+const svg = (inner: string) => Buffer.from(`<svg width="${S}" height="${S}">${inner}</svg>`);
+const bar = (w: number, h: number, fill: string) =>
+  Buffer.from(`<svg width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${Math.min(h / 2, 3)}" fill="${fill}"/></svg>`);
 
-  // 텍스트 렌더
+/** 배경 색보정 워시 — 레이아웃마다 방향이 다르다. */
+function grad(pal: Pal, kind: "vert" | "left" | "right" | "flat"): Buffer {
+  if (kind === "flat")
+    return svg(`<rect width="${S}" height="${S}" fill="${pal.card}" fill-opacity="0.4"/>`);
+  const defs: Record<string, string> = {
+    vert: `<linearGradient id="g" x1="0" y1="0" x2="0.15" y2="1"><stop offset="0%" stop-color="${pal.accent}" stop-opacity="0.12"/><stop offset="55%" stop-color="${pal.card}" stop-opacity="0.34"/><stop offset="100%" stop-color="${pal.card}" stop-opacity="0.6"/></linearGradient>`,
+    left: `<linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${pal.card}" stop-opacity="0.92"/><stop offset="52%" stop-color="${pal.card}" stop-opacity="0.58"/><stop offset="84%" stop-color="${pal.card}" stop-opacity="0.06"/></linearGradient>`,
+    right: `<linearGradient id="g" x1="1" y1="0" x2="0" y2="0"><stop offset="0%" stop-color="${pal.card}" stop-opacity="0.92"/><stop offset="52%" stop-color="${pal.card}" stop-opacity="0.58"/><stop offset="84%" stop-color="${pal.card}" stop-opacity="0.06"/></linearGradient>`,
+  };
+  return svg(`<defs>${defs[kind]}</defs><rect width="${S}" height="${S}" fill="url(#g)"/>`);
+}
+
+// 세로 크롭(16:9 등) 안전영역: 텍스트는 전부 세로 중앙 밴드 안에 둔다.
+
+/** 텍스트(병원명·부제·배지) 렌더 + 측정. 배지는 기본 다크(pill용). */
+async function renderBlock(
+  ctx: Ctx,
+  textW: number,
+  nameDpi: number,
+): Promise<Block> {
   const nameImg = await renderText(
-    `<span foreground="#ffffff" weight="bold">${escapeXml(name)}</span>`,
+    `<span foreground="#ffffff" weight="bold">${escapeXml(ctx.name)}</span>`,
     textW,
-    NAME_DPI,
+    nameDpi,
   );
-  const subLines = wrap(title, 17);
   const subImgs: Buffer[] = [];
-  for (const l of subLines) {
+  for (const l of wrap(ctx.title, 18)) {
     subImgs.push(
       await renderText(
         `<span foreground="#dbe3de" weight="500">${escapeXml(l)}</span>`,
@@ -122,86 +128,294 @@ export async function compose(
       ),
     );
   }
-  const eyeText = eyebrow && eyebrow.trim() ? eyebrow.trim() : "";
-  const eyeImg = eyeText
+  const eyeImg = ctx.eyeText
     ? await renderText(
-        `<span foreground="#0c1613" weight="bold">${escapeXml(eyeText)}</span>`,
+        `<span foreground="#0c1613" weight="bold">${escapeXml(ctx.eyeText)}</span>`,
         textW,
         EYE_DPI,
       )
     : null;
-
-  // 측정
-  const meta = (b: Buffer) => sharp(b).metadata();
-  const nm = await meta(nameImg);
-  const nameH = nm.height ?? 0;
-  const nameW = nm.width ?? 0;
-  const subMetas = await Promise.all(subImgs.map(meta));
+  const nm = await measure(nameImg);
+  const subMetas = await Promise.all(subImgs.map(measure));
+  const eyeM = eyeImg ? await measure(eyeImg) : null;
   const subGap = Math.round(S * 0.014);
   const subH =
     subMetas.reduce((s, m) => s + (m.height ?? 0), 0) +
-    subGap * Math.max(0, subLines.length - 1);
-  const eyeM = eyeImg ? await meta(eyeImg) : null;
-  const eyeTW = eyeM?.width ?? 0;
-  const eyeTH = eyeM?.height ?? 0;
+    subGap * Math.max(0, subImgs.length - 1);
+  return {
+    nameImg,
+    nameW: nm.width ?? 0,
+    nameH: nm.height ?? 0,
+    subImgs,
+    subMetas,
+    subGap,
+    subH,
+    eyeImg,
+    eyeTW: eyeM?.width ?? 0,
+    eyeTH: eyeM?.height ?? 0,
+  };
+}
 
-  // 토픽 배지(pill) 크기
-  const pillPadX = Math.round(S * 0.03);
-  const pillPadY = Math.round(S * 0.016);
-  const pillW = eyeImg ? eyeTW + pillPadX * 2 : 0;
-  const pillH = eyeImg ? eyeTH + pillPadY * 2 : 0;
+const finish = (base: Buffer, ov: sharp.OverlayOptions[]) =>
+  sharp(base).composite(ov).webp({ quality: WEBP_QUALITY }).toBuffer();
 
-  // 액센트 언더라인
-  const uW = Math.round(S * 0.07);
-  const uH = 6;
-
-  const gapEye = Math.round(S * 0.032);
-  const gapU = Math.round(S * 0.028);
-  const gapSub = Math.round(S * 0.028);
+// ── 레이아웃 0 — 중앙 다크 카드 ─────────────────────────────
+async function layoutCenterCard(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const textW = Math.round(S * 0.64);
+  const b = await renderBlock(ctx, textW, 420);
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const uW = Math.round(S * 0.07),
+    uH = 6;
+  const gapEye = Math.round(S * 0.032),
+    gapU = Math.round(S * 0.028),
+    gapSub = Math.round(S * 0.028);
   const blockH =
-    (eyeImg ? pillH + gapEye : 0) + nameH + gapU + uH + gapSub + subH;
-
-  // 카드 (액센트 테두리)
-  const padX = Math.round(S * 0.07);
-  const padY = Math.round(S * 0.075);
+    (b.eyeImg ? pillH + gapEye : 0) + b.nameH + gapU + uH + gapSub + b.subH;
+  const padX = Math.round(S * 0.07),
+    padY = Math.round(S * 0.075);
   const cardW = Math.min(Math.round(S * 0.88), textW + padX * 2);
   const cardH = blockH + padY * 2;
-  const cardX = cx(cardW);
-  const cardY = Math.round((S - cardH) / 2);
-  const card = Buffer.from(
-    `<svg width="${S}" height="${S}">` +
-      `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="${pal.card}" fill-opacity="0.86"/>` +
-      `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="none" stroke="${pal.accent}" stroke-opacity="0.5" stroke-width="2.5"/>` +
-      `</svg>`,
-  );
-
-  const overlays: sharp.OverlayOptions[] = [
-    { input: wash, top: 0, left: 0 },
-    { input: card, top: 0, left: 0 },
+  const cardX = cxOf(cardW),
+    cardY = Math.round((S - cardH) / 2);
+  const ov: sharp.OverlayOptions[] = [
+    { input: grad(pal, "vert"), top: 0, left: 0 },
+    {
+      input: svg(
+        `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="${pal.card}" fill-opacity="0.86"/><rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="34" fill="none" stroke="${pal.accent}" stroke-opacity="0.5" stroke-width="2.5"/>`,
+      ),
+      top: 0,
+      left: 0,
+    },
   ];
   let y = cardY + padY;
-  if (eyeImg) {
-    const pillX = cx(pillW);
-    const pill = Buffer.from(
-      `<svg width="${S}" height="${S}"><rect x="${pillX}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/></svg>`,
-    );
-    overlays.push({ input: pill, top: 0, left: 0 });
-    overlays.push({ input: eyeImg, top: y + pillPadY, left: cx(eyeTW) });
+  if (b.eyeImg) {
+    const px = cxOf(pillW);
+    ov.push({
+      input: svg(
+        `<rect x="${px}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: y + pillPadY, left: cxOf(b.eyeTW) });
     y += pillH + gapEye;
   }
-  overlays.push({ input: nameImg, top: y, left: cx(nameW) });
-  y += nameH + gapU;
-  const uBar = Buffer.from(
-    `<svg width="${uW}" height="${uH}"><rect width="${uW}" height="${uH}" rx="3" fill="${pal.accent}"/></svg>`,
-  );
-  overlays.push({ input: uBar, top: y, left: cx(uW) });
+  ov.push({ input: b.nameImg, top: y, left: cxOf(b.nameW) });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: cxOf(uW) });
   y += uH + gapSub;
-  for (let i = 0; i < subImgs.length; i++) {
-    overlays.push({ input: subImgs[i], top: y, left: cx(subMetas[i].width ?? 0) });
-    y += (subMetas[i].height ?? 0) + subGap;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: cxOf(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
   }
+  return finish(base, ov);
+}
 
-  return sharp(base).composite(overlays).webp({ quality: WEBP_QUALITY }).toBuffer();
+// ── 레이아웃 1 — 우측 패널(세로 중앙, 우측 정렬 + 우측 액센트 바) ──
+async function layoutRightPanel(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const marginR = S - Math.round(S * 0.09);
+  const textW = Math.round(S * 0.6);
+  const b = await renderBlock(ctx, textW, 390);
+  const uW = Math.round(S * 0.08),
+    uH = 6;
+  const gapEye = Math.round(S * 0.03),
+    gapU = Math.round(S * 0.03),
+    gapSub = Math.round(S * 0.03);
+  const blockH =
+    (b.eyeImg ? b.eyeTH + gapEye : 0) + b.nameH + gapU + uH + gapSub + b.subH;
+  const rx = (w: number) => marginR - w; // 우측 정렬
+  const ov: sharp.OverlayOptions[] = [{ input: grad(pal, "right"), top: 0, left: 0 }];
+  let y = Math.round((S - blockH) / 2);
+  if (b.eyeImg) {
+    const eb = await renderText(
+      `<span foreground="${pal.accent}" weight="bold">${escapeXml(ctx.eyeText)}</span>`,
+      textW,
+      EYE_DPI,
+    );
+    ov.push({ input: eb, top: y, left: rx(b.eyeTW) });
+    y += b.eyeTH + gapEye;
+  }
+  ov.push({ input: b.nameImg, top: y, left: rx(b.nameW) });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: rx(uW) });
+  y += uH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: rx(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
+// ── 레이아웃 2 — 좌측 패널(세로 중앙, 좌측 정렬) ────────────────
+async function layoutLeftPanel(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const marginX = Math.round(S * 0.09);
+  const textW = Math.round(S * 0.6);
+  const b = await renderBlock(ctx, textW, 390);
+  const uW = Math.round(S * 0.08),
+    uH = 6;
+  const gapEye = Math.round(S * 0.03),
+    gapU = Math.round(S * 0.03),
+    gapSub = Math.round(S * 0.03);
+  const blockH =
+    (b.eyeImg ? b.eyeTH + gapEye : 0) + b.nameH + gapU + uH + gapSub + b.subH;
+  const ov: sharp.OverlayOptions[] = [{ input: grad(pal, "left"), top: 0, left: 0 }];
+  let y = Math.round((S - blockH) / 2);
+  if (b.eyeImg) {
+    // 좌측 패널은 배지 pill 대신 액센트 텍스트 머리말
+    const eb = await renderText(
+      `<span foreground="${pal.accent}" weight="bold">${escapeXml(ctx.eyeText)}</span>`,
+      textW,
+      EYE_DPI,
+    );
+    ov.push({ input: eb, top: y, left: marginX });
+    y += b.eyeTH + gapEye;
+  }
+  ov.push({ input: b.nameImg, top: y, left: marginX });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: marginX });
+  y += uH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: marginX });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
+// ── 레이아웃 3 — 가로 룰 밴드(세로 중앙, 위·아래 액센트 라인) ────
+async function layoutRuledBand(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const b = await renderBlock(ctx, Math.round(S * 0.78), 405);
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const ruleW = Math.round(S * 0.46),
+    ruleH = 4;
+  const gapEye = Math.round(S * 0.028),
+    gapRule = Math.round(S * 0.032),
+    gapSub = Math.round(S * 0.026);
+  const blockH =
+    ruleH +
+    gapRule +
+    (b.eyeImg ? pillH + gapEye : 0) +
+    b.nameH +
+    gapSub +
+    b.subH +
+    gapRule +
+    ruleH;
+  const ov: sharp.OverlayOptions[] = [{ input: grad(pal, "vert"), top: 0, left: 0 }];
+  let y = Math.round((S - blockH) / 2);
+  ov.push({ input: bar(ruleW, ruleH, pal.accent), top: y, left: cxOf(ruleW) });
+  y += ruleH + gapRule;
+  if (b.eyeImg) {
+    const px = cxOf(pillW);
+    ov.push({
+      input: svg(
+        `<rect x="${px}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: y + pillPadY, left: cxOf(b.eyeTW) });
+    y += pillH + gapEye;
+  }
+  ov.push({ input: b.nameImg, top: y, left: cxOf(b.nameW) });
+  y += b.nameH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: cxOf(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  ov.push({ input: bar(ruleW, ruleH, pal.accent), top: y, left: cxOf(ruleW) });
+  return finish(base, ov);
+}
+
+// ── 레이아웃 4 — 아웃라인 카드(중앙 박스 + 상단 탭 배지, 크롭 안전) ──
+async function layoutOutlineCard(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const textW = Math.round(S * 0.64);
+  const b = await renderBlock(ctx, textW, 410);
+  const uW = Math.round(S * 0.07),
+    uH = 6;
+  const gapU = Math.round(S * 0.028),
+    gapSub = Math.round(S * 0.028);
+  const blockH = b.nameH + gapU + uH + gapSub + b.subH;
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const padX = Math.round(S * 0.075),
+    padY = Math.round(S * 0.08);
+  const cardW = Math.min(Math.round(S * 0.86), textW + padX * 2);
+  const cardH = blockH + padY * 2;
+  const cardX = cxOf(cardW),
+    cardY = Math.round((S - cardH) / 2);
+  const ov: sharp.OverlayOptions[] = [
+    { input: grad(pal, "flat"), top: 0, left: 0 },
+    {
+      input: svg(
+        `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="28" fill="${pal.card}" fill-opacity="0.28"/><rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="28" fill="none" stroke="${pal.accent}" stroke-opacity="0.9" stroke-width="4"/>`,
+      ),
+      top: 0,
+      left: 0,
+    },
+  ];
+  if (b.eyeImg) {
+    const px = cxOf(pillW),
+      py = cardY - Math.round(pillH / 2);
+    ov.push({
+      input: svg(
+        `<rect x="${px}" y="${py}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: py + pillPadY, left: cxOf(b.eyeTW) });
+  }
+  let y = cardY + padY;
+  ov.push({ input: b.nameImg, top: y, left: cxOf(b.nameW) });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: cxOf(uW) });
+  y += uH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: cxOf(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
+const LAYOUTS = [
+  layoutCenterCard,
+  layoutRightPanel,
+  layoutLeftPanel,
+  layoutRuledBand,
+  layoutOutlineCard,
+];
+
+/**
+ * 배경(병원 사진)은 그대로, 위에 얹는 디자인을 variant마다 5가지 레이아웃 중
+ * 하나로 다르게 그린다(색상만이 아니라 구도 자체가 겹치지 않음).
+ */
+export async function compose(
+  background: Buffer,
+  name: string,
+  title: string,
+  variant: number,
+  eyebrow?: string,
+): Promise<Buffer> {
+  const v = Math.abs(variant);
+  const pal = PALETTE[v % PALETTE.length];
+  const base = await sharp(background)
+    .resize(S, S, { fit: "cover" })
+    .modulate({ brightness: 0.78, saturation: 0.68 })
+    .toBuffer();
+  const ctx: Ctx = { base, pal, name, title, eyeText: eyebrow?.trim() ?? "" };
+  return LAYOUTS[v % LAYOUTS.length](ctx);
 }
 
 /** post.id 기반 결정적 해시 (같은 포스트 = 항상 같은 디자인) */

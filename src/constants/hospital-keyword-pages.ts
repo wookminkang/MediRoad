@@ -43,6 +43,19 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
     title: "강동 암재활, 무엇을 어떻게 관리할까",
     postIds: ["rium-gangdong-cancer-rehab-guide", "rium-gangdong-breast-cancer-rehab"],
   },
+  // ── 강동구 요양병원 가이드 (한방 입원·요양·회복 5편) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "강동구 요양병원",
+    title: "강동구 요양병원, 어떻게 골라야 할까",
+    postIds: [
+      "rium-gangdong-yoyang-guide",
+      "rium-gangdong-yoyang-cancer",
+      "rium-gangdong-yoyang-admission",
+      "rium-gangdong-yoyang-recovery",
+      "rium-gangdong-yoyang-hanbang",
+    ],
+  },
   // ── 위치 키워드 가이드(포스팅 확산 대기) ──
   { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 재활치료", postIds: [] },
   { hospitalSlug: "리움한방병원-강동송파", keyword: "송파구 한방치료", postIds: [] },
