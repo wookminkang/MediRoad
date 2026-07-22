@@ -23,6 +23,30 @@ export type HospitalGuide = {
 };
 
 export const HOSPITAL_GUIDES: HospitalGuide[] = [
+  // ══ 아미나요양병원(광화문·경복궁역) — 암 특화 요양병원 ══
+  {
+    hospitalSlug: "아미나요양병원",
+    keyword: "광화문 요양병원",
+    postIds: [
+      "amina-gwanghwamun-cancer-guide",
+      "amina-gwanghwamun-cancer-perioperative",
+      "amina-gwanghwamun-cancer-rehab",
+      "amina-gwanghwamun-cancer-nutrition",
+      "amina-gwanghwamun-cancer-mind",
+    ],
+  },
+  {
+    hospitalSlug: "아미나요양병원",
+    keyword: "광화문근처 요양병원",
+    postIds: [
+      "amina-gwanghwamun-nearby-guide",
+      "amina-gwanghwamun-nearby-transfer",
+      "amina-gwanghwamun-nearby-family",
+      "amina-gwanghwamun-nearby-stay",
+      "amina-gwanghwamun-nearby-discharge",
+    ],
+  },
+
   // ── 샘플 가이드: 강동구 재활통증치료 (포스팅 5편) ──
   {
     hospitalSlug: "리움한방병원-강동송파",
@@ -149,6 +173,25 @@ export function curatedPostIndex(postId: string): number {
   for (const g of HOSPITAL_GUIDES) {
     const i = g.postIds.indexOf(postId);
     if (i >= 0) return i;
+  }
+  return -1;
+}
+
+/** 포스팅이 속한 가이드의 키워드 — 썸네일 구도·색·사진을 허브마다 다르게 회전시키는 오프셋용. */
+export function curatedGuideKeyword(postId: string): string | null {
+  for (const g of HOSPITAL_GUIDES) {
+    if (g.postIds.includes(postId)) return g.keyword;
+  }
+  return null;
+}
+
+/**
+ * 포스팅이 속한 가이드의 인덱스(HOSPITAL_GUIDES 내 순서) — 없으면 -1.
+ * 썸네일 색·구도·사진을 허브마다 **확정적으로** 회전(해시 충돌로 겹치는 것 방지).
+ */
+export function curatedGuideIndex(postId: string): number {
+  for (let i = 0; i < HOSPITAL_GUIDES.length; i++) {
+    if (HOSPITAL_GUIDES[i].postIds.includes(postId)) return i;
   }
   return -1;
 }

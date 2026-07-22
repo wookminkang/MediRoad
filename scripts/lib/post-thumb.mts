@@ -389,33 +389,192 @@ async function layoutOutlineCard(ctx: Ctx): Promise<Buffer> {
   return finish(base, ov);
 }
 
+// ── 레이아웃 5 — 솔리드 밴드(병원명이 통짜 액센트 띠 위에) ──────
+async function layoutSolidBand(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const b = await renderBlock(ctx, Math.round(S * 0.84), 396);
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const bandPadY = Math.round(S * 0.03);
+  const bandH = b.nameH + bandPadY * 2;
+  const gapEye = Math.round(S * 0.03),
+    gapSub = Math.round(S * 0.03);
+  const blockH = (b.eyeImg ? pillH + gapEye : 0) + bandH + gapSub + b.subH;
+  const ov: sharp.OverlayOptions[] = [{ input: grad(pal, "vert"), top: 0, left: 0 }];
+  let y = Math.round((S - blockH) / 2);
+  if (b.eyeImg) {
+    const px = cxOf(pillW);
+    ov.push({
+      input: svg(
+        `<rect x="${px}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: y + pillPadY, left: cxOf(b.eyeTW) });
+    y += pillH + gapEye;
+  }
+  ov.push({
+    input: Buffer.from(
+      `<svg width="${S}" height="${bandH}"><rect width="${S}" height="${bandH}" fill="${pal.accent}" fill-opacity="0.95"/></svg>`,
+    ),
+    top: y,
+    left: 0,
+  });
+  ov.push({ input: b.nameImg, top: y + bandPadY, left: cxOf(b.nameW) });
+  y += bandH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: cxOf(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
+// ── 레이아웃 6 — 스트라이프 카드(카드 좌측에 두꺼운 액센트 띠) ──
+async function layoutStripeCard(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const textW = Math.round(S * 0.6);
+  const b = await renderBlock(ctx, textW, 410);
+  const uW = Math.round(S * 0.07),
+    uH = 6;
+  const gapEye = Math.round(S * 0.03),
+    gapU = Math.round(S * 0.028),
+    gapSub = Math.round(S * 0.028);
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const blockH =
+    (b.eyeImg ? pillH + gapEye : 0) + b.nameH + gapU + uH + gapSub + b.subH;
+  const stripeW = Math.round(S * 0.016);
+  const padY = Math.round(S * 0.075);
+  const cardW = Math.round(S * 0.82);
+  const cardH = blockH + padY * 2;
+  const cardX = cxOf(cardW),
+    cardY = Math.round((S - cardH) / 2);
+  const contentX = cardX + stripeW + Math.round(S * 0.03); // 좌측 띠 옆에서 좌측정렬 시작
+  const ov: sharp.OverlayOptions[] = [
+    { input: grad(pal, "vert"), top: 0, left: 0 },
+    {
+      input: svg(
+        `<rect x="${cardX}" y="${cardY}" width="${cardW}" height="${cardH}" rx="26" fill="${pal.card}" fill-opacity="0.9"/>` +
+          `<rect x="${cardX}" y="${cardY + Math.round(S * 0.03)}" width="${stripeW}" height="${cardH - Math.round(S * 0.06)}" rx="${Math.round(stripeW / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    },
+  ];
+  let y = cardY + padY;
+  if (b.eyeImg) {
+    ov.push({
+      input: svg(
+        `<rect x="${contentX}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: y + pillPadY, left: contentX + pillPadX });
+    y += pillH + gapEye;
+  }
+  ov.push({ input: b.nameImg, top: y, left: contentX });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: contentX });
+  y += uH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: contentX });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
+// ── 레이아웃 7 — 코너 브래킷(뷰파인더식 액센트 모서리) ─────────
+async function layoutCornerBrackets(ctx: Ctx): Promise<Buffer> {
+  const { base, pal } = ctx;
+  const b = await renderBlock(ctx, Math.round(S * 0.66), 408);
+  const uW = Math.round(S * 0.07),
+    uH = 6;
+  const gapEye = Math.round(S * 0.03),
+    gapU = Math.round(S * 0.028),
+    gapSub = Math.round(S * 0.028);
+  const pillPadX = Math.round(S * 0.03),
+    pillPadY = Math.round(S * 0.016);
+  const pillW = b.eyeImg ? b.eyeTW + pillPadX * 2 : 0,
+    pillH = b.eyeImg ? b.eyeTH + pillPadY * 2 : 0;
+  const blockH =
+    (b.eyeImg ? pillH + gapEye : 0) + b.nameH + gapU + uH + gapSub + b.subH;
+  const boxW = Math.round(S * 0.82),
+    boxH = blockH + Math.round(S * 0.14);
+  const bx = cxOf(boxW),
+    by = Math.round((S - boxH) / 2);
+  const L = Math.round(S * 0.06),
+    T = 5; // 브래킷 길이·두께
+  const brackets =
+    // 4모서리 L자
+    `<rect x="${bx}" y="${by}" width="${L}" height="${T}" fill="${pal.accent}"/><rect x="${bx}" y="${by}" width="${T}" height="${L}" fill="${pal.accent}"/>` +
+    `<rect x="${bx + boxW - L}" y="${by}" width="${L}" height="${T}" fill="${pal.accent}"/><rect x="${bx + boxW - T}" y="${by}" width="${T}" height="${L}" fill="${pal.accent}"/>` +
+    `<rect x="${bx}" y="${by + boxH - T}" width="${L}" height="${T}" fill="${pal.accent}"/><rect x="${bx}" y="${by + boxH - L}" width="${T}" height="${L}" fill="${pal.accent}"/>` +
+    `<rect x="${bx + boxW - L}" y="${by + boxH - T}" width="${L}" height="${T}" fill="${pal.accent}"/><rect x="${bx + boxW - T}" y="${by + boxH - L}" width="${T}" height="${L}" fill="${pal.accent}"/>`;
+  const ov: sharp.OverlayOptions[] = [
+    { input: grad(pal, "vert"), top: 0, left: 0 },
+    { input: svg(brackets), top: 0, left: 0 },
+  ];
+  let y = Math.round((S - blockH) / 2);
+  if (b.eyeImg) {
+    const px = cxOf(pillW);
+    ov.push({
+      input: svg(
+        `<rect x="${px}" y="${y}" width="${pillW}" height="${pillH}" rx="${Math.round(pillH / 2)}" fill="${pal.accent}"/>`,
+      ),
+      top: 0,
+      left: 0,
+    });
+    ov.push({ input: b.eyeImg, top: y + pillPadY, left: cxOf(b.eyeTW) });
+    y += pillH + gapEye;
+  }
+  ov.push({ input: b.nameImg, top: y, left: cxOf(b.nameW) });
+  y += b.nameH + gapU;
+  ov.push({ input: bar(uW, uH, pal.accent), top: y, left: cxOf(uW) });
+  y += uH + gapSub;
+  for (let i = 0; i < b.subImgs.length; i++) {
+    ov.push({ input: b.subImgs[i], top: y, left: cxOf(b.subMetas[i].width ?? 0) });
+    y += (b.subMetas[i].height ?? 0) + b.subGap;
+  }
+  return finish(base, ov);
+}
+
 const LAYOUTS = [
   layoutCenterCard,
   layoutRightPanel,
   layoutLeftPanel,
   layoutRuledBand,
   layoutOutlineCard,
+  layoutSolidBand,
+  layoutStripeCard,
+  layoutCornerBrackets,
 ];
 
 /**
- * 배경(병원 사진)은 그대로, 위에 얹는 디자인을 variant마다 5가지 레이아웃 중
- * 하나로 다르게 그린다(색상만이 아니라 구도 자체가 겹치지 않음).
+ * 배경(병원 사진)은 그대로, 위에 얹는 디자인을 그린다.
+ * accentIdx(색)와 layoutIdx(구도)를 **독립적으로** 받아, 허브마다 색·구도가 따로 회전한다
+ * (하나만 겹치고 다른 건 다르게 → 전체적으로 겹치지 않음).
  */
 export async function compose(
   background: Buffer,
   name: string,
   title: string,
-  variant: number,
+  accentIdx: number,
+  layoutIdx: number,
   eyebrow?: string,
 ): Promise<Buffer> {
-  const v = Math.abs(variant);
-  const pal = PALETTE[v % PALETTE.length];
+  const pal = PALETTE[Math.abs(accentIdx) % PALETTE.length];
   const base = await sharp(background)
     .resize(S, S, { fit: "cover" })
     .modulate({ brightness: 0.78, saturation: 0.68 })
     .toBuffer();
   const ctx: Ctx = { base, pal, name, title, eyeText: eyebrow?.trim() ?? "" };
-  return LAYOUTS[v % LAYOUTS.length](ctx);
+  return LAYOUTS[Math.abs(layoutIdx) % LAYOUTS.length](ctx);
 }
 
 /** post.id 기반 결정적 해시 (같은 포스트 = 항상 같은 디자인) */

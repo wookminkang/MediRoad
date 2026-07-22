@@ -8,7 +8,10 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
-import { curatedPostIndex } from "../src/constants/hospital-keyword-pages.js";
+import {
+  curatedGuideIndex,
+  curatedPostIndex,
+} from "../src/constants/hospital-keyword-pages.js";
 import { BUCKET, compose, seedOf } from "./lib/post-thumb.mjs";
 
 const sb = createClient(
@@ -43,11 +46,16 @@ async function genOne(postId: string) {
     console.log(`  ✗ ${postId}: 병원 사진 없음 (${hosp?.name})`);
     return;
   }
-  // 가이드에 묶인 포스팅은 순번(0,1,2…)으로 액센트·사진을 배정 → 같은 캐러셀 안에서 서로 겹치지 않음.
-  // 그 외(가이드 밖)는 id 해시로 결정적 배정.
+  // 가이드 내 순번(0,1,2…)으로 같은 캐러셀 안에서 색·구도·사진이 서로 안 겹치게 하고,
+  // 허브 인덱스(ci)로 색·구도·사진을 **서로 다른 보폭으로 확정 회전** → 다른 허브끼리 확실히 다름.
+  //   색 보폭1, 구도 보폭3(+5로 화려한 레이아웃부터), 사진 보폭2 (mod 6/8/5라 서로 어긋남).
   const gi = curatedPostIndex(post.id);
-  const seed = gi >= 0 ? gi : seedOf(post.id);
-  const photoUrl = photos[seed % photos.length]; // 포스트마다 다른 사진
+  const ci = curatedGuideIndex(post.id);
+  const curated = gi >= 0 && ci >= 0;
+  const accentIdx = curated ? gi + ci : seedOf(post.id + "#a");
+  const layoutIdx = curated ? gi + ci * 3 + 5 : seedOf(post.id + "#l");
+  const photoIdx = curated ? gi + ci * 2 : seedOf(post.id);
+  const photoUrl = photos[photoIdx % photos.length]; // 순번+허브별 확정 회전
   const region = (hosp?.sigungu ?? "").replace(/[구시군]$/, "");
   // 병원명에 이미 지점(괄호)이 있으면 지역을 덧붙이지 않는다. 예: "리움한방병원(강동송파)"
   const baseName = hosp?.name ?? "";
@@ -58,7 +66,14 @@ async function genOne(postId: string) {
       : baseName;
   const photo = Buffer.from(await (await fetch(photoUrl)).arrayBuffer());
   const eyebrow = Array.isArray(post.tags) ? (post.tags[0] as string) : undefined;
-  const webp = await compose(photo, nameText, post.title, seed, eyebrow);
+  const webp = await compose(
+    photo,
+    nameText,
+    post.title,
+    accentIdx,
+    layoutIdx,
+    eyebrow,
+  );
   const key = `post-thumbs/${post.id}.webp`;
   const up = await sb.storage.from(BUCKET).upload(key, webp, {
     contentType: "image/webp",

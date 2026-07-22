@@ -139,8 +139,14 @@ async function genOne(postId: string, force: boolean) {
   const nameText = region ? `${hosp?.name} (${region})` : (hosp?.name ?? "");
 
   const bg = await genImage(`${sceneFor(post.title)} ${GUARD}`);
-  const seed = seedOf(post.id);
-  const webp = await compose(bg, nameText, post.title, seed);
+  // 색·구도를 서로 다른 해시로(같은 seed면 상관되므로 salt로 분리)
+  const webp = await compose(
+    bg,
+    nameText,
+    post.title,
+    seedOf(post.id + "#accent"),
+    seedOf(post.id + "#layout"),
+  );
 
   const key = `post-thumbs/${post.id}.webp`;
   const up = await sb.storage

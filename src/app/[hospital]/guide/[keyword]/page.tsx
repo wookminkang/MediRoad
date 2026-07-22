@@ -75,8 +75,9 @@ export async function generateMetadata({
   const { h, guide, slug } = data;
   const url = `${SITE_URL}${guideUrl(slug, guide.keyword)}`;
   const description = guideSummary(guide, h);
-  // 검색 의도형 허브 제목 — "{키워드 자연어} | {병원명}" (40자 이내로 짧은 병원명 사용)
-  const title = `${guideTitle(guide)} | ${h.name}`;
+  // 허브 제목 — title에 이미 병원명이 있으면 그대로, 없으면 "| 병원명" 붙임
+  const gt = guideTitle(guide);
+  const title = gt.includes(h.name) ? gt : `${gt} | ${h.name}`;
   // 대표 이미지 = 가이드 첫 포스팅 썸네일(있으면)
   const firstPostId = guide.postIds[0];
   const firstPost = firstPostId ? await getHospitalPost(firstPostId) : null;
@@ -132,10 +133,8 @@ export default async function HospitalGuideHubPage({
     await Promise.all(guide.postIds.map((id) => getHospitalPost(id)))
   ).filter((p): p is HospitalPost => Boolean(p));
   const repImage = guidePosts.find((p) => p.thumbnail)?.thumbnail;
-  // 이 병원의 다른 대표 키워드(현재 키워드 제외) — 허브 간 내부링크
-  const otherGuides = guidesForHospital(h.slug).filter(
-    (g) => g.keyword !== guide.keyword,
-  );
+  // 이 병원의 대표 키워드 전체(현재 키워드 포함) — 허브 간 내부링크, 현재 것은 활성 표시
+  const allGuides = guidesForHospital(h.slug);
 
   // ── JSON-LD @graph — BreadcrumbList·WebPage·MedicalClinic·ItemList·ImageObject ──
   const clinicUrl = `${SITE_URL}${detailUrl}`;
@@ -193,7 +192,9 @@ export default async function HospitalGuideHubPage({
     "@type": "WebPage",
     "@id": `${url}#webpage`,
     url,
-    name: `${guideTitle(guide)} | ${h.name}`,
+    name: guideTitle(guide).includes(h.name)
+      ? guideTitle(guide)
+      : `${guideTitle(guide)} | ${h.name}`,
     description: summary,
     inLanguage: "ko-KR",
     about: { "@id": clinicNode["@id"] },
@@ -292,8 +293,8 @@ export default async function HospitalGuideHubPage({
         </section>
       )}
 
-      {/* H2 대표 키워드 — 이 병원의 다른 키워드 허브로 크로스링크 */}
-      {otherGuides.length > 0 && (
+      {/* H2 대표 키워드 — 이 병원의 키워드 허브 전체(현재 것은 활성) */}
+      {allGuides.length > 1 && (
         <section aria-labelledby="hub-keywords" className="mt-10">
           <h2
             id="hub-keywords"
@@ -302,15 +303,29 @@ export default async function HospitalGuideHubPage({
             {h.name} 대표 키워드
           </h2>
           <div className="mt-4 flex flex-wrap gap-2">
-            {otherGuides.map((g) => (
-              <Link
-                key={g.keyword}
-                href={guideUrl(h.slug, g.keyword)}
-                className="rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
-              >
-                {g.keyword}
-              </Link>
-            ))}
+            {allGuides.map((g) =>
+              g.keyword === guide.keyword ? (
+                <span
+                  key={g.keyword}
+                  aria-current="page"
+                  className="rounded-full border border-brand bg-brand-weak px-3.5 py-1.5 text-sm font-bold text-brand"
+                  style={{
+                    borderColor: "var(--seed-color-fg-brand)",
+                    color: "var(--seed-color-fg-brand)",
+                  }}
+                >
+                  {g.keyword}
+                </span>
+              ) : (
+                <Link
+                  key={g.keyword}
+                  href={guideUrl(h.slug, g.keyword)}
+                  className="rounded-full border border-line px-3.5 py-1.5 text-sm font-medium text-neutral transition-colors hover:border-brand hover:text-brand"
+                >
+                  {g.keyword}
+                </Link>
+              ),
+            )}
           </div>
         </section>
       )}
