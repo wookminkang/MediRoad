@@ -12,13 +12,19 @@ export const metadata: Metadata = {
 
 type SP = Promise<{ q?: string }>;
 
+// "청담한의원"처럼 전국에 흔한 이름은 30개로 자르면 뒤쪽 시도(충남·경북 등)가 통째로 잘린다.
+// id가 시도 순이라 정렬 없이 자르면 늘 수도권만 남는다 — 정렬을 고정하고 한도를 올린다.
+const SEARCH_LIMIT = 100;
+
 async function searchHospitals(q: string) {
   if (!isSupabaseConfigured || q.trim().length < 2) return [];
   const { data } = await getSupabaseServer()
     .from("hospitals")
     .select("id, name, slug, type, sido, sigungu")
     .ilike("name", `%${q.trim()}%`)
-    .limit(30);
+    .order("name")
+    .order("id")
+    .limit(SEARCH_LIMIT);
   return data ?? [];
 }
 
