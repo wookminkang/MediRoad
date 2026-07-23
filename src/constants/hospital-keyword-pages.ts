@@ -22,21 +22,9 @@ export type HospitalGuide = {
   postIds: string[];
 };
 
+// 새 허브는 **배열 끝에 추가한다.** 순번(curatedGuideIndex)이 썸네일 색·구도·사진 회전에
+// 쓰이므로, 중간에 끼워 넣으면 뒤쪽 허브의 기존 썸네일이 코드와 어긋난다.
 export const HOSPITAL_GUIDES: HospitalGuide[] = [
-  // ══ 청담한의원(천안 동남구 청수동) — 추나·약침·교통사고·입원실 ══
-  {
-    hospitalSlug: "청담한의원-천안시",
-    keyword: "천안한의원",
-    title: "천안한의원, 어떤 진료를 볼 수 있을까",
-    postIds: [
-      "cheongdam-cheonan-hanuiwon-caraccident",
-      "cheongdam-cheonan-hanuiwon-neck-disc",
-      "cheongdam-cheonan-hanuiwon-back-disc",
-      "cheongdam-cheonan-hanuiwon-diet",
-      "cheongdam-cheonan-hanuiwon-accident-admission",
-    ],
-  },
-
   // ══ 아미나요양병원(광화문·경복궁역) — 암 특화 요양병원 ══
   {
     hospitalSlug: "아미나요양병원",
@@ -124,6 +112,63 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-songpa-cancer-yoyang-radiation",
       "rium-songpa-cancer-yoyang-emotion",
       "rium-songpa-cancer-yoyang-stamina",
+    ],
+  },
+
+  // ══ 청담한의원(천안 동남구 청수동) — 추나·약침·교통사고·입원실 ══
+  {
+    hospitalSlug: "청담한의원-천안시",
+    keyword: "천안한의원",
+    title: "천안한의원, 어떤 진료를 볼 수 있을까",
+    postIds: [
+      "cheongdam-cheonan-hanuiwon-caraccident",
+      "cheongdam-cheonan-hanuiwon-neck-disc",
+      "cheongdam-cheonan-hanuiwon-back-disc",
+      "cheongdam-cheonan-hanuiwon-diet",
+      "cheongdam-cheonan-hanuiwon-accident-admission",
+    ],
+  },
+
+  // ══ 경희신기한의원(목동역 2번 출구) — 척추·관절·소화기·다이어트 ══
+  // 제목의 키워드 표현을 분산한다: "목동역한의원" / "목동역한의원 근처" / "목동역 근처 한의원".
+  {
+    hospitalSlug: "경희신기한의원",
+    keyword: "목동역한의원",
+    title: "목동역한의원, 어떤 진료를 볼 수 있을까",
+    postIds: [
+      "kyunghee-singi-mokdong-guide",
+      "kyunghee-singi-mokdong-back-pain",
+      "kyunghee-singi-mokdong-neck-shoulder",
+      "kyunghee-singi-mokdong-digestion",
+      "kyunghee-singi-mokdong-diet",
+      "kyunghee-singi-mokdong-gongjindan",
+    ],
+  },
+  // 아래 두 허브는 목동역 허브와 **진료영역을 나눠** 중복을 피한다.
+  // 오목교역 = 척추·관절 중 다른 부위·상황, 신정역 = 소화기·한약·체력.
+  // 병원 실소재는 목동역 2번 출구 앞이라 본문은 "한 정거장 거리"로만 쓴다.
+  {
+    hospitalSlug: "경희신기한의원",
+    keyword: "오목교역한의원",
+    title: "오목교역한의원, 척추·관절 통증 어디서 볼까",
+    postIds: [
+      "kyunghee-singi-omokgyo-acute",
+      "kyunghee-singi-omokgyo-knee",
+      "kyunghee-singi-omokgyo-wrist",
+      "kyunghee-singi-omokgyo-sciatica",
+      "kyunghee-singi-omokgyo-acupuncture",
+    ],
+  },
+  {
+    hospitalSlug: "경희신기한의원",
+    keyword: "신정역한의원",
+    title: "신정역한의원, 소화·체력 관리 어디서 볼까",
+    postIds: [
+      "kyunghee-singi-sinjeong-fatigue",
+      "kyunghee-singi-sinjeong-ibs",
+      "kyunghee-singi-sinjeong-herbal",
+      "kyunghee-singi-sinjeong-yoyo",
+      "kyunghee-singi-sinjeong-appetite",
     ],
   },
 ];
