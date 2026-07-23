@@ -23,6 +23,20 @@ export type HospitalGuide = {
 };
 
 export const HOSPITAL_GUIDES: HospitalGuide[] = [
+  // ══ 청담한의원(천안 동남구 청수동) — 추나·약침·교통사고·입원실 ══
+  {
+    hospitalSlug: "청담한의원-천안시",
+    keyword: "천안한의원",
+    title: "천안한의원, 어떤 진료를 볼 수 있을까",
+    postIds: [
+      "cheongdam-cheonan-hanuiwon-caraccident",
+      "cheongdam-cheonan-hanuiwon-neck-disc",
+      "cheongdam-cheonan-hanuiwon-back-disc",
+      "cheongdam-cheonan-hanuiwon-diet",
+      "cheongdam-cheonan-hanuiwon-accident-admission",
+    ],
+  },
+
   // ══ 아미나요양병원(광화문·경복궁역) — 암 특화 요양병원 ══
   {
     hospitalSlug: "아미나요양병원",

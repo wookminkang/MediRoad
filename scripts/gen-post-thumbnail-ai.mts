@@ -23,6 +23,10 @@
  */
 import { createClient } from "@supabase/supabase-js";
 
+import {
+  curatedGuideIndex,
+  curatedPostIndex,
+} from "../src/constants/hospital-keyword-pages.js";
 import { BUCKET, compose, seedOf } from "./lib/post-thumb.mjs";
 
 const sb = createClient(
@@ -46,8 +50,42 @@ const GUARD = [
  * 글 주제 → 배경 소재.
  * 제목 키워드로 고른다. 못 고르면 기본값(잔잔한 진료 공간).
  * 암 이야기라고 어둡게 갈 필요는 없다 — 차분하고 단정한 쪽이 낫다.
+ *
+ * **순서가 곧 우선순위다(첫 매치 승).** 제목이 "{키워드}한의원 …" 꼴이면 병원 종별
+ * 규칙(한방·한의원)이 전부 먹어 5편이 같은 배경이 된다. 그래서 주제 규칙을 먼저 두고
+ * 종별 규칙은 뒤에 둔다. 같은 이유로 "교통사고 입원"은 교통사고보다 입원이 먼저다.
  */
 const VISUALS: { match: RegExp; scene: string }[] = [
+  {
+    match: /입원|병실|입원실/,
+    scene:
+      "A quiet single hospital room: a neatly made bed with crisp white linen, a wooden bedside table with a folded towel, a tall window with sheer curtains. Nobody present. Calm daylight.",
+  },
+  {
+    match: /교통사고|사고 후유증|자동차보험|산재/,
+    scene:
+      "A calm still life on a light wood desk by a window: a car key, a folded paper document, a pen and a glass of water. Nobody present. Soft daylight, quiet and orderly.",
+  },
+  {
+    match: /목디스크|목 통증|어깨|경추/,
+    scene:
+      "A quiet still life on a pale linen surface: a rolled neck cushion, a folded cotton towel and a small ceramic cup, beside a window. Nobody present. Soft side light.",
+  },
+  {
+    match: /허리디스크|허리|요추|좌골|다리 저림/,
+    scene:
+      "An empty, calm treatment room seen from the side: a low wooden bench with a folded blanket, a rolled bolster on the floor, warm daylight through a wide window. Nobody present.",
+  },
+  {
+    match: /다이어트|체중|감량|비만/,
+    scene:
+      "A bright kitchen counter still life: a bowl of fresh vegetables, a glass carafe of water, a linen napkin and a small wooden board on pale stone. Nobody present. Clean morning light.",
+  },
+  {
+    match: /성장|아이|소아|청소년/,
+    scene:
+      "A serene child's room corner in daylight: a wooden growth-height ruler on the wall, a small chair, a folded blanket, a shelf with a few books. Nobody present.",
+  },
   {
     match: /식단|영양|식사|음식|비타민|수분|단백질|저잔사|채소|설탕/,
     scene:
@@ -79,7 +117,7 @@ const VISUALS: { match: RegExp; scene: string }[] = [
       "A tranquil bedroom corner at dawn: a neatly made bed with white linen, a bedside table with a small lamp and a book, sheer curtains glowing with soft light. Nobody present.",
   },
   {
-    match: /한약|침|뜸|약침|추나|한방/,
+    match: /한약|침|뜸|약침|추나|한방|한의원|한의학/,
     scene:
       "A quiet Korean-medicine dispensary still life: dried herbs in small ceramic bowls, a wooden tray, a linen cloth, on a dark wood table. Warm low light. No people, no needles.",
   },
@@ -139,13 +177,18 @@ async function genOne(postId: string, force: boolean) {
   const nameText = region ? `${hosp?.name} (${region})` : (hosp?.name ?? "");
 
   const bg = await genImage(`${sceneFor(post.title)} ${GUARD}`);
-  // 색·구도를 서로 다른 해시로(같은 seed면 상관되므로 salt로 분리)
+  // 큐레이션된 글은 사진 버전(gen-post-thumbnail.mts)과 같은 회전 규칙을 쓴다 —
+  // 가이드 내 순번으로 한 캐러셀 안에서 색·구도가 겹치지 않고, 허브 인덱스로 허브끼리도 갈린다.
+  // 큐레이션 밖의 글만 해시로 떨어뜨린다(같은 seed면 색·구도가 상관되므로 salt로 분리).
+  const gi = curatedPostIndex(post.id);
+  const ci = curatedGuideIndex(post.id);
+  const curated = gi >= 0 && ci >= 0;
   const webp = await compose(
     bg,
     nameText,
     post.title,
-    seedOf(post.id + "#accent"),
-    seedOf(post.id + "#layout"),
+    curated ? gi + ci : seedOf(post.id + "#accent"),
+    curated ? gi + ci * 3 + 5 : seedOf(post.id + "#layout"),
   );
 
   const key = `post-thumbs/${post.id}.webp`;
