@@ -25,6 +25,16 @@ const NAVER_VERIFY =
 const SITE_DESCRIPTION =
   "전국 병원·의원·치과·한의원·한방병원을 지도에서. 위치·진료시간·진료과목·야간진료를 한눈에 확인하고 가까운 병원을 빠르게 찾으세요.";
 
+// 공유 카드 기본 이미지 — 브랜드 로고(1200×630, PNG).
+// SVG는 카카오·페이스북 크롤러가 렌더하지 않아 반드시 PNG로 둔다.
+// 자체 이미지를 지정하는 페이지(병원 상세·포스팅 등)는 이 값을 덮어쓴다.
+const OG_IMAGE = {
+  url: "/og-default.png",
+  width: 1200,
+  height: 630,
+  alt: "메디로드 로고",
+};
+
 // 모바일에서 인풋 포커스 시 자동 확대(iOS) 및 핀치 줌 차단
 export const viewport: Viewport = {
   width: "device-width",
@@ -62,6 +72,13 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: "메디로드 - 내 주변 병원 찾기 | 진료시간·야간진료 지도",
     description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "메디로드 - 내 주변 병원 찾기 | 진료시간·야간진료 지도",
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   ...((GOOGLE_VERIFY || NAVER_VERIFY) && {
     verification: {
