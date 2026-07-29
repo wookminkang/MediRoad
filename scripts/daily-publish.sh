@@ -31,12 +31,22 @@ PROMPT="$(cat scripts/daily-prompt.md)
 
 ## 사용할 값
 - 프론트매터 id: ${ID}
+- 프론트매터 publishedAt: ${DATE}
 - 저장 파일 경로: ${FILE}${TOPIC_LINE}
 
 ## 이미 존재하는 주제 (절대 중복 금지)
 ${EXISTING}"
 
 claude -p "${PROMPT}" --allowedTools "Write"
+
+# 2-1) publishedAt 보정 — 없으면 실행일(DATE)로 주입.
+# ingest는 publishedAt이 없으면 "적재 실행일"을 쓴다. 적재가 실패해 다음날 재시도되면
+# 발행일이 하루 밀리므로, 모델이 빠뜨렸을 때를 대비해 여기서 확정한다.
+if [ -f "$FILE" ] && ! grep -q '^publishedAt:' "$FILE"; then
+  awk -v d="$DATE" 'NR==1 && $0=="---" { print; print "publishedAt: \"" d "\""; next } { print }' \
+    "$FILE" > "${FILE}.tmp" && mv "${FILE}.tmp" "$FILE"
+  echo "publishedAt 주입 — ${DATE}"
+fi
 
 # 3) Supabase 적재 (draft)
 npm run ingest
