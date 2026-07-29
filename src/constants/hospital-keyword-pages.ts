@@ -171,6 +171,35 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "kyunghee-singi-sinjeong-appetite",
     ],
   },
+
+  // ══ 자람한방병원(부천 중동·부천시청역) — 한방병원, 암 면역·회복 ══
+  // 기존 포스팅 4편(jaram-integrated-care/autonomic/thermal/nutrition)은 각도가 달라
+  // 허브에 묶지 않는다. 아래 두 허브는 서로도 겹치지 않게 갈랐다:
+  //   브랜드 = 진료 범위·암종·의료진·입원·장비 / 역세권 = 접근성·통원·보호자·회복 시점·퇴원 후
+  {
+    hospitalSlug: "자람한방병원",
+    keyword: "자람한방병원",
+    title: "자람한방병원, 어떤 진료를 볼 수 있을까",
+    postIds: [
+      "jaram-brand-guide",
+      "jaram-brand-cancer-scope",
+      "jaram-brand-medical-team",
+      "jaram-brand-inpatient",
+      "jaram-brand-equipment",
+    ],
+  },
+  {
+    hospitalSlug: "자람한방병원",
+    keyword: "부천시청역 근처 한방병원",
+    title: "부천시청역 근처 한방병원, 어떻게 골라야 할까",
+    postIds: [
+      "jaram-station-guide",
+      "jaram-station-commute",
+      "jaram-station-family",
+      "jaram-station-recovery",
+      "jaram-station-aftercare",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
