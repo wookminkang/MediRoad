@@ -7,13 +7,14 @@ import { COLUMN_CATEGORIES } from "./column";
  * 추천·최상급 표현은 금지하며 선정 기준(지역·병원 유형·출처·확인일) 공개가 필수다.
  */
 export const BRIEFING_CATEGORIES = [
+  // region-guide를 맨 앞에 — 탭 순서가 이 배열 순서를 따른다 (일일 발행 주력 카테고리)
+  { id: "region-guide", label: "지역 병원 찾기" },
   { id: "policy", label: "의료 정책·제도" },
   { id: "ad-policy", label: "의료광고 정책" },
   { id: "trend", label: "건강 트렌드" },
   { id: "public-health", label: "공공 건강정보" },
   { id: "issue", label: "의료 이슈" },
   { id: "seasonal", label: "계절·감염병" },
-  { id: "region-guide", label: "지역 병원 찾기" },
 ] as const;
 
 export type BriefingCategory = (typeof BRIEFING_CATEGORIES)[number]["id"];
