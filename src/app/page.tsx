@@ -181,10 +181,20 @@ const REGIONS: {
 const areaHref = (r: { name: string }) => `/area/${r.name}`;
 
 export default async function Home() {
-  const [{ items: columns }, posts] = await Promise.all([
-    getColumns({ pageSize: 4 }), // 건강 이야기 — 최대 4개
-    getLatestHospitalPosts(6), // 1열 목록 — 최대 6개
-  ]);
+  const [{ items: columns }, posts, { items: regionGuides }, { items: otherBriefings }] =
+    await Promise.all([
+      getColumns({ pageSize: 4 }), // 건강 이야기 — 최대 4개
+      getLatestHospitalPosts(6), // 1열 목록 — 최대 6개
+      // 메디브리핑 섹션 — 지역 병원 찾기 우선, 최신순 최대 6개
+      getColumns({ kind: "briefing", category: "region-guide", pageSize: 6 }),
+      getColumns({ kind: "briefing", pageSize: 6 }),
+    ]);
+  // 지역 병원 찾기 글이 6개 미만인 초기에는 다른 브리핑 최신글로 채운다.
+  // 일일 발행이 쌓이면 자연스럽게 지역 글만 남는다.
+  const briefings = [
+    ...regionGuides,
+    ...otherBriefings.filter((b) => b.category !== "region-guide"),
+  ].slice(0, 6);
 
   return (
     <>
@@ -236,6 +246,32 @@ export default async function Home() {
       </section>
 
       <PromoCarousel slides={PROMO_SLIDES} />
+
+      {/* 메디브리핑 — 지역 병원 찾기 우선 최신 6개 (실데이터) */}
+      {briefings.length > 0 && (
+        <section aria-labelledby="briefings" className="bg-neutral-weak">
+          <div className="mx-auto max-w-6xl px-4 py-12">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <SectionHeading
+                title={"메디브리핑,\n지역 병원 찾기"}
+                sub="지역별 병원 정보를 공공데이터 기준으로 정리했습니다."
+                align="left"
+                id="briefings"
+              />
+              <ActionButton asChild variant="neutralOutline" size="medium">
+                <Link href="/briefing">메디브리핑 전체 보기</Link>
+              </ActionButton>
+            </div>
+            <ul className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3">
+              {briefings.map((b) => (
+                <li key={b.id}>
+                  <ColumnCard column={b} basePath="/briefing" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* 병원이 전하는 건강정보 — 병원별 포스트 (실데이터) */}
       {posts.length > 0 && (

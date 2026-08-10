@@ -1,8 +1,10 @@
 import { COLUMN_CATEGORIES } from "./column";
 
 /**
- * 메디브리핑 카테고리 — 의료광고법 안전 영역(중립 정보)만.
- * 특정 병원 홍보가 아니라 정책·트렌드·공공정보·이슈 중심.
+ * 메디브리핑 카테고리 — 의료광고법 안전 영역만.
+ * policy~seasonal은 중립 정보(정책·트렌드·공공정보·이슈 중심, 특정 병원 홍보 금지).
+ * region-guide는 제휴병원 중심 지역 안내 — 단, 사실 기반 서술만 허용하고
+ * 추천·최상급 표현은 금지하며 선정 기준(지역·병원 유형·출처·확인일) 공개가 필수다.
  */
 export const BRIEFING_CATEGORIES = [
   { id: "policy", label: "의료 정책·제도" },
@@ -11,6 +13,7 @@ export const BRIEFING_CATEGORIES = [
   { id: "public-health", label: "공공 건강정보" },
   { id: "issue", label: "의료 이슈" },
   { id: "seasonal", label: "계절·감염병" },
+  { id: "region-guide", label: "지역 병원 찾기" },
 ] as const;
 
 export type BriefingCategory = (typeof BRIEFING_CATEGORIES)[number]["id"];

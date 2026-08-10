@@ -54,3 +54,8 @@ scripts/.enrich-cursor
 .claude/scheduled_tasks.lock
 .gstack/
 scripts/.inpatient-cursor
+
+# GEO 브리핑 배치 산출물 (DB가 진실 소스 — 큐만 커밋한다)
+content/geo-briefings/out/
+scripts/daily-geo-publish.log
+scripts/daily-publish.log

@@ -33,6 +33,7 @@ const BENIGN = [
 ];
 const CATEGORIES = [
   "policy", "ad-policy", "trend", "public-health", "issue", "seasonal",
+  "region-guide",
 ];
 
 const DRY = process.argv.includes("--dry");

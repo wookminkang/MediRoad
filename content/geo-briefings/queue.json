@@ -1,0 +1,140 @@
+{
+  "note": "GEO 브리핑 키워드 큐 — 사람이 편집한다. 배치(scripts/daily-geo-publish.sh)는 이 파일을 절대 수정하지 않고, columns에 status='published' 행이 없는 첫 항목을 골라 하루 1편 발행한다. 같은 (hospitalSlug, hospitalType) 조합은 angle이 서로 달라야 한다(doorway 방지). hospitalType 매칭 규칙: '요양병원'은 이름에 요양병원이 들어간 병원(type 컬럼에 요양병원이 따로 없음), 그 외는 type 컬럼 일치. landmarkHpid가 있으면 그 병원 좌표 기준 거리순으로 비교 병원을 뽑는다. featureMode: 'section'=중심 병원을 본문 섹션으로 서술(소재지·인접권만), 'link-only'=본문에서 중심 병원 언급 금지, 하단 '함께 보면 좋은 가이드' 링크 블록만(소재지 밖·광역 — GEO 인용 확률 보호).",
+  "items": [
+    {
+      "id": "gangdong-yoyang-guide",
+      "query": "강동구 근처 요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강동구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-요양병원"
+      ],
+      "areaLink": "/area/강동구",
+      "angle": "입원 상담 전에 확인할 항목 중심 — 병상 규모, 면회 규정, 상담 준비물",
+      "featureMode": "section"
+    },
+    {
+      "id": "songpa-cancer-yoyang-guide",
+      "query": "송파구 암 요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "송파구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원"
+      ],
+      "areaLink": "/area/송파구",
+      "angle": "항암 치료를 병행하며 요양할 때 확인할 것 — 대학병원 통원 동선, 식이·회복 관리",
+      "featureMode": "section"
+    },
+    {
+      "id": "asan-nearby-yoyang-guide",
+      "query": "아산병원 근처 요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "송파구"
+      },
+      "landmarkHpid": "A1100009",
+      "landmarkLabel": "서울아산병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/아산병원-근처-요양병원"
+      ],
+      "areaLink": "/area/송파구",
+      "angle": "대학병원 치료 후 전원 절차 — 진료의뢰서, 의무기록 준비, 외래 일정과의 병행",
+      "featureMode": "section"
+    },
+    {
+      "id": "samsung-nearby-cancer-yoyang-guide",
+      "query": "삼성병원 근처 암요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강남구"
+      },
+      "landmarkHpid": "A1100010",
+      "landmarkLabel": "삼성서울병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원"
+      ],
+      "areaLink": "/area/강남구",
+      "angle": "통원 거리와 보호자 접근성 — 지하철·차량 이동 시간, 면회와 상주 규정",
+      "featureMode": "link-only"
+    },
+    {
+      "id": "seoul-cancer-yoyang-guide",
+      "query": "서울 암요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": null
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원",
+        "/리움한방병원-강동송파/guide/강동구-요양병원"
+      ],
+      "areaLink": null,
+      "angle": "서울 권역별로 나눠 보는 선택 기준 — 동남권·도심권·서남권 이동 동선과 병상 규모",
+      "featureMode": "link-only"
+    },
+    {
+      "id": "jongno-yoyang-guide",
+      "query": "종로 요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "종로구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/아미나요양병원/guide/광화문-요양병원",
+        "/리움한방병원-강동송파/guide/강동구-요양병원"
+      ],
+      "areaLink": "/area/종로구",
+      "angle": "도심 요양병원의 특징 — 대중교통 접근성, 도심 병원과 외곽 병원의 차이",
+      "featureMode": "link-only"
+    },
+    {
+      "id": "kondae-nearby-hanbang-guide",
+      "query": "건국대학병원 근처 한방병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "광진구"
+      },
+      "landmarkHpid": "A1100002",
+      "landmarkLabel": "건국대학교병원",
+      "hospitalType": "한방병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-재활통증치료"
+      ],
+      "areaLink": "/area/광진구",
+      "angle": "대학병원 진료와 한방 치료를 병행할 때 확인할 것 — 협진 기록, 치료 시기 조율",
+      "featureMode": "link-only"
+    }
+  ]
+}
