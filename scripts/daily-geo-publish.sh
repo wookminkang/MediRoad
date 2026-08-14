@@ -12,6 +12,11 @@ cd "$(dirname "$0")/.."
 NVM_BIN_DIR="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)"
 [ -n "${NVM_BIN_DIR:-}" ] && export PATH="${NVM_BIN_DIR}:${PATH}"
 
+# launchd는 macOS TCC 때문에 ~/Desktop의 파일을 읽지 못한다(exit 78, 로그도 안 남음).
+# 그래서 스케줄 실행은 보호 밖 경로의 배치 전용 클론(~/MediRoad-batch)에서 돌고,
+# 최신 코드·큐를 반영하기 위해 실행 전 pull 한다 (실패해도 현재 상태로 진행).
+git pull --ff-only --quiet 2>/dev/null || echo "git pull 실패(무시) — 현재 체크아웃 상태로 진행"
+
 # 이 Mac에는 .env만 있는 환경도 있어서 .env.local → .env 순으로 쓴다
 ENV_FILE=".env.local"
 [ -f "$ENV_FILE" ] || ENV_FILE=".env"

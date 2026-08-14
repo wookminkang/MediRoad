@@ -2,6 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   GEO 브리핑 일일 자동 발행 — 매일 오전 11:00. (밤 11시로 바꾸려면 Hour를 23으로)
+
+  ⚠️ 실행 경로가 ~/Desktop/MediRoad가 아니라 ~/MediRoad-batch(배치 전용 클론)인 이유:
+  macOS TCC가 launchd 백그라운드 프로세스의 Desktop 파일 읽기를 차단해서
+  Desktop 경로로는 스폰 자체가 실패한다(exit 78, 로그 없음 — 2026-08-14 확인).
+  클론은 배치 시작 시 git pull로 최신 코드·큐를 받아온다.
+  최초 1회 설정: git clone <repo> ~/MediRoad-batch && cp Desktop/MediRoad/.env ~/MediRoad-batch/ && npm install --prefix ~/MediRoad-batch
+
   설치:
     cp scripts/com.mediroad.daily-geo-publish.plist ~/Library/LaunchAgents/
     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.mediroad.daily-geo-publish.plist
@@ -16,7 +23,7 @@
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>cd /Users/kangminwook/Desktop/MediRoad &amp;&amp; ./scripts/daily-geo-publish.sh</string>
+    <string>cd /Users/kangminwook/MediRoad-batch &amp;&amp; ./scripts/daily-geo-publish.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -26,8 +33,8 @@
     <integer>0</integer>
   </dict>
   <key>StandardOutPath</key>
-  <string>/Users/kangminwook/Desktop/MediRoad/scripts/daily-geo-publish.log</string>
+  <string>/Users/kangminwook/Library/Logs/mediroad-geo-publish.log</string>
   <key>StandardErrorPath</key>
-  <string>/Users/kangminwook/Desktop/MediRoad/scripts/daily-geo-publish.log</string>
+  <string>/Users/kangminwook/Library/Logs/mediroad-geo-publish.log</string>
 </dict>
 </plist>
