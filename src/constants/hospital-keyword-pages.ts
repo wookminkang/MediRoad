@@ -200,6 +200,21 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "jaram-station-aftercare",
     ],
   },
+
+  // ── 강동구 암요양병원 가이드 ("송파구 암요양병원"과 각도 분리: 암종별 전문의·센터/장비·
+  // 소화기암·여성암·첫상담 준비) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "강동구 암요양병원",
+    title: "강동구 암요양병원, 어떻게 골라야 할까",
+    postIds: [
+      "rium-gangdong-cancer-yoyang-guide",
+      "rium-gangdong-cancer-yoyang-center",
+      "rium-gangdong-cancer-yoyang-digestive",
+      "rium-gangdong-cancer-yoyang-women",
+      "rium-gangdong-cancer-yoyang-consult",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
