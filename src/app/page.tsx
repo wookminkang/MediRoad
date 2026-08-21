@@ -15,7 +15,8 @@ import {
 } from "@/components/home/promo-carousel";
 import { ScrollRow } from "@/components/home/scroll-row";
 import { AREA_REGIONS } from "@/constants/area-regions";
-import { SITE_URL } from "@/constants/site";
+import { isBriefingCategory } from "@/constants/briefing";
+import { SITE_NAME, SITE_URL } from "@/constants/site";
 // import { ImagePlaceholder } from "@/components/home/image-placeholder"; // CTA 밴드 보류로 미사용
 
 // 홈 self-canonical (사이트맵 홈 URL과 동일 — 슬래시 없는 SITE_URL)
@@ -188,6 +189,38 @@ export default async function Home() {
     getColumns({ kind: "briefing", category: "region-guide", pageSize: 6 }),
   ]);
 
+  // 네이버 검색 캐러셀용 ItemList — 홈에 노출되는 콘텐츠(건강정보 + 병원 포스팅) 중 대표 이미지 있는 것.
+  const carouselItems = [
+    ...columns.map((c) => ({
+      url: `${SITE_URL}${isBriefingCategory(c.category) ? "/briefing" : "/health"}/${c.id}`,
+      name: c.title,
+      image: c.thumbnail,
+    })),
+    ...posts.map((p) => ({
+      url: `${SITE_URL}/hospitals/${p.hospitalSlug}/posts/${p.id}`,
+      name: p.title,
+      image: p.thumbnail,
+    })),
+  ].filter((it): it is { url: string; name: string; image: string } =>
+    Boolean(it.image),
+  );
+  const homeItemListLd =
+    carouselItems.length >= 3
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: `${SITE_NAME} 추천 콘텐츠`,
+          numberOfItems: carouselItems.length,
+          itemListElement: carouselItems.map((it, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            url: it.url,
+            name: it.name,
+            image: { "@type": "ImageObject", url: it.image },
+          })),
+        }
+      : null;
+
   return (
     <>
       {/*
@@ -197,6 +230,14 @@ export default async function Home() {
       <h1 className="sr-only">
         내 주변 병원 찾기 — 위치·진료시간·진료과목을 지도에서 한눈에
       </h1>
+
+      {/* 네이버 검색 캐러셀 — 홈 대표 콘텐츠 ItemList */}
+      {homeItemListLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(homeItemListLd) }}
+        />
+      )}
 
       <HeroCarousel slides={HERO_SLIDES} />
 
