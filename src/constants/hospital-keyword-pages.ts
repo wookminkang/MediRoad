@@ -215,6 +215,20 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-gangdong-cancer-yoyang-consult",
     ],
   },
+  // ── 방이동 암요양병원 가이드 (기존 암요양 허브들과 각도 분리: 암 치료 중/후
+  // 활동 감소·수술 영향으로 생기는 부위별 관절통증 관리 — 무릎·어깨·허리·손목·발목) ──
+  {
+    hospitalSlug: "리움한방병원-강동송파",
+    keyword: "방이동 암요양병원",
+    title: "방이동 암요양병원, 어떻게 골라야 할까",
+    postIds: [
+      "rium-bangi-cancer-yoyang-knee",
+      "rium-bangi-cancer-yoyang-shoulder",
+      "rium-bangi-cancer-yoyang-back",
+      "rium-bangi-cancer-yoyang-wrist",
+      "rium-bangi-cancer-yoyang-ankle",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
