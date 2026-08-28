@@ -24,9 +24,13 @@ type Params = Promise<{ slug: string }>;
 
 // 78k건 → 빌드 시 전부 생성 불가. 첫 요청 시 on-demand 렌더 후 ISR 캐시.
 export const dynamicParams = true;
-// 이 페이지가 병원의 포스트 목록을 들고 있다. 예약 발행 글이 그날 안에 목록에
-// 올라오도록 한 시간으로 줄인다(하루로 두면 최대 24시간 늦게 뜬다).
-export const revalidate = 3600;
+// 78k개 페이지 × 크롤러 트래픽이 겹쳐 revalidate=3600(1시간)일 때 Vercel ISR
+// Writes가 월 1.5M까지 치솟았다(2026-08-28). 24시간으로 늘려 write 빈도를 최대
+// 24배 줄인다. 대가: 이 페이지가 들고 있는 병원의 포스트 목록(예약 발행 글 포함)이
+// 최대 24시간 늦게 반영될 수 있다(admin에서 병원 정보를 직접 수정하면
+// actions.ts의 revalidatePath로 즉시 반영되지만, 예약 발행 글은 별도 트리거가
+// 없어 다음 재생성까지 기다린다).
+export const revalidate = 86400;
 
 export async function generateStaticParams() {
   const ids = await getAllHospitalIds(); // Supabase면 [] (mock일 때만 목록 = slug)
