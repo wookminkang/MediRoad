@@ -121,7 +121,7 @@ export default function FaqPage() {
         <CalloutContent>
           <CalloutTitle>찾는 답이 없으신가요?</CalloutTitle>
           <CalloutDescription>
-            고객센터 010-7665-4418 (평일 09:00~18:00) 으로 문의해 주세요.
+            oper2068@kakao.com 으로 문의해 주세요.
             병원 정보 오류 제보도 환영합니다.
           </CalloutDescription>
         </CalloutContent>

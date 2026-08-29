@@ -186,9 +186,8 @@ export default function AboutPage() {
           <CalloutContent>
             <CalloutTitle>제보를 환영합니다</CalloutTitle>
             <CalloutDescription>
-              병원 정보에 오류가 있으면 고객센터 010-7665-4418 (평일
-              09:00~18:00) 또는 oper2068@kakao.com 으로 알려주세요. 공공데이터와
-              병원 확인을 거쳐 반영합니다.
+              병원 정보에 오류가 있으면 oper2068@kakao.com 으로 알려주세요.
+              공공데이터와 병원 확인을 거쳐 반영합니다.
             </CalloutDescription>
           </CalloutContent>
         </CalloutRoot>
@@ -205,7 +204,6 @@ export default function AboutPage() {
             ["대표이사", "전형진"],
             ["사업자등록번호", "640-87-03558"],
             ["대표전화", "02-3402-1070"],
-            ["고객센터", "010-7665-4418 (평일 09:00~18:00)"],
             ["이메일", "oper2068@kakao.com"],
           ].map(([k, v]) => (
             <div key={k} className="flex gap-4">

@@ -230,6 +230,20 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "rium-bangi-cancer-yoyang-ankle",
     ],
   },
+
+  // ══ 하늘체한의원 인천점(남동구 구월동) — 피부·체형 진료 중심 한의원 ══
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "구월동 여드름",
+    title: "구월동 여드름, 한방 진료는 어떻게 접근할까",
+    postIds: [
+      "haneulche-guwol-acne-guide",
+      "haneulche-guwol-acne-scar",
+      "haneulche-guwol-acne-comorbid",
+      "haneulche-guwol-acne-doctors",
+      "haneulche-guwol-acne-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */

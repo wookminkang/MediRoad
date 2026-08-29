@@ -32,7 +32,6 @@ export function buildOrganizationLd() {
       {
         "@type": "ContactPoint",
         contactType: "customer support",
-        telephone: "+82-10-7665-4418",
         email: "oper2068@kakao.com",
         areaServed: "KR",
         availableLanguage: ["ko"],

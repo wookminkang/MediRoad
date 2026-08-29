@@ -16,7 +16,7 @@ export function Footer() {
         <div className="flex flex-col gap-6">
           <div>
             <Text as="p" textStyle="t6Bold">
-              고객센터 010-7665-4418
+              고객센터
             </Text>
             <div className="mt-1">
               <Text as="p" textStyle="t4Regular" className="text-muted">
