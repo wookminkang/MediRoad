@@ -154,6 +154,84 @@
       "areaLink": "/area/송파구",
       "angle": "어떤 진료과와 치료 프로그램을 운영하는지 확인하기 — 진료과목 구성과 협진 여부",
       "featureMode": "section"
+    },
+    {
+      "id": "songpa-cancer-yoyang-stage-guide",
+      "query": "송파구 암 요양병원 언제 입원하면 좋을까",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "송파구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원"
+      ],
+      "areaLink": "/area/송파구",
+      "angle": "암 치료 단계별로 달라지는 확인 사항 — 진단 직후, 치료 중, 치료 종료 후 각 시기에 따져볼 것",
+      "featureMode": "section"
+    },
+    {
+      "id": "gangnam-severance-nearby-cancer-guide",
+      "query": "강남세브란스병원 근처 암요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강남구"
+      },
+      "landmarkHpid": "A1100015",
+      "landmarkLabel": "강남세브란스병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원",
+        "/리움한방병원-강동송파/guide/강동구-암요양병원"
+      ],
+      "areaLink": "/area/강남구",
+      "angle": "치료 종류에 따라 달라지는 통원 빈도 — 매일 오가는 방사선치료 일정과 주기별 항암 일정의 차이",
+      "featureMode": "link-only"
+    },
+    {
+      "id": "gangnam-severance-nearby-cancer-admission-guide",
+      "query": "강남세브란스병원 근처 암요양병원 입원 절차 알려줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강남구"
+      },
+      "landmarkHpid": "A1100015",
+      "landmarkLabel": "강남세브란스병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-암요양병원"
+      ],
+      "areaLink": "/area/강남구",
+      "angle": "입원 문의부터 입원까지의 절차 — 상담 예약 방법, 준비할 서류와 기록, 대기 기간 확인",
+      "featureMode": "link-only"
+    },
+    {
+      "id": "gangnam-severance-nearby-cancer-room-guide",
+      "query": "강남세브란스병원 근처 암요양병원 병실 알려줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강남구"
+      },
+      "landmarkHpid": "A1100015",
+      "landmarkLabel": "강남세브란스병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-요양병원",
+        "/리움한방병원-강동송파/guide/송파구-암요양병원"
+      ],
+      "areaLink": "/area/강남구",
+      "angle": "병실 구성과 간병 방식 — 병실 유형, 간병 체계, 입원 생활에서 확인할 환경 조건",
+      "featureMode": "link-only"
     }
   ]
 }
