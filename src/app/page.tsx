@@ -426,15 +426,15 @@ export default async function Home() {
            */}
           <nav aria-label="주요 지역" className="mt-10 border-t border-line pt-8">
             <p className="text-sm font-bold text-neutral">주요 지역 바로가기</p>
-            <ul className="mt-4 flex flex-wrap gap-2">
+            {/*
+             * 칩 목록은 화면에서 감추되 DOM에는 남긴다(sr-only). 위 주석대로 이 링크들이
+             * 지역 랜딩의 크롤 경로라, 지워 버리면 색인이 밀린다. 화면 진입점은 아래
+             * "전국 지역 전체보기" 버튼이 대신한다.
+             */}
+            <ul className="sr-only">
               {TOP_REGIONS.map((r) => (
                 <li key={r.slug}>
-                  <Link
-                    href={`/area/${r.slug}`}
-                    className="inline-block rounded-full border border-line px-3.5 py-2 text-sm text-neutral transition-colors hover:border-brand hover:bg-brand-weak"
-                  >
-                    {r.label}
-                  </Link>
+                  <Link href={`/area/${r.slug}`}>{r.label}</Link>
                 </li>
               ))}
             </ul>
