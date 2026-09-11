@@ -268,6 +268,18 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-incheon-scar-visit",
     ],
   },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "구월동 모공치료",
+    title: "구월동 모공치료, 계절 따라 유독 심해지는 이유",
+    postIds: [
+      "haneulche-guwol-pore-seasonal",
+      "haneulche-guwol-pore-bodyparts",
+      "haneulche-guwol-pore-age",
+      "haneulche-guwol-pore-habits",
+      "haneulche-guwol-pore-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
