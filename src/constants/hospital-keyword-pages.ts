@@ -244,6 +244,30 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-guwol-acne-visit",
     ],
   },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 모공치료",
+    title: "인천 모공치료, 정확히는 무엇을 진료하는 걸까",
+    postIds: [
+      "haneulche-incheon-pore-guide",
+      "haneulche-incheon-pore-selfcare",
+      "haneulche-incheon-pore-vs-others",
+      "haneulche-incheon-pore-diet",
+      "haneulche-incheon-pore-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 흉터치료",
+    title: "인천 흉터치료 알아보기 전, 흉터가 왜 생기는지부터 알면 도움이 됩니다",
+    postIds: [
+      "haneulche-incheon-scar-guide",
+      "haneulche-incheon-scar-checklist",
+      "haneulche-incheon-scar-habits",
+      "haneulche-incheon-scar-prep",
+      "haneulche-incheon-scar-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
