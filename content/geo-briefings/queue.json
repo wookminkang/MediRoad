@@ -232,6 +232,63 @@
       "areaLink": "/area/강남구",
       "angle": "병실 구성과 간병 방식 — 병실 유형, 간병 체계, 입원 생활에서 확인할 환경 조건",
       "featureMode": "link-only"
+    },
+    {
+      "id": "songpa-thyroid-cancer-surgery-guide",
+      "query": "송파구 갑상선암 요양병원 수술 후 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "송파구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/송파구-암요양병원"
+      ],
+      "areaLink": "/area/송파구",
+      "angle": "갑상선암 수술 후 회복기에 확인할 것 — 목·경부 움직임 관리, 발성 회복, 방사성요오드 치료 통원 일정과의 병행",
+      "featureMode": "section"
+    },
+    {
+      "id": "dunchon-cancer-yoyang-guide",
+      "query": "서울 둔촌동 암요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강동구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-요양병원"
+      ],
+      "areaLink": "/area/강동구",
+      "angle": "둔촌오륜역에서 실제로 걸어가는 길 — 도보 이동시간, 대중교통 환승, 올림픽공원 인접 접근성",
+      "featureMode": "section"
+    },
+    {
+      "id": "gangdong-kyunghee-nearby-cancer-guide",
+      "query": "강동경희대병원 근처 암요양병원 추천해줘",
+      "hpid": "C1110185",
+      "hospitalSlug": "리움한방병원-강동송파",
+      "region": {
+        "sido": "서울",
+        "sigungu": "강동구"
+      },
+      "landmarkHpid": "A1100043",
+      "landmarkLabel": "강동경희대학교병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/리움한방병원-강동송파/guide/강동구-요양병원"
+      ],
+      "areaLink": "/area/강동구",
+      "angle": "대학병원 응급실·검사 일정과의 연계 — 정기 검사·재진 통원, 응급 상황 시 이동 거리",
+      "featureMode": "section"
     }
   ]
 }
