@@ -87,6 +87,37 @@ async function generateImage(prompt: string): Promise<Buffer> {
   throw new Error("이미지 응답 형식 불명(b64_json/url 없음)");
 }
 
+/** 브랜드 톤 그라데이션 플레이스홀더 (AI 생성 실패 시 대체용) */
+async function fallbackGradientImage(): Promise<Buffer> {
+  const S = 1024;
+  const svg = `<svg width="${S}" height="${S}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0f3d2e"/>
+        <stop offset="100%" stop-color="#1f6f4f"/>
+      </linearGradient>
+    </defs>
+    <rect width="${S}" height="${S}" fill="url(#g)"/>
+    <circle cx="${S * 0.78}" cy="${S * 0.22}" r="200" fill="#ffffff" opacity="0.06"/>
+    <circle cx="${S * 0.18}" cy="${S * 0.82}" r="260" fill="#ffffff" opacity="0.05"/>
+  </svg>`;
+  return sharp(Buffer.from(svg)).png().toBuffer();
+}
+
+/**
+ * generateImage 실패(크레딧 소진, API 오류, 타임아웃 등) 시 발행 자체가 막히지 않도록
+ * 그라데이션 플레이스홀더로 대체한다. 대체 발생 사실은 실행 로그에 크게 남겨
+ * 나중에 실사진/AI 이미지로 교체할 대상을 알아볼 수 있게 한다.
+ */
+async function generateImageOrFallback(prompt: string): Promise<Buffer> {
+  try {
+    return await generateImage(prompt);
+  } catch (e) {
+    console.warn(`  ⚠ AI 이미지 생성 실패 — 플레이스홀더로 대체: ${(e as Error).message}`);
+    return fallbackGradientImage();
+  }
+}
+
 const THUMB_SIZE = 1080;
 const WEBP_QUALITY = Number(process.env.IMAGE_WEBP_QUALITY ?? 80);
 
@@ -227,7 +258,7 @@ async function resolveImage(
     buf = await readFile(localPath);
     ext = path.extname(localPath).toLowerCase() || ".png";
   } else if (img.prompt) {
-    buf = await addWatermark(await generateImage(img.prompt));
+    buf = await addWatermark(await generateImageOrFallback(img.prompt));
     ext = ".webp";
   } else {
     throw new Error(
@@ -252,7 +283,7 @@ async function resolveThumbnail(
 ): Promise<string> {
   let base: Buffer;
   if (img.file) base = await readFile(path.resolve(mdDir, img.file));
-  else if (img.prompt) base = await generateImage(img.prompt);
+  else if (img.prompt) base = await generateImageOrFallback(img.prompt);
   else throw new Error("thumbnail에 file 또는 prompt가 필요합니다");
 
   const composed = await composeThumbnail(base, title);

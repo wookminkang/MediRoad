@@ -59,3 +59,8 @@ scripts/.inpatient-cursor
 content/geo-briefings/out/
 scripts/daily-geo-publish.log
 scripts/daily-publish.log
+
+# 로컬 원고 대시보드 (~/dashboard) 상태 파일 - 커밋 불필요
+.dashboard-status.json
+.dashboard-history.jsonl
+scripts/.dashboard.lock/

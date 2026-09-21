@@ -5,6 +5,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# 대시보드(scripts/dashboard-trigger.sh)의 수동 트리거와 launchd 자동 실행이 겹치지 않도록
+# 같은 락 디렉터리를 공유한다(mkdir은 원자적). 이미 실행 중이면 조용히 종료.
+LOCK_DIR="scripts/.dashboard.lock"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  echo "[$(date '+%F %T')] 이미 다른 실행이 진행 중 — 건너뜀 (lock: $LOCK_DIR)"
+  exit 75   # 임시 실패(락 충돌) — 호출자가 "성공"과 구분할 수 있도록 0이 아닌 전용 코드 사용
+fi
+trap 'rm -rf "$LOCK_DIR"' EXIT
+
 # launchd는 PATH가 최소 → nvm의 최신 node bin을 PATH에 추가 (node/npm/claude/tsx 인식용)
 NVM_BIN_DIR="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1 || true)"
 [ -n "${NVM_BIN_DIR:-}" ] && export PATH="${NVM_BIN_DIR}:${PATH}"
