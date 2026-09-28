@@ -280,6 +280,21 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-guwol-pore-visit",
     ],
   },
+
+  // ── 하늘체한의원 인천점 "송도 여드름피부" — 병원은 구월동. 송도는 이동 경로(인천1호선)로만
+  // 연결하고 모든 글에 소재지를 밝힌다. 한의원이라 "피부과" 표기는 쓰지 않는다. ──
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "송도 여드름피부",
+    title: "송도 여드름피부, 성인이 되어서도 계속 올라오는 이유",
+    postIds: [
+      "haneulche-songdo-acne-adult",
+      "haneulche-songdo-acne-body",
+      "haneulche-songdo-acne-routine",
+      "haneulche-songdo-acne-season",
+      "haneulche-songdo-acne-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
