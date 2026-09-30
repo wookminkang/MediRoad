@@ -348,6 +348,26 @@
       "areaLink": "/area/성북구",
       "angle": "면역력이 떨어지는 치료 시기의 생활 환경 — 감염 관리, 면회 제한, 발열 시 대학병원 연락·이동 절차",
       "featureMode": "link-only"
+    },
+    {
+      "id": "jongno-cancer-yoyang-guide",
+      "query": "종로 암요양병원 추천해줘",
+      "hpid": "A1122829",
+      "hospitalSlug": "아미나요양병원",
+      "region": {
+        "sido": "서울",
+        "sigungu": "종로구"
+      },
+      "landmarkHpid": "A1100006",
+      "landmarkLabel": "강북삼성병원",
+      "hospitalType": "요양병원",
+      "hubLinks": [
+        "/아미나요양병원/guide/광화문-요양병원",
+        "/아미나요양병원/guide/광화문근처-요양병원"
+      ],
+      "areaLink": "/area/종로구",
+      "angle": "입원 중 받을 수 있는 진료 여건 확인 — 진료과목 구성, 대학병원 치료와의 역할 구분, 입원 중 증상 변화 시 진료 연계",
+      "featureMode": "section"
     }
   ]
 }
