@@ -388,6 +388,26 @@
       "areaLink": "/area/남동구",
       "angle": "여드름으로 한의원을 알아볼 때 확인할 것 — 피부질환 진료 안내 여부, 상담 방식, 퇴근 후 방문 가능한 진료시간, 함께 보는 피부 증상",
       "featureMode": "section"
+    },
+    {
+      "id": "guwol-acne-scar-hanui-guide",
+      "query": "구월동 여드름흉터 한의원 추천해줘",
+      "hpid": "B1400527",
+      "hospitalSlug": "하늘체한의원-남동구",
+      "region": {
+        "sido": "인천",
+        "sigungu": "남동구"
+      },
+      "landmarkHpid": "A1400001",
+      "landmarkLabel": "가천대 길병원",
+      "hospitalType": "한의원",
+      "hubLinks": [
+        "/하늘체한의원-남동구/guide/인천-흉터치료",
+        "/하늘체한의원-남동구/guide/구월동-여드름"
+      ],
+      "areaLink": "/area/남동구",
+      "angle": "여드름 흉터 상담 전에 알아둘 것 — 붉은 자국·갈색 색소·패인 흉터 구분, 관리 시작 시점, 상담에서 확인할 진료 계획",
+      "featureMode": "section"
     }
   ]
 }
