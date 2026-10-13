@@ -310,6 +310,21 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-incheon-skin-eczema-visit",
     ],
   },
+
+  // ── 하늘체한의원 인천점 "남동구 두드러기" — 두드러기 단일 주제(급성·만성, 원인 일지, 한랭·피부묘기증,
+  // 악화 요인, 방문 안내). "인천 피부질환"의 건선·두드러기 구분 글과 각도 분리. ──
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "남동구 두드러기",
+    title: "남동구 두드러기, 몇 주째 반복된다면 급성과 만성부터 구분하세요",
+    postIds: [
+      "haneulche-namdong-hives-acute-chronic",
+      "haneulche-namdong-hives-trigger-log",
+      "haneulche-namdong-hives-cold",
+      "haneulche-namdong-hives-triggers-care",
+      "haneulche-namdong-hives-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
