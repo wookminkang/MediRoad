@@ -295,6 +295,21 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-songdo-acne-visit",
     ],
   },
+
+  // ── 하늘체한의원 인천점 "인천 피부질환" — 여드름·모공·흉터 외 피부질환(사마귀·지루성피부염·
+  // 아토피·건선·두드러기·습진·한포진). 근거: hospitals.description 진료 항목. ──
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 피부질환",
+    title: "인천 피부질환, 사마귀부터 아토피까지 한의원에서 함께 보는 것",
+    postIds: [
+      "haneulche-incheon-skin-wart",
+      "haneulche-incheon-skin-seborrheic",
+      "haneulche-incheon-skin-atopic",
+      "haneulche-incheon-skin-psoriasis-hives",
+      "haneulche-incheon-skin-eczema-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
