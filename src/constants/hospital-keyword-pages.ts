@@ -242,6 +242,7 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-guwol-acne-comorbid",
       "haneulche-guwol-acne-doctors",
       "haneulche-guwol-acne-visit",
+      "haneulche-guwol-acne-lifestyle",
     ],
   },
   {
