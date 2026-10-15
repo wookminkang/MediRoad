@@ -326,6 +326,33 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulche-namdong-hives-visit",
     ],
   },
+
+  // ══ 경희하늘애한의원 부산하단점(사하구 하단동) — 근거: description·FAQ(다이어트 프로그램,
+  // 교통사고 후유증·추나, 한방신경정신) ══
+  {
+    hospitalSlug: "경희하늘애한의원-사하구",
+    keyword: "사하구 다이어트",
+    title: "사하구 다이어트, 한방 다이어트 상담 전에 알아둘 것",
+    postIds: [
+      "haneulae-saha-diet-guide",
+      "haneulae-saha-diet-postpartum",
+      "haneulae-saha-diet-child",
+      "haneulae-saha-diet-severe",
+      "haneulae-saha-diet-visit",
+    ],
+  },
+  {
+    hospitalSlug: "경희하늘애한의원-사하구",
+    keyword: "사하구 교통사고 한의원",
+    title: "사하구 교통사고 한의원, 사고 직후 괜찮다가 며칠 뒤 아픈 이유",
+    postIds: [
+      "haneulae-saha-car-delayed-pain",
+      "haneulae-saha-car-insurance",
+      "haneulae-saha-car-chuna",
+      "haneulae-saha-car-sleep-anxiety",
+      "haneulae-saha-car-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
