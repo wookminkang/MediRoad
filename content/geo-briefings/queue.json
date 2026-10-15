@@ -447,6 +447,26 @@
       "areaLink": "/area/남동구",
       "angle": "아토피로 한의원을 알아볼 때 확인할 것 — 진료 범위(아토피·습진·건선 등), 기존 치료·처방약과의 병행, 가려움·악화 요인 기록, 꾸준히 다닐 수 있는 동선",
       "featureMode": "section"
+    },
+    {
+      "id": "saha-car-accident-hanui-guide",
+      "query": "사하구 교통사고 한의원 추천해줘",
+      "hpid": "B1201798",
+      "hospitalSlug": "경희하늘애한의원-사하구",
+      "region": {
+        "sido": "부산",
+        "sigungu": "사하구"
+      },
+      "landmarkHpid": null,
+      "landmarkLabel": null,
+      "hospitalType": "한의원",
+      "hubLinks": [
+        "/경희하늘애한의원-사하구/guide/사하구-교통사고-한의원",
+        "/경희하늘애한의원-사하구/guide/사하구-다이어트"
+      ],
+      "areaLink": "/area/사하구",
+      "angle": "교통사고 후 한의원을 알아볼 때 확인할 것 — 영상검사 먼저 필요한 신호, 자동차보험 접수 준비, 진료시간(퇴근 후·주말), 통원 동선",
+      "featureMode": "section"
     }
   ]
 }
