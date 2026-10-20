@@ -353,6 +353,32 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulae-saha-car-visit",
     ],
   },
+  // "사하구 교통사고 한의원"과 각도 분리: 만성기·합의 전 확인·목어깨·허리골반·일상 복귀
+  {
+    hospitalSlug: "경희하늘애한의원-사하구",
+    keyword: "하단 교통사고 후유증",
+    title: "하단 교통사고 후유증, 몇 주가 지나도 낫지 않을 때",
+    postIds: [
+      "haneulae-hadan-car-chronic",
+      "haneulae-hadan-car-settlement",
+      "haneulae-hadan-car-neck",
+      "haneulae-hadan-car-back",
+      "haneulae-hadan-car-return",
+    ],
+  },
+  // 근거: 여성 진료 항목(산후보약·유산 후 관리). "사하구 다이어트"의 산후 다이어트 글과 각도 분리.
+  {
+    hospitalSlug: "경희하늘애한의원-사하구",
+    keyword: "산후보약",
+    title: "산후보약, 출산 후 언제부터 먹으면 좋을까",
+    postIds: [
+      "haneulae-hadan-postpartum-timing",
+      "haneulae-hadan-postpartum-breastfeeding",
+      "haneulae-hadan-postpartum-csection",
+      "haneulae-hadan-postpartum-miscarriage",
+      "haneulae-hadan-postpartum-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
