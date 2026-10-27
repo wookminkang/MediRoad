@@ -379,6 +379,19 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "haneulae-hadan-postpartum-visit",
     ],
   },
+  // 근거: 급·만성 통증과 추나요법. 교통사고 허브들과 각도 분리(사고와 무관한 일상 통증).
+  {
+    hospitalSlug: "경희하늘애한의원-사하구",
+    keyword: "사하구 통증 한의원",
+    title: "사하구 통증 한의원, 급성 통증과 만성 통증은 다르게 봐야 합니다",
+    postIds: [
+      "haneulae-saha-pain-acute-chronic",
+      "haneulae-saha-pain-back",
+      "haneulae-saha-pain-neck-shoulder",
+      "haneulae-saha-pain-knee",
+      "haneulae-saha-pain-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */

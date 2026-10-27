@@ -113,11 +113,16 @@ async function renderBlock(
   textW: number,
   nameDpi: number,
 ): Promise<Block> {
-  const nameImg = await renderText(
-    `<span foreground="#ffffff" weight="bold">${escapeXml(ctx.name)}</span>`,
-    textW,
-    nameDpi,
-  );
+  // 병원명은 한 줄이어야 한다 — 좁은 패널 레이아웃에서 "(사\n하)"처럼 꺾이면 dpi를 줄여 다시 렌더.
+  const nameMarkup = `<span foreground="#ffffff" weight="bold">${escapeXml(ctx.name)}</span>`;
+  const lineH = async (dpi: number) =>
+    (await measure(await renderText(nameMarkup.replace(/>[^<]*</, ">가<"), textW, dpi))).height ?? 0;
+  let nameImg = await renderText(nameMarkup, textW, nameDpi);
+  for (let dpi = nameDpi; dpi > nameDpi * 0.6; ) {
+    if (((await measure(nameImg)).height ?? 0) < (await lineH(dpi)) * 1.5) break;
+    dpi = Math.round(dpi * 0.92);
+    nameImg = await renderText(nameMarkup, textW, dpi);
+  }
   const subImgs: Buffer[] = [];
   for (const l of wrap(ctx.title, 18)) {
     subImgs.push(
