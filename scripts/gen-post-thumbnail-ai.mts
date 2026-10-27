@@ -143,7 +143,7 @@ async function genImage(prompt: string): Promise<Buffer> {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1",
+      model: process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-2",
       prompt,
       size: "1024x1024", // 썸네일이 정사각(1080)이라 정사각으로 뽑는다
       quality: "high",
