@@ -39,6 +39,21 @@ const DEPT_AS_TYPE: Record<string, readonly string[]> = {
 
 const DEFAULT_PAGE_SIZE = 20;
 
+/**
+ * 빌드 때 수백 페이지가 동시에 DB를 조회하면 anon 역할의 statement timeout(57014)에
+ * 가끔 걸린다. 한 페이지 실패가 배포 전체를 멈추므로 타임아웃만 잠깐 쉬고 다시 시도한다.
+ */
+async function retryOnTimeout<T extends { error: { code?: string } | null }>(
+  run: () => PromiseLike<T>,
+  tries = 3,
+): Promise<T> {
+  for (let i = 1; ; i++) {
+    const res = await run();
+    if (res.error?.code !== "57014" || i >= tries) return res;
+    await new Promise((r) => setTimeout(r, 500 * i));
+  }
+}
+
 // "0900" → "09:00"
 const hhmm = (t: string | null) =>
   t && t.length === 4 ? `${t.slice(0, 2)}:${t.slice(2)}` : (t ?? undefined);
@@ -379,19 +394,21 @@ export async function getHospitals(
 
   let partnerItems: Hospital[] = [];
   if (page === 1) {
-    const { data: pData, error: pErr } = await makeFiltered()
-      .in("id", partnerIds)
-      .order("name");
+    const { data: pData, error: pErr } = await retryOnTimeout(() =>
+      makeFiltered().in("id", partnerIds).order("name"),
+    );
     if (pErr) throw pErr;
     partnerItems = (pData as unknown as HospitalRow[])
       .map(rowToHospital)
       .map((h) => ({ ...h, isOpenNow: computeOpenNow(h.hours) }));
   }
 
-  const { data, count, error } = await makeFiltered()
-    .not("id", "in", `(${partnerIds.join(",")})`)
-    .order("name")
-    .range(start, start + pageSize - 1);
+  const { data, count, error } = await retryOnTimeout(() =>
+    makeFiltered()
+      .not("id", "in", `(${partnerIds.join(",")})`)
+      .order("name")
+      .range(start, start + pageSize - 1),
+  );
   if (error) throw error;
 
   let items = [
