@@ -27,7 +27,7 @@ import {
   curatedGuideIndex,
   curatedPostIndex,
 } from "../src/constants/hospital-keyword-pages.js";
-import { BUCKET, compose, seedOf } from "./lib/post-thumb.mjs";
+import { BUCKET, compose, seedOf, thumbName } from "./lib/post-thumb.mjs";
 
 const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -173,8 +173,7 @@ async function genOne(postId: string, force: boolean) {
     return;
   }
   const hosp = Array.isArray(post.hospital) ? post.hospital[0] : post.hospital;
-  const region = (hosp?.sigungu ?? "").replace(/[구시군]$/, "");
-  const nameText = region ? `${hosp?.name} (${region})` : (hosp?.name ?? "");
+  const nameText = thumbName(post.hospital_id, hosp?.name ?? "", hosp?.sigungu);
 
   const bg = await genImage(`${sceneFor(post.title)} ${GUARD}`);
   // 큐레이션된 글은 사진 버전(gen-post-thumbnail.mts)과 같은 회전 규칙을 쓴다 —

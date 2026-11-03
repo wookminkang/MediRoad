@@ -10,6 +10,22 @@ import sharp from "sharp";
 
 export const BUCKET = "column-images";
 export const S = 1080;
+
+/** 썸네일 병원명 뒤 괄호 표기 — 기본은 시군구("남동구"→"남동"), 병원이 지점명으로 부르는 곳만 덮어쓴다. */
+const BRANCH_LABEL: Record<string, string> = {
+  B1400527: "인천", // 하늘체한의원 인천점
+};
+
+export function thumbName(
+  hospitalId: string,
+  name: string,
+  sigungu: string | null | undefined,
+): string {
+  // 병원명에 이미 지점(괄호)이 있으면 덧붙이지 않는다. 예: "리움한방병원(강동송파)"
+  if (/[()]/.test(name)) return name;
+  const label = BRANCH_LABEL[hospitalId] ?? (sigungu ?? "").replace(/[구시군]$/, "");
+  return label ? `${name} (${label})` : name;
+}
 const WEBP_QUALITY = Number(process.env.IMAGE_WEBP_QUALITY ?? 82);
 
 const escapeXml = (s: string) =>

@@ -12,7 +12,7 @@ import {
   curatedGuideIndex,
   curatedPostIndex,
 } from "../src/constants/hospital-keyword-pages.js";
-import { BUCKET, compose, seedOf } from "./lib/post-thumb.mjs";
+import { BUCKET, compose, seedOf, thumbName } from "./lib/post-thumb.mjs";
 
 const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,14 +56,7 @@ async function genOne(postId: string) {
   const layoutIdx = curated ? gi + ci * 3 + 5 : seedOf(post.id + "#l");
   const photoIdx = curated ? gi + ci * 2 : seedOf(post.id);
   const photoUrl = photos[photoIdx % photos.length]; // 순번+허브별 확정 회전
-  const region = (hosp?.sigungu ?? "").replace(/[구시군]$/, "");
-  // 병원명에 이미 지점(괄호)이 있으면 지역을 덧붙이지 않는다. 예: "리움한방병원(강동송파)"
-  const baseName = hosp?.name ?? "";
-  const nameText = /[()]/.test(baseName)
-    ? baseName
-    : region
-      ? `${baseName} (${region})`
-      : baseName;
+  const nameText = thumbName(post.hospital_id, hosp?.name ?? "", hosp?.sigungu);
   const photo = Buffer.from(await (await fetch(photoUrl)).arrayBuffer());
   const eyebrow = Array.isArray(post.tags) ? (post.tags[0] as string) : undefined;
   const webp = await compose(
