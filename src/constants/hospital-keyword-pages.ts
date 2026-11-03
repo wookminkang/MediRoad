@@ -327,6 +327,21 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
     ],
   },
 
+  // ── 하늘체한의원 인천점 "인천 여드름치료" — "구월동 여드름"·"송도 여드름피부"와 각도 분리
+  // (단계 구분·짜기 전 주의·턱 여드름·치료 기간·평일 저녁 방문). ──
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 여드름치료",
+    title: "인천 여드름치료, 내 여드름 단계부터 알면 상담이 쉬워집니다",
+    postIds: [
+      "haneulche-incheon-acne-types",
+      "haneulche-incheon-acne-squeeze",
+      "haneulche-incheon-acne-chin",
+      "haneulche-incheon-acne-duration",
+      "haneulche-incheon-acne-visit",
+    ],
+  },
+
   // ══ 경희하늘애한의원 부산하단점(사하구 하단동) — 근거: description·FAQ(다이어트 프로그램,
   // 교통사고 후유증·추나, 한방신경정신) ══
   {
