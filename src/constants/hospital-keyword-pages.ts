@@ -342,6 +342,81 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
     ],
   },
 
+  // ── 하늘체한의원 인천점 피부질환별 허브 6종 — 지역명(인천·구월동·남동구)을 나눠 기존 허브와
+  // 키워드 충돌을 피한다. 근거: description 진료 항목. ──
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "구월동 여드름흉터",
+    title: "구월동 여드름흉터, 아이스픽·박스카·롤링형 패인 흉터 구분하기",
+    postIds: [
+      "haneulche-guwol-acnescar-types",
+      "haneulche-guwol-acnescar-raised",
+      "haneulche-guwol-acnescar-mark",
+      "haneulche-guwol-acnescar-prevent",
+      "haneulche-guwol-acnescar-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 여드름자국",
+    title: "인천 여드름자국, 붉은 자국과 갈색 자국은 어떻게 다를까",
+    postIds: [
+      "haneulche-incheon-acnemark-red-brown",
+      "haneulche-incheon-acnemark-fade",
+      "haneulche-incheon-acnemark-sunscreen",
+      "haneulche-incheon-acnemark-habits",
+      "haneulche-incheon-acnemark-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "남동구 안면홍조",
+    title: "남동구 안면홍조, 얼굴이 쉽게 붉어지는 원인과 악화 요인",
+    postIds: [
+      "haneulche-namdong-flush-triggers",
+      "haneulche-namdong-flush-rosacea",
+      "haneulche-namdong-flush-seborrheic",
+      "haneulche-namdong-flush-folliculitis",
+      "haneulche-namdong-flush-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "인천 아토피",
+    title: "인천 아토피, 겨울철에 더 심해지는 이유와 보습 방법",
+    postIds: [
+      "haneulche-incheon-atopic-winter",
+      "haneulche-incheon-atopic-night-itch",
+      "haneulche-incheon-atopic-child",
+      "haneulche-incheon-atopic-face",
+      "haneulche-incheon-atopic-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "구월동 건선",
+    title: "구월동 건선, 옮는 병이 아니라 오래가는 면역 염증입니다",
+    postIds: [
+      "haneulche-guwol-psoriasis-basics",
+      "haneulche-guwol-psoriasis-scalp",
+      "haneulche-guwol-psoriasis-winter",
+      "haneulche-guwol-psoriasis-triggers",
+      "haneulche-guwol-psoriasis-visit",
+    ],
+  },
+  {
+    hospitalSlug: "하늘체한의원-남동구",
+    keyword: "남동구 사마귀",
+    title: "남동구 사마귀, 보통사마귀·편평사마귀·발바닥 사마귀 종류부터 알아보세요",
+    postIds: [
+      "haneulche-namdong-wart-types",
+      "haneulche-namdong-wart-plantar",
+      "haneulche-namdong-wart-flat-face",
+      "haneulche-namdong-wart-child-family",
+      "haneulche-namdong-wart-visit",
+    ],
+  },
+
   // ══ 경희하늘애한의원 부산하단점(사하구 하단동) — 근거: description·FAQ(다이어트 프로그램,
   // 교통사고 후유증·추나, 한방신경정신) ══
   {
