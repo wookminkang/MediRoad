@@ -564,6 +564,47 @@
       "areaLink": "/area/수원시",
       "angle": "충치치료 받을 치과를 고를 때 확인할 것 — 충치 진행 정도에 따른 치료 범위(레진·인레이·신경치료) 설명을 듣는지, 치료 전 비용과 보험 적용 항목 안내, 여러 번 방문할 때의 진료시간(평일 야간·토요일)과 휴진일, 아이 진료 가능 여부, 정기검진·스케일링 연계",
       "featureMode": "section"
+    },
+    {
+      "id": "hadan-station-hanui-guide",
+      "query": "하단역 한의원 추천해줘",
+      "hpid": "B1201798",
+      "hospitalSlug": "경희하늘애한의원-사하구",
+      "region": {
+        "sido": "부산",
+        "sigungu": "사하구"
+      },
+      "landmarkHpid": "B1201798",
+      "landmarkLabel": "하단역 인근",
+      "sameSigunguOnly": true,
+      "hospitalType": "한의원",
+      "areaLink": "/area/사하구",
+      "featureMode": "section",
+      "hubLinks": [
+        "/경희하늘애한의원-사하구/guide/사하구-통증-한의원",
+        "/경희하늘애한의원-사하구/guide/사하구-다이어트"
+      ],
+      "angle": "하단역 근처에서 다닐 한의원을 고를 때 확인할 것 — 한의원마다 다른 주 진료 분야(통증·여성·다이어트·신경정신 등), 역 출구와 건물 층 확인, 평일 저녁·토요일 진료와 점심시간·일요일 휴진, 첫 방문 때 알릴 것(복용 약·임신 여부), 건강보험 적용 항목"
+    },
+    {
+      "id": "saha-postpartum-hanui-guide",
+      "query": "사하구 산후보약 한의원 추천해줘",
+      "hpid": "B1201798",
+      "hospitalSlug": "경희하늘애한의원-사하구",
+      "region": {
+        "sido": "부산",
+        "sigungu": "사하구"
+      },
+      "landmarkHpid": "B1201798",
+      "landmarkLabel": "하단역 인근",
+      "sameSigunguOnly": true,
+      "hospitalType": "한의원",
+      "areaLink": "/area/사하구",
+      "featureMode": "section",
+      "hubLinks": [
+        "/경희하늘애한의원-사하구/guide/산후보약"
+      ],
+      "angle": "산후보약 상담 전에 확인할 것 — 출산 방식(자연분만·제왕절개)과 출산 후 시기, 수유 중 한약 복용 상의, 산후 통증·부기·땀 등 함께 알릴 증상, 유산 후 관리, 한약은 건강보험이 적용되지 않는 점과 비용 확인"
     }
   ]
 }
