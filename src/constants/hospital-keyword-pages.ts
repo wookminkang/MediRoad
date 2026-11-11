@@ -577,6 +577,69 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "yesung-nampo-directions",
     ],
   },
+  // ══ 신통한방병원(광주 광산구 수완동) — 한방병원(입원 52병상), 한의사 5·의사 1, 365일 진료 ══
+  // 근거: DB·홈페이지 이미지 전사(교통사고·허리디스크·도수·내성발톱·척추관절 수술 후 입원 섹션).
+  // 암·여성암·갱년기 섹션은 효과 주장·고주파온열 표기 충돌로 이번 범위에서 제외.
+  {
+    hospitalSlug: "신통한방병원",
+    keyword: "광주 교통사고 한방병원",
+    title: "광주 교통사고 한방병원 진료와 입원",
+    postIds: [
+      "sintong-gwangju-traffic-first-visit",
+      "sintong-gwangju-traffic-symptoms",
+      "sintong-gwangju-traffic-inpatient",
+      "sintong-gwangju-traffic-head-injury",
+      "sintong-gwangju-traffic-visit",
+    ],
+  },
+  {
+    hospitalSlug: "신통한방병원",
+    keyword: "광주 허리디스크",
+    title: "광주 허리디스크 진단과 치료 선택",
+    postIds: [
+      "sintong-gwangju-disc-stenosis",
+      "sintong-gwangju-disc-inpatient",
+      "sintong-gwangju-disc-chuna",
+      "sintong-gwangju-disc-red-flags",
+      "sintong-gwangju-disc-visit",
+    ],
+  },
+  {
+    hospitalSlug: "신통한방병원",
+    keyword: "광주 도수치료",
+    title: "광주 도수치료 받기 전 확인할 것",
+    postIds: [
+      "sintong-gwangju-manual-basics",
+      "sintong-gwangju-manual-shockwave",
+      "sintong-gwangju-manual-insurance",
+      "sintong-gwangju-manual-swelling",
+      "sintong-gwangju-manual-visit",
+    ],
+  },
+  {
+    hospitalSlug: "신통한방병원",
+    keyword: "광주 내성발톱",
+    title: "광주 내성발톱 관리 안내",
+    postIds: [
+      "sintong-gwangju-nail-symptoms",
+      "sintong-gwangju-nail-koh-test",
+      "sintong-gwangju-nail-brace",
+      "sintong-gwangju-nail-antifungal",
+      "sintong-gwangju-nail-visit",
+    ],
+  },
+  {
+    hospitalSlug: "신통한방병원",
+    keyword: "광주 척추수술 후 입원",
+    title: "광주 척추수술 후 회복 입원 안내",
+    postIds: [
+      "sintong-gwangju-postop-timing",
+      "sintong-gwangju-postop-daily",
+      "sintong-gwangju-postop-rehab",
+      "sintong-gwangju-postop-prepare",
+      "sintong-gwangju-postop-visit",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
