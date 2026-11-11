@@ -489,7 +489,7 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
   {
     hospitalSlug: "연세새빛치과의원",
     keyword: "수원 임플란트",
-    title: "수원 임플란트, 수술 계획보다 보철 계획을 먼저 세우는 이유",
+    title: "수원 임플란트 치료 순서와 관리",
     postIds: [
       "yonsei-suwon-implant-topdown",
       "yonsei-suwon-implant-bone",
@@ -501,13 +501,27 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
   {
     hospitalSlug: "연세새빛치과의원",
     keyword: "광교 치아교정",
-    title: "광교 치아교정, 장치를 고르기 전에 정밀진단부터",
+    title: "광교 치아교정 진단과 장치 선택",
     postIds: [
       "yonsei-gwanggyo-ortho-diagnosis",
       "yonsei-gwanggyo-ortho-appliances",
       "yonsei-gwanggyo-ortho-kids",
       "yonsei-gwanggyo-ortho-retainer",
       "yonsei-gwanggyo-ortho-visit",
+    ],
+  },
+  // 근거: description 진료 항목(충치치료·보존치료·예방치료·소아치료, 키즈클리닉) + 홈페이지.
+  // 임플란트·교정 허브와 겹치지 않게 자연치아 보존 쪽(단계·재료·신경치료·아이 충치)으로.
+  {
+    hospitalSlug: "연세새빛치과의원",
+    keyword: "수원 충치치료",
+    title: "수원 충치치료 단계와 치료 방법",
+    postIds: [
+      "yonsei-suwon-cavity-stages",
+      "yonsei-suwon-cavity-filling",
+      "yonsei-suwon-cavity-rootcanal",
+      "yonsei-suwon-cavity-kids",
+      "yonsei-suwon-cavity-visit",
     ],
   },
 ];

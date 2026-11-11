@@ -33,6 +33,8 @@ type QueueItem = {
   region: { sido: string; sigungu: string | null };
   landmarkHpid: string | null;
   landmarkLabel: string | null;
+  /** 랜드마크 거리순이어도 region.sigungu 안의 병원만 (경계 지역에서 옆 시군구가 섞이는 것 방지) */
+  sameSigunguOnly?: boolean;
   hospitalType: string;
   hubLinks: string[];
   areaLink: string | null;
@@ -146,14 +148,25 @@ function km(aLat: number, aLng: number, bLat: number, bLng: number): number {
  * 그 외(한방병원·한의원 등)는 type 컬럼 일치.
  */
 async function comparisonHospitals(item: QueueItem, landmark: HospitalRow | null) {
-  let q = sb.from("hospitals").select(HOSPITAL_COLS).eq("sido", item.region.sido);
-  if (item.hospitalType === "요양병원") q = q.ilike("name", "%요양병원%");
-  else if (item.hospitalType === "피부과") q = q.eq("type", "의원").ilike("name", "%피부과%");
-  else q = q.eq("type", item.hospitalType);
-  if (!landmark && item.region.sigungu) q = q.eq("sigungu", item.region.sigungu);
-  const { data, error } = await q;
-  if (error) throw new Error(error.message);
-  let rows = (data ?? []) as HospitalRow[];
+  const query = () => {
+    let q = sb.from("hospitals").select(HOSPITAL_COLS).eq("sido", item.region.sido);
+    if (item.hospitalType === "요양병원") q = q.ilike("name", "%요양병원%");
+    else if (item.hospitalType === "피부과") q = q.eq("type", "의원").ilike("name", "%피부과%");
+    else q = q.eq("type", item.hospitalType);
+    if ((!landmark || item.sameSigunguOnly) && item.region.sigungu) {
+      q = q.eq("sigungu", item.region.sigungu);
+    }
+    return q.order("id");
+  };
+  // PostgREST는 한 번에 최대 1,000행만 준다. 시도 단위(예: 서울 한의원 3,600여 곳)를 한 번에 받으면
+  // 뒤쪽이 잘려 "가장 가까운 병원"이 빠지므로 끝까지 페이지를 넘긴다.
+  let rows: HospitalRow[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await query().range(from, from + 999);
+    if (error) throw new Error(error.message);
+    rows = rows.concat((data ?? []) as HospitalRow[]);
+    if ((data ?? []).length < 1000) break;
+  }
 
   if (landmark) {
     // 랜드마크(대형병원) 좌표 기준 가까운 순
