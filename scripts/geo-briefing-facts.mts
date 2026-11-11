@@ -142,11 +142,13 @@ function km(aLat: number, aLng: number, bLat: number, bLng: number): number {
 /**
  * 비교표용 병원 목록.
  * '요양병원'은 E-Gen type에 없어서(전부 type='병원') 이름 패턴으로 찾는다.
+ * '피부과'도 type이 '의원'이라 상호에 '피부과'가 들어간 의원으로 찾는다.
  * 그 외(한방병원·한의원 등)는 type 컬럼 일치.
  */
 async function comparisonHospitals(item: QueueItem, landmark: HospitalRow | null) {
   let q = sb.from("hospitals").select(HOSPITAL_COLS).eq("sido", item.region.sido);
   if (item.hospitalType === "요양병원") q = q.ilike("name", "%요양병원%");
+  else if (item.hospitalType === "피부과") q = q.eq("type", "의원").ilike("name", "%피부과%");
   else q = q.eq("type", item.hospitalType);
   if (!landmark && item.region.sigungu) q = q.eq("sigungu", item.region.sigungu);
   const { data, error } = await q;
