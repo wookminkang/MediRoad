@@ -524,6 +524,59 @@ export const HOSPITAL_GUIDES: HospitalGuide[] = [
       "yonsei-suwon-cavity-visit",
     ],
   },
+  // ══ 봄담한방병원(강동구 명일동, 5호선 굽은다리역 305m) — 한방병원(입원 75병상), 한·양방 협진 ══
+  // 근거: 홈페이지(의료진·특화센터·시설·FAQ)·네이버 플레이스. 같은 강동구 리움한방병원 허브 키워드
+  // (강동구 요양병원·강동구 암요양병원·둔촌동·송파구·아산병원 근처)와 겹치지 않게 유방암·명일동으로.
+  {
+    hospitalSlug: "봄담한방병원",
+    keyword: "강동 유방암 요양병원",
+    title: "강동 유방암 요양병원 회복기 입원",
+    postIds: [
+      "bomdam-gangdong-breast-after-surgery",
+      "bomdam-gangdong-breast-chemo",
+      "bomdam-gangdong-breast-hormone",
+      "bomdam-gangdong-breast-ward",
+      "bomdam-gangdong-breast-consult",
+    ],
+  },
+  {
+    hospitalSlug: "봄담한방병원",
+    keyword: "명일동 한방병원",
+    title: "명일동 한방병원 진료와 입원",
+    postIds: [
+      "bomdam-myeongil-gyn-cancer",
+      "bomdam-myeongil-gi-diet",
+      "bomdam-myeongil-integrative",
+      "bomdam-myeongil-admission",
+      "bomdam-myeongil-visit",
+    ],
+  },
+  // ══ 예성한방병원(부산 중구 중앙동, 남포역 10번 출구 215m) — 한방병원(입원 66병상), 한의사·가정의학과 협진 ══
+  // 근거: DB·네이버 플레이스·홈페이지. 암 회복기 허브는 표준치료 비대체를 명시, 면역주사류 명칭은 쓰지 않는다.
+  {
+    hospitalSlug: "예성한방병원",
+    keyword: "부산 암요양병원",
+    title: "부산 암요양병원 회복기 진료 안내",
+    postIds: [
+      "yesung-busan-cancer-admission-timing",
+      "yesung-busan-cancer-side-effects",
+      "yesung-busan-cancer-thyroid",
+      "yesung-busan-cancer-hyperthermia-oxygen",
+      "yesung-busan-cancer-consult",
+    ],
+  },
+  {
+    hospitalSlug: "예성한방병원",
+    keyword: "남포역 한방병원",
+    title: "남포역 한방병원 외래·입원 안내",
+    postIds: [
+      "yesung-nampo-gyn-surgery-recovery",
+      "yesung-nampo-menopause",
+      "yesung-nampo-integrated-care",
+      "yesung-nampo-inpatient-life",
+      "yesung-nampo-directions",
+    ],
+  },
 ];
 
 /** 키워드 → URL slug(공백→하이픈). 예: "강동구 재활통증치료" → "강동구-재활통증치료" */
