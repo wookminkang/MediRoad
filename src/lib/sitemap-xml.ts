@@ -17,7 +17,10 @@ const esc = (s: string) =>
 
 // <loc>은 canonical과 동일하게 비ASCII 경로를 퍼센트 인코딩한 뒤 XML 이스케이프.
 // (sitemap URL ≠ canonical 불일치로 인한 네이버 등 색인 누락 방지)
-const encLoc = (s: string) => esc(encodeURI(s));
+// 이미 인코딩된 URL(guideUrl·postUrl의 encodeURIComponent 결과)도 들어오므로 encodeURI를 그대로
+// 쓰면 %가 %25로 이중 인코딩돼 404 주소가 된다. encodeURI가 남기는 문자와 %는 두고 나머지만 인코딩한다.
+const encLoc = (s: string) =>
+  esc(s.replace(/[^A-Za-z0-9;,/?:@&=+$\-_.!~*'()#%]+/g, (m) => encodeURIComponent(m)));
 
 const iso = (d?: Date | string): string | undefined =>
   d == null ? undefined : typeof d === "string" ? d : d.toISOString();
