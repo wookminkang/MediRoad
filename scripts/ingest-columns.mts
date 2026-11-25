@@ -70,7 +70,7 @@ async function generateImage(prompt: string): Promise<Buffer> {
   if (!apiKey) throw new Error("OPENAI_API_KEY 미설정 (AI 이미지 생성용)");
   const model = process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-2";
   const size = process.env.OPENAI_IMAGE_SIZE ?? "1024x1024";
-  const quality = process.env.OPENAI_IMAGE_QUALITY ?? "high";
+  const quality = process.env.OPENAI_IMAGE_QUALITY ?? "low";
   const res = await fetch("https://api.openai.com/v1/images/generations", {
     method: "POST",
     headers: {
